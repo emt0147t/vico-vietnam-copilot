@@ -1,0 +1,211 @@
+// VICO Database Schema - Optimized for Market Intelligence Platform
+// PostgreSQL (Supabase) + Prisma ORM + pgvector + pg_trgm
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+// ============================================================================
+// CORE ENTITIES
+// ============================================================================
+
+model Company {
+  id                  String    @id @default(cuid())
+  name                String
+  legalName           String?
+  ticker              String?   @unique
+  domain              String?   @unique
+  industry            String?
+  description         String?
+  hqCountry           String?   @db.VarChar(64)
+  hqCity              String?   @db.VarChar(64)
+  employeeCount       Int?
+  fundingStage        String?
+  foundedYear         Int?
+  logoUrl             String?
+  website             String?
+
+  // Denormalized fields for fast UI reads (updated via trigger/cron)
+  latestNewsSentiment Float?              // -1.0 to 1.0
+  latestNewsAt        DateTime?
+  headlineSnapshot    String?   @db.VarChar(280)
+  newsCount           Int       @default(0)
+
+  // Timestamps
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  news                News[]
+  analytics           CompanyAnalytics?
+  vectors             VectorEmbedding[]
+  aliases             CompanyAlias[]
+
+  // Indexes for high-frequency queries
+  @@index([name], map: "idx_company_name")
+  @@index([industry], map: "idx_company_industry")
+  @@index([hqCity], map: "idx_company_city")
+  @@index([latestNewsSentiment], map: "idx_company_sentiment")
+  @@index([newsCount], map: "idx_company_news_count")
+  @@index([updatedAt], map: "idx_company_updated")
+
+  // NOTE: Add these indexes via raw SQL migration for fuzzy search:
+  // CREATE EXTENSION IF NOT EXISTS pg_trgm;
+  // CREATE INDEX idx_company_name_trgm ON "Company" USING GIN (name gin_trgm_ops);
+  // CREATE INDEX idx_company_legalname_trgm ON "Company" USING GIN ("legalName" gin_trgm_ops);
+}
+
+model CompanyAlias {
+  id        String   @id @default(cuid())
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+  alias     String
+  source    String?  // "crunchbase" | "google_news" | "manual"
+  createdAt DateTime @default(now())
+
+  @@unique([companyId, alias])
+  @@index([alias], map: "idx_alias_name")
+}
+
+model News {
+  id          String    @id @default(cuid())
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId   String
+  title       String
+  url         String    @unique
+  source      String?   // "google_news" | "vnexpress" | "cafef" | etc.
+  publishedAt DateTime
+  content     String?
+  summary     String?
+  sentiment   Float?    // -1.0 to 1.0
+  category    String?   // "finance" | "m&a" | "product" | "legal" | "leadership" | "partnership" | "general"
+  isBreaking  Boolean   @default(false)
+  type        String    @default("live") // "live" | "mock" | "enriched"
+  language    String?   @db.VarChar(8)
+  imageUrl    String?
+  author      String?
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  vectors     VectorEmbedding[]
+
+  // Composite indexes for filtered queries
+  @@index([companyId, publishedAt], map: "idx_news_company_date")
+  @@index([companyId, sentiment], map: "idx_news_company_sentiment")
+  @@index([companyId, category], map: "idx_news_company_category")
+  @@index([publishedAt], map: "idx_news_date")
+  @@index([category], map: "idx_news_category")
+  @@index([sentiment], map: "idx_news_sentiment")
+  @@index([isBreaking, publishedAt], map: "idx_news_breaking")
+
+  // NOTE: Add full-text search via raw SQL:
+  // ALTER TABLE "News" ADD COLUMN ts tsvector
+  //   GENERATED ALWAYS AS (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(summary,''))) STORED;
+  // CREATE INDEX idx_news_ts ON "News" USING GIN (ts);
+}
+
+model VectorEmbedding {
+  id        String   @id @default(cuid())
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId String?
+  news      News?    @relation(fields: [newsId], references: [id], onDelete: SetNull)
+  newsId    String?
+  source    String   // "company_profile" | "news" | "analytics" | "gtm_strategy"
+  text      String?  // Original text that was embedded (for debugging)
+  dimension Int      @default(1536)
+  // pgvector column - stored as Bytes, queried via raw SQL
+  // embedding vector(1536) -- Add via migration
+  createdAt DateTime @default(now())
+
+  @@index([companyId], map: "idx_vec_company")
+  @@index([newsId], map: "idx_vec_news")
+  @@index([source], map: "idx_vec_source")
+
+  // NOTE: Add ANN index via raw SQL:
+  // CREATE INDEX idx_vec_embedding_ivfflat ON "VectorEmbedding"
+  //   USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+}
+
+model CompanyAnalytics {
+  id               String   @id @default(cuid())
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId        String   @unique
+  
+  // Time-series sentiment data
+  dailySentiment   Json?    // { "2026-01-01": 0.12, "2026-01-02": -0.05, ... }
+  weeklySentiment  Json?    // { "2026-01-02": 0.08, ... }
+  
+  // Article distribution
+  articleCounts    Json?    // { "finance": 12, "m&a": 3, "product": 8, ... }
+  sourceBreakdown  Json?    // { "google_news": 45, "vnexpress": 12, ... }
+  
+  // Competitor analysis
+  competitorScores Json?    // { "Samsung": 0.71, "LG": 0.65, ... }
+  
+  // Market metrics
+  marketShare      Float?
+  growthRate       Float?
+  visibility       Float?   // 0-100 social/news visibility score
+  
+  // Timestamps
+  calculatedAt     DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([calculatedAt], map: "idx_analytics_calculated")
+}
+
+// ============================================================================
+// ENRICHMENT & JOB TRACKING
+// ============================================================================
+
+model IngestRun {
+  id           String    @id @default(cuid())
+  provider     String    // "google_news" | "crunchbase" | "manual"
+  status       String    // "pending" | "running" | "completed" | "failed"
+  companyId    String?
+  companyName  String?
+  
+  // Metrics
+  itemsFound   Int       @default(0)
+  itemsInserted Int      @default(0)
+  itemsSkipped Int       @default(0)
+  itemsFailed  Int       @default(0)
+  
+  // Error tracking
+  errorMessage String?
+  errorStack   String?
+  
+  // Timing
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+  durationMs   Int?
+
+  @@index([provider, status], map: "idx_ingest_provider_status")
+  @@index([companyId], map: "idx_ingest_company")
+  @@index([startedAt], map: "idx_ingest_started")
+}
+
+model EnrichmentQueue {
+  id          String   @id @default(cuid())
+  companyId   String
+  companyName String
+  provider    String   // "google_news" | "crunchbase" | etc.
+  priority    Int      @default(0) // Higher = more urgent
+  status      String   @default("pending") // "pending" | "processing" | "completed" | "failed"
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(3)
+  lastError   String?
+  scheduledAt DateTime @default(now())
+  processedAt DateTime?
+
+  @@index([status, priority, scheduledAt], map: "idx_queue_processing")
+  @@index([companyId], map: "idx_queue_company")
+}

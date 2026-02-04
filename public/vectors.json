@@ -1,0 +1,25 @@
+{
+  "vectors": [
+    {
+      "id": "sample-company-1",
+      "type": "company",
+      "content": "VinFast is Vietnam's leading electric vehicle manufacturer, a subsidiary of Vingroup. It produces EVs, e-scooters, and e-buses.",
+      "vector": [0.012, 0.045, -0.023, 0.089, -0.012],
+      "metadata": { "name": "VinFast", "industry": "Automotive", "website": "vinfastauto.com" }
+    },
+    {
+      "id": "sample-news-1",
+      "type": "news",
+      "content": "VinFast expands into the US market with new dealership network and VF8 model delivery.",
+      "vector": [0.015, 0.042, -0.020, 0.091, -0.010],
+      "metadata": { "title": "VinFast US Expansion", "date": "2024-01-15", "source": "Reuters" }
+    },
+    {
+      "id": "sample-news-2",
+      "type": "news",
+      "content": "FPT Software hits $1B revenue milestone, focusing on AI and automotive software services.",
+      "vector": [-0.05, 0.01, 0.08, 0.02, 0.05],
+      "metadata": { "title": "FPT Billion Dollar Revenue", "date": "2023-12-20", "source": "VnExpress" }
+    }
+  ]
+}
