@@ -430,7 +430,7 @@ interface SearchResult<T> {
     pageSize: number;
 }
 
-const API_BASE = 'http://localhost:3001';
+const API_BASE = '';
 
 // Company queries
 export const useCompanies = (params: { 

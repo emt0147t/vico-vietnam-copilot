@@ -824,7 +824,7 @@ export const CustomerInsightsPanel: React.FC<CustomerInsightsPanelProps> = ({
         setError(null);
         
         try {
-            const response = await fetch('http://localhost:3001/api/customer-insights', {
+            const response = await fetch('/api/customer-insights', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ companyName: company, industry, products, targetMarket })

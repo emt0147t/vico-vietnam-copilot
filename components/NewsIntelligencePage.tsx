@@ -437,17 +437,23 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({ user
                     keywords: ['công ty', 'kinh doanh', 'thị trường']
                 })));
 
-                // Fetch competitor news if available
+                // Fetch competitor news if available (PARALLEL for performance)
                 if (competitors && competitors.length > 0) {
-                    for (const competitor of competitors.slice(0, 3)) {
-                        const compNews = await getCompanyNews(competitor.name);
-                        allNews = allNews.concat(compNews.map((item: any) => ({
-                            ...item,
-                            sentiment: Math.random() > 0.7 ? 'positive' : Math.random() > 0.5 ? 'negative' : 'neutral',
-                            relevanceScore: Math.floor(Math.random() * 40) + 50,
-                            keywords: ['cạnh tranh', 'công nghệ', 'phát triển']
-                        })));
-                    }
+                    const competitorPromises = competitors.slice(0, 3).map(async (competitor) => {
+                        try {
+                            const compNews = await getCompanyNews(competitor.name);
+                            return compNews.map((item: any) => ({
+                                ...item,
+                                sentiment: Math.random() > 0.7 ? 'positive' : Math.random() > 0.5 ? 'negative' : 'neutral',
+                                relevanceScore: Math.floor(Math.random() * 40) + 50,
+                                keywords: ['cạnh tranh', 'công nghệ', 'phát triển']
+                            }));
+                        } catch {
+                            return [];
+                        }
+                    });
+                    const competitorResults = await Promise.all(competitorPromises);
+                    allNews = allNews.concat(competitorResults.flat());
                 }
 
                 // Fetch industry news

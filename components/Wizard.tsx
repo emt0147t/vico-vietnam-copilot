@@ -221,7 +221,7 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
         try {
           const searchQuery = formData.orgName || formData.companyDescription || formData.productsServices;
           const response = await fetch(
-            `http://localhost:3001/api/companies/competitors?company=${encodeURIComponent(searchQuery)}&limit=15&minSimilarity=25&source=all`
+            `/api/companies/competitors?company=${encodeURIComponent(searchQuery)}&limit=15&minSimilarity=25&source=all`
           );
           
           if (response.ok) {

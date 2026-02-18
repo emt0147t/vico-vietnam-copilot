@@ -63,7 +63,7 @@ export const RagService = {
         try {
             if (onProgress) onProgress(5, "Tải vectors từ backend...");
             
-            const response = await fetch('http://localhost:3001/api/vectors/cache', {
+            const response = await fetch('/api/vectors/cache', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -90,7 +90,7 @@ export const RagService = {
 
         let companiesFromDB: any[] = [];
         try {
-            const response = await fetch('http://localhost:3001/api/companies/raw/all', {
+            const response = await fetch('/api/companies/raw/all', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
             });

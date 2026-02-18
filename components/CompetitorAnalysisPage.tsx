@@ -819,7 +819,7 @@ export const CompetitorAnalysisPage: React.FC<CompetitorAnalysisPageProps> = ({ 
                 ? currentCompetitors.filter(c => c.selected !== false)
                 : currentUserData?.competitors?.filter((c: any) => c.selected) || [];
             
-            const response = await fetch('http://localhost:3001/api/competitor-intelligence', {
+            const response = await fetch('/api/competitor-intelligence', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
