@@ -149,17 +149,35 @@ const INDUSTRY_CONFIGS: Record<string, {
     concentrationBase: number;  // Base HHI index
 }> = {
     'Technology': { tamMultiplier: 156, samRatio: 0.12, somRatio: 0.15, baseCagr: 18.5, avgCompanyRevenue: 2.5, concentrationBase: 1850 },
-    'Fintech': { tamMultiplier: 85, samRatio: 0.15, somRatio: 0.12, baseCagr: 25.3, avgCompanyRevenue: 5.2, concentrationBase: 2100 },
-    'E-commerce': { tamMultiplier: 120, samRatio: 0.18, somRatio: 0.10, baseCagr: 22.1, avgCompanyRevenue: 8.5, concentrationBase: 2400 },
+    'Finance': { tamMultiplier: 85, samRatio: 0.15, somRatio: 0.12, baseCagr: 25.3, avgCompanyRevenue: 5.2, concentrationBase: 2100 },
+    'Retail': { tamMultiplier: 95, samRatio: 0.35, somRatio: 0.08, baseCagr: 11.5, avgCompanyRevenue: 6.8, concentrationBase: 1700 },
     'Healthcare': { tamMultiplier: 95, samRatio: 0.08, somRatio: 0.18, baseCagr: 12.8, avgCompanyRevenue: 3.2, concentrationBase: 1600 },
     'Education': { tamMultiplier: 45, samRatio: 0.22, somRatio: 0.15, baseCagr: 15.2, avgCompanyRevenue: 1.8, concentrationBase: 1400 },
     'Manufacturing': { tamMultiplier: 180, samRatio: 0.25, somRatio: 0.08, baseCagr: 8.5, avgCompanyRevenue: 12.5, concentrationBase: 2200 },
     'Logistics': { tamMultiplier: 65, samRatio: 0.20, somRatio: 0.12, baseCagr: 14.2, avgCompanyRevenue: 4.5, concentrationBase: 1900 },
-    'Real Estate': { tamMultiplier: 110, samRatio: 0.30, somRatio: 0.05, baseCagr: 9.8, avgCompanyRevenue: 25.0, concentrationBase: 2600 },
-    'Retail': { tamMultiplier: 95, samRatio: 0.35, somRatio: 0.08, baseCagr: 11.5, avgCompanyRevenue: 6.8, concentrationBase: 1700 },
+    'RealEstate': { tamMultiplier: 110, samRatio: 0.30, somRatio: 0.05, baseCagr: 9.8, avgCompanyRevenue: 25.0, concentrationBase: 2600 },
     'Automotive': { tamMultiplier: 89, samRatio: 0.14, somRatio: 0.12, baseCagr: 12.3, avgCompanyRevenue: 45.0, concentrationBase: 2800 },
+    'Telecommunications': { tamMultiplier: 130, samRatio: 0.16, somRatio: 0.10, baseCagr: 10.5, avgCompanyRevenue: 15.0, concentrationBase: 2500 },
+    'Energy': { tamMultiplier: 200, samRatio: 0.10, somRatio: 0.08, baseCagr: 7.5, avgCompanyRevenue: 30.0, concentrationBase: 2900 },
+    'FoodBeverage': { tamMultiplier: 75, samRatio: 0.28, somRatio: 0.10, baseCagr: 9.2, avgCompanyRevenue: 8.0, concentrationBase: 1800 },
+    'Entertainment': { tamMultiplier: 60, samRatio: 0.18, somRatio: 0.12, baseCagr: 16.5, avgCompanyRevenue: 4.0, concentrationBase: 1600 },
     'Agriculture': { tamMultiplier: 55, samRatio: 0.40, somRatio: 0.06, baseCagr: 6.5, avgCompanyRevenue: 2.2, concentrationBase: 1200 },
+    'Construction': { tamMultiplier: 140, samRatio: 0.22, somRatio: 0.07, baseCagr: 8.0, avgCompanyRevenue: 18.0, concentrationBase: 2300 },
     'Tourism': { tamMultiplier: 35, samRatio: 0.25, somRatio: 0.10, baseCagr: 16.8, avgCompanyRevenue: 3.5, concentrationBase: 1500 },
+    'Insurance': { tamMultiplier: 90, samRatio: 0.12, somRatio: 0.10, baseCagr: 11.0, avgCompanyRevenue: 10.0, concentrationBase: 2400 },
+    'Consulting': { tamMultiplier: 50, samRatio: 0.20, somRatio: 0.15, baseCagr: 13.5, avgCompanyRevenue: 3.0, concentrationBase: 1500 },
+    'Pharmaceutical': { tamMultiplier: 105, samRatio: 0.10, somRatio: 0.12, baseCagr: 14.0, avgCompanyRevenue: 8.5, concentrationBase: 2100 },
+    'Aerospace': { tamMultiplier: 160, samRatio: 0.06, somRatio: 0.15, baseCagr: 9.0, avgCompanyRevenue: 50.0, concentrationBase: 3200 },
+    'Gaming': { tamMultiplier: 55, samRatio: 0.15, somRatio: 0.12, baseCagr: 20.0, avgCompanyRevenue: 3.5, concentrationBase: 1700 },
+    'Cybersecurity': { tamMultiplier: 45, samRatio: 0.12, somRatio: 0.18, baseCagr: 22.0, avgCompanyRevenue: 2.8, concentrationBase: 1900 },
+    'Blockchain': { tamMultiplier: 30, samRatio: 0.10, somRatio: 0.20, baseCagr: 35.0, avgCompanyRevenue: 1.5, concentrationBase: 1400 },
+    'Media': { tamMultiplier: 70, samRatio: 0.20, somRatio: 0.10, baseCagr: 12.0, avgCompanyRevenue: 5.0, concentrationBase: 1800 },
+    'Fashion': { tamMultiplier: 65, samRatio: 0.25, somRatio: 0.08, baseCagr: 10.5, avgCompanyRevenue: 4.5, concentrationBase: 1600 },
+    'Sports': { tamMultiplier: 40, samRatio: 0.18, somRatio: 0.12, baseCagr: 11.0, avgCompanyRevenue: 3.0, concentrationBase: 1500 },
+    'Legal': { tamMultiplier: 35, samRatio: 0.15, somRatio: 0.15, baseCagr: 8.5, avgCompanyRevenue: 2.0, concentrationBase: 1300 },
+    'HumanResources': { tamMultiplier: 40, samRatio: 0.18, somRatio: 0.14, baseCagr: 14.0, avgCompanyRevenue: 2.5, concentrationBase: 1500 },
+    'Marketing': { tamMultiplier: 50, samRatio: 0.16, somRatio: 0.15, baseCagr: 16.0, avgCompanyRevenue: 2.0, concentrationBase: 1600 },
+    'EnvironmentalTech': { tamMultiplier: 42, samRatio: 0.12, somRatio: 0.18, baseCagr: 28.0, avgCompanyRevenue: 2.0, concentrationBase: 1400 },
     'Default': { tamMultiplier: 80, samRatio: 0.15, somRatio: 0.10, baseCagr: 12.0, avgCompanyRevenue: 5.0, concentrationBase: 1800 }
 };
 
@@ -174,76 +192,95 @@ export async function generateMarketIntelligence(input: MarketIntelligenceInput)
     console.log(`   Industry: ${input.userCompany.industry}`);
     console.log(`   Selected Competitors: ${input.selectedCompetitors.length}`);
     
-    // 1. Load all companies from database
-    const allCompanies = await loadAllCompanies();
-    
-    // 2. Find industry peers
-    const industry = normalizeIndustry(input.userCompany.industry);
-    const industryPeers = allCompanies.filter(c => 
-        normalizeIndustry(c.industry) === industry
-    );
-    
-    console.log(`   Industry Peers Found: ${industryPeers.length}`);
-    
-    // 3. Get similar companies using vector similarity
-    let similarCompanies: CompetitorMatch[] = [];
     try {
-        const searchResult = await findTopCompetitors({
-            companyDescription: input.userCompany.description || '',
-            productsServices: input.userCompany.products || '',
-            industry: input.userCompany.industry,
-            hqCountry: input.userCompany.location || 'Vietnam',
-            orgSize: input.userCompany.size || '11-50'
-        }, 50);
-        similarCompanies = searchResult.competitors;
-    } catch (error) {
-        console.warn('   ⚠️ Could not fetch similar companies:', error);
-    }
-    
-    // 4. Calculate market metrics
-    const config = INDUSTRY_CONFIGS[industry] || INDUSTRY_CONFIGS['Default'];
-    
-    // 5. Generate all sections
-    const marketSize = calculateMarketSize(config, industryPeers.length, input.selectedCompetitors.length);
-    const competitiveLandscape = analyzeCompetitiveLandscape(
-        input.selectedCompetitors, 
-        similarCompanies, 
-        industryPeers.length,
-        config
-    );
-    const marketDynamics = generateMarketDynamics(industry, input.selectedCompetitors);
-    const portersForces = calculatePortersForces(industry, competitiveLandscape, config);
-    const funding = generateFundingData(industry, input.selectedCompetitors);
-    
-    // 6. Generate executive summary
-    const executiveSummary = generateExecutiveSummary(
-        input.userCompany,
-        marketSize,
-        competitiveLandscape,
-        funding,
-        input.selectedCompetitors
-    );
-    
-    const elapsed = Date.now() - startTime;
-    console.log(`✅ Market Intelligence Report generated in ${elapsed}ms`);
-    
-    return {
-        generatedAt: new Date().toISOString(),
-        industry,
-        market: 'Vietnam',
-        companyCount: industryPeers.length,
-        marketSize,
-        competitiveLandscape,
-        marketDynamics,
-        portersForces,
-        funding,
-        executiveSummary,
-        sources: {
-            competitorsAnalyzed: input.selectedCompetitors.length,
-            industryPeersFound: industryPeers.length,
-            similarityThreshold: 0.5
+        // 1. Load all companies from database
+        console.log('   Step 1: Loading all companies...');
+        const allCompanies = await loadAllCompanies();
+        console.log(`   ✓ Loaded ${allCompanies.length} companies`);
+        
+        // 2. Find industry peers
+        console.log('   Step 2: Finding industry peers...');
+        const industry = normalizeIndustry(input.userCompany.industry);
+        const industryPeers = allCompanies.filter(c => 
+            normalizeIndustry(c.industry) === industry
+        );
+        
+        console.log(`   ✓ Industry Peers Found: ${industryPeers.length}`);
+        
+        // 3. Get similar companies using vector similarity
+        console.log('   Step 3: Finding similar companies...');
+        let similarCompanies: CompetitorMatch[] = [];
+        try {
+            console.log(`   Calling findTopCompetitors with:`, {
+                name: input.userCompany.name,
+                limit: 50,
+                minSimilarity: 20,
+                sourceFilter: 'all'
+            });
+            const searchResult = await findTopCompetitors(
+                input.userCompany.name,
+                50,
+                20,
+                'all'
+            );
+            console.log(`   ✓ Found ${searchResult.competitors.length} similar companies in ${searchResult.searchTime}ms`);
+            similarCompanies = searchResult.competitors;
+        } catch (error) {
+            console.warn('   ⚠️ Could not fetch similar companies:', error instanceof Error ? error.message : error);
         }
-    };
+        
+        // 4. Calculate market metrics
+        console.log('   Step 4: Calculating metrics...');
+        const config = INDUSTRY_CONFIGS[industry] || INDUSTRY_CONFIGS['Default'];
+        
+        // 5. Generate all sections
+        const marketSize = calculateMarketSize(config, industryPeers.length, input.selectedCompetitors.length);
+        const competitiveLandscape = analyzeCompetitiveLandscape(
+            input.selectedCompetitors, 
+            similarCompanies, 
+            industryPeers.length,
+            config
+        );
+        const marketDynamics = generateMarketDynamics(industry, input.selectedCompetitors);
+        const portersForces = calculatePortersForces(industry, competitiveLandscape, config);
+        const funding = generateFundingData(industry, input.selectedCompetitors);
+        
+        // 6. Generate executive summary
+        console.log('   Step 5: Generating executive summary...');
+        const executiveSummary = generateExecutiveSummary(
+            input.userCompany,
+            marketSize,
+            competitiveLandscape,
+            funding,
+            input.selectedCompetitors
+        );
+        
+        const elapsed = Date.now() - startTime;
+        console.log(`✅ Market Intelligence Report generated in ${elapsed}ms`);
+        
+        return {
+            generatedAt: new Date().toISOString(),
+            industry,
+            market: 'Vietnam',
+            companyCount: industryPeers.length,
+            marketSize,
+            competitiveLandscape,
+            marketDynamics,
+            portersForces,
+            funding,
+            executiveSummary,
+            sources: {
+                competitorsAnalyzed: input.selectedCompetitors.length,
+                industryPeersFound: industryPeers.length,
+                similarityThreshold: 0.5
+            }
+        };
+    } catch (error) {
+        console.error('❌ Error in generateMarketIntelligence:', error);
+        console.error('   Error message:', error instanceof Error ? error.message : String(error));
+        console.error('   Stack:', error instanceof Error ? error.stack : 'no stack');
+        throw error;
+    }
 }
 
 // ============================================================================
@@ -253,19 +290,39 @@ export async function generateMarketIntelligence(input: MarketIntelligenceInput)
 function normalizeIndustry(industry: string): string {
     if (!industry) return 'Technology';
     
-    const normalized = industry.toLowerCase();
+    // Direct match for exact industry values from CompanyProfile
+    const directMatch: Record<string, string> = {
+        'technology': 'Technology', 'automotive': 'Automotive', 'education': 'Education',
+        'retail': 'Retail', 'finance': 'Finance', 'healthcare': 'Healthcare',
+        'manufacturing': 'Manufacturing', 'telecommunications': 'Telecommunications',
+        'realestate': 'RealEstate', 'energy': 'Energy', 'foodbeverage': 'FoodBeverage',
+        'logistics': 'Logistics', 'entertainment': 'Entertainment', 'agriculture': 'Agriculture',
+        'construction': 'Construction', 'tourism': 'Tourism', 'insurance': 'Insurance',
+        'consulting': 'Consulting', 'pharmaceutical': 'Pharmaceutical', 'aerospace': 'Aerospace',
+        'gaming': 'Gaming', 'cybersecurity': 'Cybersecurity', 'blockchain': 'Blockchain',
+        'media': 'Media', 'fashion': 'Fashion', 'sports': 'Sports', 'legal': 'Legal',
+        'humanresources': 'HumanResources', 'marketing': 'Marketing',
+        'environmentaltech': 'EnvironmentalTech'
+    };
     
+    const normalized = industry.toLowerCase().replace(/[\s_-]/g, '');
+    if (directMatch[normalized]) return directMatch[normalized];
+    
+    // Fuzzy matching for Vietnamese and alternative terms
     if (normalized.includes('tech') || normalized.includes('software') || normalized.includes('it') || normalized.includes('công nghệ')) {
         return 'Technology';
     }
     if (normalized.includes('fintech') || normalized.includes('tài chính') || normalized.includes('banking') || normalized.includes('ngân hàng')) {
-        return 'Fintech';
+        return 'Finance';
     }
     if (normalized.includes('ecommerce') || normalized.includes('e-commerce') || normalized.includes('thương mại điện tử')) {
-        return 'E-commerce';
+        return 'Retail';
     }
-    if (normalized.includes('health') || normalized.includes('y tế') || normalized.includes('medical') || normalized.includes('dược')) {
+    if (normalized.includes('health') || normalized.includes('y tế') || normalized.includes('medical')) {
         return 'Healthcare';
+    }
+    if (normalized.includes('dược') || normalized.includes('pharma')) {
+        return 'Pharmaceutical';
     }
     if (normalized.includes('education') || normalized.includes('edtech') || normalized.includes('giáo dục')) {
         return 'Education';
@@ -277,7 +334,7 @@ function normalizeIndustry(industry: string): string {
         return 'Logistics';
     }
     if (normalized.includes('real estate') || normalized.includes('bất động sản') || normalized.includes('property')) {
-        return 'Real Estate';
+        return 'RealEstate';
     }
     if (normalized.includes('retail') || normalized.includes('bán lẻ')) {
         return 'Retail';
@@ -290,6 +347,60 @@ function normalizeIndustry(industry: string): string {
     }
     if (normalized.includes('tour') || normalized.includes('du lịch') || normalized.includes('travel')) {
         return 'Tourism';
+    }
+    if (normalized.includes('food') || normalized.includes('beverage') || normalized.includes('thực phẩm') || normalized.includes('đồ uống')) {
+        return 'FoodBeverage';
+    }
+    if (normalized.includes('energy') || normalized.includes('năng lượng') || normalized.includes('oil') || normalized.includes('gas')) {
+        return 'Energy';
+    }
+    if (normalized.includes('telecom') || normalized.includes('viễn thông')) {
+        return 'Telecommunications';
+    }
+    if (normalized.includes('entertainment') || normalized.includes('giải trí')) {
+        return 'Entertainment';
+    }
+    if (normalized.includes('construct') || normalized.includes('xây dựng')) {
+        return 'Construction';
+    }
+    if (normalized.includes('insur') || normalized.includes('bảo hiểm')) {
+        return 'Insurance';
+    }
+    if (normalized.includes('consult') || normalized.includes('tư vấn')) {
+        return 'Consulting';
+    }
+    if (normalized.includes('aero') || normalized.includes('hàng không')) {
+        return 'Aerospace';
+    }
+    if (normalized.includes('game') || normalized.includes('gaming')) {
+        return 'Gaming';
+    }
+    if (normalized.includes('cyber') || normalized.includes('security') || normalized.includes('an ninh mạng')) {
+        return 'Cybersecurity';
+    }
+    if (normalized.includes('blockchain') || normalized.includes('crypto') || normalized.includes('defi') || normalized.includes('web3')) {
+        return 'Blockchain';
+    }
+    if (normalized.includes('media') || normalized.includes('truyền thông')) {
+        return 'Media';
+    }
+    if (normalized.includes('fashion') || normalized.includes('thời trang')) {
+        return 'Fashion';
+    }
+    if (normalized.includes('sport') || normalized.includes('thể thao')) {
+        return 'Sports';
+    }
+    if (normalized.includes('legal') || normalized.includes('luật') || normalized.includes('pháp lý')) {
+        return 'Legal';
+    }
+    if (normalized.includes('hr') || normalized.includes('human') || normalized.includes('nhân sự') || normalized.includes('tuyển dụng')) {
+        return 'HumanResources';
+    }
+    if (normalized.includes('market') || normalized.includes('advertising') || normalized.includes('quảng cáo')) {
+        return 'Marketing';
+    }
+    if (normalized.includes('environ') || normalized.includes('green') || normalized.includes('môi trường') || normalized.includes('cleantech')) {
+        return 'EnvironmentalTech';
     }
     
     return 'Technology'; // Default

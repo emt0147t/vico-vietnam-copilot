@@ -9,7 +9,7 @@ interface Company {
   size: string;
   products: string;
   customers: string;
-  industry: 'Automotive' | 'Technology' | 'Education' | 'Retail' | 'Finance';
+  industry: 'Automotive' | 'Technology' | 'Education' | 'Retail' | 'Finance' | 'Healthcare' | 'Manufacturing' | 'Telecommunications' | 'RealEstate' | 'Energy' | 'FoodBeverage' | 'Logistics' | 'Entertainment' | 'Agriculture' | 'Construction' | 'Tourism' | 'Insurance' | 'Consulting' | 'Pharmaceutical' | 'Aerospace' | 'Gaming' | 'Cybersecurity' | 'Blockchain' | 'Media' | 'Fashion' | 'Sports' | 'Legal' | 'HumanResources' | 'Marketing' | 'EnvironmentalTech';
   website?: string;
   revenue: string;
   growth: number;
@@ -24,7 +24,14 @@ export function CompanyBrowser() {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({ total: 0, byIndustry: {} as Record<string, number> });
 
-  const industries = ['Technology', 'Automotive', 'Education', 'Retail', 'Finance'];
+  const industries = [
+    'Technology', 'Finance', 'Retail', 'Healthcare', 'Manufacturing',
+    'Telecommunications', 'RealEstate', 'Energy', 'FoodBeverage', 'Logistics',
+    'Education', 'Automotive', 'Entertainment', 'Agriculture', 'Construction',
+    'Tourism', 'Insurance', 'Consulting', 'Pharmaceutical', 'Aerospace',
+    'Gaming', 'Cybersecurity', 'Blockchain', 'Media', 'Fashion',
+    'Sports', 'Legal', 'HumanResources', 'Marketing', 'EnvironmentalTech'
+  ];
 
   // Load initial data
   useEffect(() => {
@@ -114,7 +121,7 @@ export function CompanyBrowser() {
               <Filter className="w-5 h-5" />
               Ngành
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2">
               {industries.map((industry) => (
                 <button
                   key={industry}

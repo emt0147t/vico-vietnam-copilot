@@ -1,0 +1,15 @@
+# ============================================
+# Railway.app - VICO Market Intelligence
+# Auto-deploy khi push code lên GitHub
+# ============================================
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm install --legacy-peer-deps && npx prisma generate 2>/dev/null; npm run build"
+
+[deploy]
+startCommand = "npx tsx server.ts"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5

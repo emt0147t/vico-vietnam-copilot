@@ -209,3 +209,89 @@ model EnrichmentQueue {
   @@index([status, priority, scheduledAt], map: "idx_queue_processing")
   @@index([companyId], map: "idx_queue_company")
 }
+model MarketData {
+  id        String   @id @default(uuid())
+  type      String   // "MACRO", "FINANCE", "INDUSTRY"
+  key       String   // "GDP", "PE_REAL_ESTATE"
+  value     String
+  unit      String?
+  source    String   // "WorldBank", "CafeF"
+  updatedAt DateTime @default(now())
+}
+
+// ============================================================================
+// USER & AUTHENTICATION (Clerk)
+// ============================================================================
+
+model User {
+  id            String   @id @default(cuid())
+  clerkId       String   @unique
+  email         String   @unique
+  firstName     String?
+  lastName      String?
+  avatar        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  strategies    Strategy[]
+  
+  @@index([email], map: "idx_user_email")
+  @@index([clerkId], map: "idx_user_clerk")
+}
+
+// ============================================================================
+// STRATEGIES & ANALYSIS PERSISTENCE
+// ============================================================================
+
+model Strategy {
+  id            String   @id @default(cuid())
+  
+  // Owner
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  
+  // Company reference
+  companyId     String?
+  companyName   String   @db.VarChar(255)
+  
+  // Strategy data
+  type          String   @default("gtm")  // "gtm", "competitor", "market"
+  title         String?  @db.VarChar(255)
+  description   String?  @db.Text
+  
+  // The full analysis (JSON blob for flexibility)
+  data          Json     // Complete GTM/competitor/market analysis
+  
+  // Status tracking
+  status        String   @default("draft")  // "draft", "saved", "shared", "archived"
+  version       Int      @default(1)
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  versions      StrategyVersion[]
+  
+  @@index([userId], map: "idx_strategy_user")
+  @@index([companyId], map: "idx_strategy_company")
+  @@index([updatedAt], map: "idx_strategy_recent")
+  @@unique([userId, companyId, type], map: "idx_strategy_unique")
+}
+
+model StrategyVersion {
+  id            String   @id @default(cuid())
+  
+  strategy      Strategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  strategyId    String
+  
+  version       Int
+  data          Json
+  changeLog     String?  @db.Text
+  
+  createdAt     DateTime @default(now())
+  
+  @@unique([strategyId, version], map: "idx_version_unique")
+  @@index([strategyId], map: "idx_version_strategy")
+}

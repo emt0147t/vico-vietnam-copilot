@@ -9,6 +9,35 @@
       "DOM",
       "DOM.Iterable"
     ],
+    
+    // ============================================================
+    // STRICT TYPE CHECKING
+    // ============================================================
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    
+    // ============================================================
+    // ADDITIONAL TYPE SAFETY
+    // ============================================================
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    
+    // ============================================================
+    // MODULE RESOLUTION & BUILD
+    // ============================================================
     "skipLibCheck": true,
     "types": [
       "node"
@@ -24,6 +53,34 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
-  }
+    "noEmit": true,
+    
+    // ============================================================
+    // DECLARATION FILES
+    // ============================================================
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    
+    // ============================================================
+    // ESMODULE INTEROP
+    // ============================================================
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  },
+  
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "types/**/*"
+  ],
+  
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }

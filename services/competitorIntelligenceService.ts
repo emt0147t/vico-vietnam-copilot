@@ -215,7 +215,21 @@ const INDUSTRY_CONFIGS: Record<string, {
             analytics: ['Google Analytics', 'Mixpanel', 'Amplitude', 'Segment', 'Heap']
         }
     },
-    'Fintech': {
+    'Healthcare': {
+        avgRevenue: 20,
+        avgHeadcount: 180,
+        revGrowthRange: [10, 30],
+        headcountGrowthRange: [8, 22],
+        fundingMultiplier: 3.0,
+        techStacks: {
+            cloud: ['AWS', 'Azure', 'GCP'],
+            frontend: ['React', 'Angular', 'Flutter'],
+            backend: ['Python', 'Java', 'Node.js'],
+            database: ['PostgreSQL', 'MongoDB', 'MySQL'],
+            analytics: ['Tableau', 'Power BI', 'Custom BI']
+        }
+    },
+    'Finance': {
         avgRevenue: 25,
         avgHeadcount: 200,
         revGrowthRange: [20, 55],
@@ -229,7 +243,7 @@ const INDUSTRY_CONFIGS: Record<string, {
             analytics: ['Tableau', 'Power BI', 'Looker', 'DataDog']
         }
     },
-    'E-commerce': {
+    'Retail': {
         avgRevenue: 35,
         avgHeadcount: 300,
         revGrowthRange: [18, 42],
@@ -243,18 +257,116 @@ const INDUSTRY_CONFIGS: Record<string, {
             analytics: ['Google Analytics', 'Hotjar', 'Mixpanel', 'Klaviyo']
         }
     },
-    'Healthcare': {
-        avgRevenue: 20,
-        avgHeadcount: 180,
-        revGrowthRange: [10, 30],
-        headcountGrowthRange: [8, 22],
-        fundingMultiplier: 3.0,
+    'Manufacturing': {
+        avgRevenue: 50,
+        avgHeadcount: 500,
+        revGrowthRange: [5, 18],
+        headcountGrowthRange: [3, 12],
+        fundingMultiplier: 1.5,
         techStacks: {
-            cloud: ['AWS', 'Azure', 'GCP'],
-            frontend: ['React', 'Angular', 'Flutter'],
-            backend: ['Python', 'Java', 'Node.js'],
-            database: ['PostgreSQL', 'MongoDB', 'MySQL'],
+            cloud: ['AWS', 'Azure', 'SAP Cloud'],
+            frontend: ['React', 'Angular'],
+            backend: ['Java', '.NET', 'Python'],
+            database: ['Oracle', 'SQL Server', 'PostgreSQL'],
+            analytics: ['SAP Analytics', 'Power BI', 'Tableau']
+        }
+    },
+    'Telecommunications': {
+        avgRevenue: 80,
+        avgHeadcount: 1000,
+        revGrowthRange: [5, 15],
+        headcountGrowthRange: [3, 10],
+        fundingMultiplier: 1.2,
+        techStacks: {
+            cloud: ['AWS', 'Azure', 'Private Cloud'],
+            frontend: ['React', 'Angular', 'Vue.js'],
+            backend: ['Java', 'C++', 'Python', 'Go'],
+            database: ['Oracle', 'PostgreSQL', 'Cassandra'],
+            analytics: ['Splunk', 'Grafana', 'Elasticsearch']
+        }
+    },
+    'FoodBeverage': {
+        avgRevenue: 30,
+        avgHeadcount: 400,
+        revGrowthRange: [8, 20],
+        headcountGrowthRange: [5, 15],
+        fundingMultiplier: 1.5,
+        techStacks: {
+            cloud: ['AWS', 'Azure'],
+            frontend: ['React', 'Vue.js'],
+            backend: ['Node.js', 'Python', 'Java'],
+            database: ['MySQL', 'PostgreSQL'],
+            analytics: ['Google Analytics', 'Tableau', 'Power BI']
+        }
+    },
+    'Blockchain': {
+        avgRevenue: 8,
+        avgHeadcount: 80,
+        revGrowthRange: [30, 120],
+        headcountGrowthRange: [20, 60],
+        fundingMultiplier: 5.0,
+        techStacks: {
+            cloud: ['AWS', 'GCP', 'Decentralized'],
+            frontend: ['React', 'Next.js', 'Vue.js'],
+            backend: ['Rust', 'Solidity', 'Go', 'Node.js'],
+            database: ['PostgreSQL', 'DynamoDB', 'IPFS'],
+            analytics: ['Dune Analytics', 'Chainalysis', 'Nansen']
+        }
+    },
+    'Gaming': {
+        avgRevenue: 15,
+        avgHeadcount: 120,
+        revGrowthRange: [15, 50],
+        headcountGrowthRange: [10, 35],
+        fundingMultiplier: 2.5,
+        techStacks: {
+            cloud: ['AWS', 'GCP', 'Azure PlayFab'],
+            frontend: ['Unity', 'Unreal Engine', 'React'],
+            backend: ['C++', 'C#', 'Go', 'Node.js'],
+            database: ['Redis', 'MongoDB', 'PostgreSQL'],
+            analytics: ['GameAnalytics', 'Unity Analytics', 'Amplitude']
+        }
+    },
+    'Logistics': {
+        avgRevenue: 20,
+        avgHeadcount: 250,
+        revGrowthRange: [12, 30],
+        headcountGrowthRange: [8, 22],
+        fundingMultiplier: 2.0,
+        techStacks: {
+            cloud: ['AWS', 'GCP', 'Azure'],
+            frontend: ['React', 'Flutter', 'React Native'],
+            backend: ['Java', 'Node.js', 'Python'],
+            database: ['PostgreSQL', 'MongoDB', 'Redis'],
             analytics: ['Tableau', 'Power BI', 'Custom BI']
+        }
+    },
+    'RealEstate': {
+        avgRevenue: 60,
+        avgHeadcount: 350,
+        revGrowthRange: [8, 25],
+        headcountGrowthRange: [5, 18],
+        fundingMultiplier: 1.8,
+        techStacks: {
+            cloud: ['AWS', 'Azure'],
+            frontend: ['React', 'Vue.js'],
+            backend: ['Node.js', 'Python', 'Java'],
+            database: ['PostgreSQL', 'MySQL'],
+            analytics: ['Power BI', 'Tableau', 'Google Analytics']
+        }
+    },
+    'Energy': {
+        avgRevenue: 100,
+        avgHeadcount: 800,
+        revGrowthRange: [5, 15],
+        headcountGrowthRange: [3, 10],
+        fundingMultiplier: 1.2,
+        techStacks: {
+            cloud: ['Azure', 'AWS', 'Private Cloud'],
+            frontend: ['React', 'Angular'],
+            backend: ['Java', 'Python', 'C++'],
+            database: ['Oracle', 'PostgreSQL', 'TimescaleDB'],
+            analytics: ['SAP Analytics', 'Power BI', 'OSIsoft PI']
         }
     },
     'Default': {
@@ -431,15 +543,25 @@ const BATTLECARD_TEMPLATES = {
 // ============================================================================
 
 function normalizeIndustry(industry: string): string {
-    const industryMap: Record<string, string> = {
+    const directMatch: Record<string, string> = {
         'tech': 'Technology', 'technology': 'Technology', 'it': 'Technology', 'software': 'Technology',
-        'saas': 'Technology', 'ai': 'Technology', 'fintech': 'Fintech', 'finance': 'Fintech',
-        'banking': 'Fintech', 'ecommerce': 'E-commerce', 'e-commerce': 'E-commerce', 'retail': 'Retail',
+        'saas': 'Technology', 'ai': 'Technology', 'fintech': 'Finance', 'finance': 'Finance',
+        'banking': 'Finance', 'ecommerce': 'Retail', 'e-commerce': 'Retail', 'retail': 'Retail',
         'healthcare': 'Healthcare', 'health': 'Healthcare', 'medtech': 'Healthcare',
         'education': 'Education', 'edtech': 'Education', 'logistics': 'Logistics',
-        'manufacturing': 'Manufacturing', 'automotive': 'Automotive'
+        'manufacturing': 'Manufacturing', 'automotive': 'Automotive',
+        'telecommunications': 'Telecommunications', 'telecom': 'Telecommunications',
+        'realestate': 'RealEstate', 'energy': 'Energy', 'foodbeverage': 'FoodBeverage',
+        'entertainment': 'Entertainment', 'agriculture': 'Agriculture',
+        'construction': 'Construction', 'tourism': 'Tourism', 'insurance': 'Insurance',
+        'consulting': 'Consulting', 'pharmaceutical': 'Pharmaceutical', 'aerospace': 'Aerospace',
+        'gaming': 'Gaming', 'cybersecurity': 'Cybersecurity', 'blockchain': 'Blockchain',
+        'media': 'Media', 'fashion': 'Fashion', 'sports': 'Sports', 'legal': 'Legal',
+        'humanresources': 'HumanResources', 'marketing': 'Marketing',
+        'environmentaltech': 'EnvironmentalTech'
     };
-    const normalized = industryMap[industry.toLowerCase()] || industry;
+    const key = industry.toLowerCase().replace(/[\s_-]/g, '');
+    const normalized = directMatch[key] || industry;
     return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 

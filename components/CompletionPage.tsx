@@ -21,6 +21,7 @@ import { PremiumCompetitorDashboard } from './PremiumCompetitorDashboard';
 import { MarketIndustryPage } from './MarketIndustryPage';
 import { CompetitorAnalysisPage } from './CompetitorAnalysisPage';
 import { CustomerInsightsPage } from './CustomerInsightsPage';
+import { NewsIntelligencePage } from './NewsIntelligencePage';
 
 interface CompletionPageProps { userData: any; onBack: () => void; }
 
@@ -153,6 +154,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
   // Top navigation tabs (GlobalCopilot style)
   const topTabs = [
     { id: 'market-industry', label: 'Market & Industry' },
+    { id: 'news-intelligence', label: 'News Intelligence' },
     { id: 'competitor-analysis', label: 'Competitor Analysis' },
     { id: 'customer-insights', label: 'Customer Insights' },
     { id: 'go-to-market', label: 'Go-To-Market' },
@@ -242,6 +244,17 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                 >
                     <LineChart size={16} className="text-gray-500" />
                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Customer Insights</span>
+                </button>
+                <button 
+                    onClick={() => setActiveTab('news-intelligence')} 
+                    className={`w-full p-2.5 rounded-lg flex items-center gap-3 transition-all ${
+                        activeTab === 'news-intelligence' 
+                            ? 'bg-gray-100 dark:bg-gray-800 border-l-2 border-[#B91C1C]' 
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                    }`}
+                >
+                    <Newspaper size={16} className="text-gray-500" />
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">News Intelligence</span>
                 </button>
             </div>
             
@@ -373,6 +386,14 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                   {/* Customer Insights Tab - Dynamic 4-Tier Analysis */}
                   {activeTab === 'customer-insights' && (
                       <CustomerInsightsPage userData={userData} />
+                  )}
+                  
+                  {/* News Intelligence Tab */}
+                  {activeTab === 'news-intelligence' && (
+                      <NewsIntelligencePage 
+                          userData={userData} 
+                          competitors={userData.competitors?.filter((c: any) => c.selected) || []}
+                      />
                   )}
                   
                   {/* Go-To-Market Tab */}
