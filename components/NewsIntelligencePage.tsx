@@ -10,9 +10,24 @@
  * 6. Advanced News Search & Filtering
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { getCompanyNews } from '../services/newsService';
 import { RagService, SearchResult } from '../services/ragLayer';
+
+// Stable sentiment from string hash (deterministic, no Math.random)
+const hashSentiment = (str: string): 'positive' | 'neutral' | 'negative' => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    const mod = Math.abs(hash) % 10;
+    if (mod < 3) return 'positive';
+    if (mod < 5) return 'negative';
+    return 'neutral';
+};
+const hashScore = (str: string, min: number, range: number): number => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    return min + (Math.abs(hash) % range);
+};
 
 interface NewsIntelligencePageProps {
     userData: any;
@@ -421,7 +436,28 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({ user
     const [sentimentFilter, setSentimentFilter] = useState<'all' | 'positive' | 'neutral' | 'negative'>('all');
     const [activeTab, setActiveTab] = useState<'all' | 'company' | 'competitors' | 'industry'>('all');
 
+    // Stable references to prevent re-fetch loops
+    const hasFetchedRef = useRef(false);
+    const orgNameRef = useRef(userData.orgName);
+    const competitorNamesRef = useRef(
+        competitors?.map(c => c.name).join(',') || ''
+    );
+
     useEffect(() => {
+        // Only re-fetch if orgName or competitor names actually changed
+        const currentCompNames = competitors?.map(c => c.name).join(',') || '';
+        if (
+            hasFetchedRef.current &&
+            orgNameRef.current === userData.orgName &&
+            competitorNamesRef.current === currentCompNames
+        ) {
+            return; // Skip: nothing changed
+        }
+
+        orgNameRef.current = userData.orgName;
+        competitorNamesRef.current = currentCompNames;
+        hasFetchedRef.current = true;
+
         const loadNews = async () => {
             setIsLoading(true);
             try {
@@ -432,8 +468,8 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({ user
                 const companyNews = await getCompanyNews(userData.orgName);
                 allNews = allNews.concat(companyNews.map((item: any) => ({
                     ...item,
-                    sentiment: Math.random() > 0.7 ? 'positive' : Math.random() > 0.5 ? 'negative' : 'neutral',
-                    relevanceScore: Math.floor(Math.random() * 40) + 60,
+                    sentiment: hashSentiment(item.guid || item.title || ''),
+                    relevanceScore: hashScore(item.guid || item.title || '', 60, 40),
                     keywords: ['công ty', 'kinh doanh', 'thị trường']
                 })));
 
@@ -444,8 +480,8 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({ user
                             const compNews = await getCompanyNews(competitor.name);
                             return compNews.map((item: any) => ({
                                 ...item,
-                                sentiment: Math.random() > 0.7 ? 'positive' : Math.random() > 0.5 ? 'negative' : 'neutral',
-                                relevanceScore: Math.floor(Math.random() * 40) + 50,
+                                sentiment: hashSentiment(item.guid || item.title || ''),
+                                relevanceScore: hashScore(item.guid || item.title || '', 50, 40),
                                 keywords: ['cạnh tranh', 'công nghệ', 'phát triển']
                             }));
                         } catch {
@@ -460,8 +496,8 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({ user
                 const industryNews = await getCompanyNews('công nghệ');
                 allNews = allNews.concat(industryNews.map((item: any) => ({
                     ...item,
-                    sentiment: Math.random() > 0.7 ? 'positive' : Math.random() > 0.5 ? 'negative' : 'neutral',
-                    relevanceScore: Math.floor(Math.random() * 40) + 40,
+                    sentiment: hashSentiment(item.guid || item.title || ''),
+                    relevanceScore: hashScore(item.guid || item.title || '', 40, 40),
                     keywords: ['ngành', 'thị trường', 'xu hướng']
                 })));
 
@@ -480,7 +516,8 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({ user
         };
 
         loadNews();
-    }, [userData.orgName, competitors]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userData.orgName]);
 
     // Filter news based on search and sentiment
     useEffect(() => {
