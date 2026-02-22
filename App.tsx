@@ -3,6 +3,7 @@ import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { Wizard } from './components/Wizard';
 import { CompletionPage } from './components/CompletionPage';
+import { VicoChatBot } from './components/VicoChatBot';
 import { Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { RagService } from './services/ragLayer';
 import { logger } from './utils/logger';
@@ -112,7 +113,7 @@ function App() {
   };
 
   const loadingOverlay = appState.isSeeding && (
-    <div className="fixed bottom-6 right-6 z-[100] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-fade-in max-w-xs">
+    <div className="fixed bottom-6 left-6 z-[100] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-fade-in max-w-xs">
       <div className="relative w-10 h-10 flex items-center justify-center">
         <Loader2 className="animate-spin text-[#B91C1C]" size={24} />
         <span className="absolute text-[8px] font-black text-gray-900 dark:text-white">{appState.seedProgress.p}%</span>
@@ -152,7 +153,6 @@ function App() {
           <Wizard 
             onComplete={handleWizardComplete}
             onBack={handleBackToHome}
-            onSignInClick={() => setView('login')}
           />
         )}
 
@@ -163,6 +163,7 @@ function App() {
           />
         )}
       </div>
+      <VicoChatBot />
     </AppErrorBoundary>
   );
 }

@@ -1,0 +1,494 @@
+
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import {
+    MessageCircle, X, Send, Trash2, Search, Newspaper,
+    Swords, Brain, Sparkles, Copy, Check,
+    Bot, User, Loader2, Minimize2, ArrowDown
+} from 'lucide-react';
+import { chatService, type ChatMessage } from '../services/chatService';
+
+// ─── Quick Action Items ───
+const QUICK_ACTIONS = [
+    { icon: Search, label: 'Tìm công ty', prompt: 'Tìm kiếm thông tin về công ty VinFast', color: 'blue' },
+    { icon: Newspaper, label: 'Tin tức mới', prompt: 'Tin tức mới nhất về thị trường Việt Nam hôm nay', color: 'green' },
+    { icon: Swords, label: 'Phân tích đối thủ', prompt: 'Tìm đối thủ cạnh tranh của FPT Software', color: 'orange' },
+    { icon: Brain, label: 'Insight thị trường', prompt: 'Xu hướng nổi bật của ngành công nghệ Việt Nam 2026', color: 'purple' },
+];
+
+const TOOL_LABELS: Record<string, string> = {
+    search_companies: '🔍 Tra cứu công ty',
+    get_latest_news: '📰 Tìm tin tức',
+    find_competitors: '⚔️ Phân tích đối thủ',
+    search_knowledge_base: '🧠 Tìm kiếm tri thức',
+};
+
+// ─── Markdown Renderer ───
+function renderMarkdown(text: string): React.ReactNode {
+    const lines = text.split('\n');
+    const elements: React.ReactNode[] = [];
+    let listBuffer: string[] = [];
+    let listType: 'ul' | 'ol' | null = null;
+
+    const flushList = () => {
+        if (listBuffer.length > 0 && listType) {
+            const Tag = listType;
+            elements.push(
+                <Tag key={`list-${elements.length}`} className={`${listType === 'ol' ? 'list-decimal' : 'list-disc'} pl-5 my-2 space-y-1`}>
+                    {listBuffer.map((item, i) => (
+                        <li key={i} className="text-[13px] leading-relaxed" dangerouslySetInnerHTML={{ __html: processInline(item) }} />
+                    ))}
+                </Tag>
+            );
+            listBuffer = [];
+            listType = null;
+        }
+    };
+
+    const processInline = (line: string): string => {
+        return line
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold">$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/`(.+?)`/g, '<code class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-xs font-mono">$1</code>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">$1</a>');
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line) continue;
+        const trimmed = line.trim();
+
+        // Empty line
+        if (!trimmed) {
+            flushList();
+            continue;
+        }
+
+        // Headings
+        if (trimmed.startsWith('### ')) {
+            flushList();
+            elements.push(<h4 key={`h-${i}`} className="font-bold text-sm mt-3 mb-1 text-gray-900 dark:text-white" dangerouslySetInnerHTML={{ __html: processInline(trimmed.slice(4)) }} />);
+            continue;
+        }
+        if (trimmed.startsWith('## ')) {
+            flushList();
+            elements.push(<h3 key={`h-${i}`} className="font-bold text-[15px] mt-3 mb-1 text-gray-900 dark:text-white" dangerouslySetInnerHTML={{ __html: processInline(trimmed.slice(3)) }} />);
+            continue;
+        }
+
+        // Unordered list
+        if (/^[-*•]\s/.test(trimmed)) {
+            if (listType !== 'ul') flushList();
+            listType = 'ul';
+            listBuffer.push(trimmed.replace(/^[-*•]\s/, ''));
+            continue;
+        }
+
+        // Ordered list
+        if (/^\d+\.\s/.test(trimmed)) {
+            if (listType !== 'ol') flushList();
+            listType = 'ol';
+            listBuffer.push(trimmed.replace(/^\d+\.\s/, ''));
+            continue;
+        }
+
+        // Normal paragraph
+        flushList();
+        elements.push(
+            <p key={`p-${i}`} className="text-[13px] leading-relaxed my-1" dangerouslySetInnerHTML={{ __html: processInline(trimmed) }} />
+        );
+    }
+    flushList();
+    return <>{elements}</>;
+}
+
+// ─── Main Component ───
+export const VicoChatBot: React.FC = () => {
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [input, setInput] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [showScrollBtn, setShowScrollBtn] = useState<boolean>(false);
+    const [unreadCount, setUnreadCount] = useState<number>(0);
+    const [hasInteracted, setHasInteracted] = useState<boolean>(false);
+
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
+
+    // Auto-scroll to bottom
+    const scrollToBottom = useCallback((smooth = true) => {
+        messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    }, []);
+
+    useEffect(() => {
+        if (isOpen) scrollToBottom(false);
+    }, [isOpen, scrollToBottom]);
+
+    useEffect(() => {
+        if (isOpen && messages.length > 0) {
+            scrollToBottom();
+            setUnreadCount(0);
+        }
+    }, [messages.length, isOpen, scrollToBottom]);
+
+    // Focus input when opened
+    useEffect(() => {
+        if (isOpen) {
+            setTimeout(() => inputRef.current?.focus(), 300);
+        }
+    }, [isOpen]);
+
+    // Scroll detection for "scroll to bottom" button
+    const handleScroll = useCallback(() => {
+        const el = messagesContainerRef.current;
+        if (!el) return;
+        const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+        setShowScrollBtn(!isNearBottom);
+    }, []);
+
+    // Send message
+    const handleSend = useCallback(async (text?: string) => {
+        const messageText = (text || input).trim();
+        if (!messageText || isLoading) return;
+
+        setInput('');
+        setHasInteracted(true);
+        setIsLoading(true);
+
+        // Add user message immediately
+        const userMsg: ChatMessage = {
+            id: `u_${Date.now()}`,
+            role: 'user',
+            content: messageText,
+            timestamp: Date.now(),
+        };
+        setMessages((prev: ChatMessage[]) => [...prev, userMsg]);
+
+        try {
+            await chatService.sendMessage(messageText);
+            setMessages(chatService.getHistory().filter(m => !m.isLoading));
+
+            // If chat is closed, increment unread
+            if (!isOpen) {
+                setUnreadCount((prev: number) => prev + 1);
+            }
+        } catch {
+            setMessages(chatService.getHistory().filter(m => !m.isLoading));
+        } finally {
+            setIsLoading(false);
+        }
+    }, [input, isLoading, isOpen]);
+
+    // Handle Enter key (Shift+Enter for newline)
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    };
+
+    // Copy message content
+    const handleCopy = async (msg: ChatMessage) => {
+        try {
+            await navigator.clipboard.writeText(msg.content);
+            setCopiedId(msg.id);
+            setTimeout(() => setCopiedId(null), 2000);
+        } catch { /* clipboard may not be available */ }
+    };
+
+    // Clear chat
+    const handleClear = () => {
+        chatService.clearHistory();
+        setMessages([]);
+        setHasInteracted(false);
+    };
+
+    // Toggle open
+    const toggleOpen = () => {
+        setIsOpen((prev: boolean) => !prev);
+        if (!isOpen) setUnreadCount(0);
+    };
+
+    // Quick action
+    const handleQuickAction = (prompt: string) => {
+        handleSend(prompt);
+    };
+
+    // Auto-resize textarea
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setInput(e.target.value);
+        const el = e.target;
+        el.style.height = 'auto';
+        el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+    };
+
+    const formatTime = (ts: number) => {
+        return new Date(ts).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    };
+
+    return (
+        <>
+            {/* ─── Floating Button ─── */}
+            <button
+                onClick={toggleOpen}
+                className={`fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 group ${
+                    isOpen
+                        ? 'bg-gray-200 dark:bg-gray-700 rotate-0 scale-90'
+                        : 'bg-gradient-to-br from-[#B91C1C] to-red-700 hover:from-red-700 hover:to-red-800 hover:scale-110 hover:shadow-[0_0_30px_rgba(185,28,28,0.4)]'
+                }`}
+                aria-label={isOpen ? 'Đóng chat' : 'Mở VICO AI Chat'}
+            >
+                {isOpen ? (
+                    <X size={22} className="text-gray-600 dark:text-gray-300" />
+                ) : (
+                    <>
+                        <MessageCircle size={24} className="text-white" />
+                        {/* Pulse animation when haven't interacted */}
+                        {!hasInteracted && (
+                            <span className="absolute inset-0 rounded-full bg-[#B91C1C] animate-ping opacity-30" />
+                        )}
+                    </>
+                )}
+
+                {/* Unread badge */}
+                {unreadCount > 0 && !isOpen && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                )}
+            </button>
+
+            {/* ─── Chat Panel ─── */}
+            {isOpen && (
+                <div
+                    className="fixed bottom-24 right-6 z-[9998] w-[400px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-8rem)]
+                        bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700
+                        rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.5)]
+                        flex flex-col overflow-hidden
+                        animate-slide-up"
+                    role="dialog"
+                    aria-label="VICO AI Chat"
+                >
+                    {/* ─── Header ─── */}
+                    <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-[#B91C1C] to-red-700 text-white flex-shrink-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <Sparkles size={18} />
+                            </div>
+                            <div>
+                                <h3 className="font-black text-sm tracking-tight leading-none">VICO AI</h3>
+                                <p className="text-[10px] text-white/70 font-medium mt-0.5">Market Intelligence Assistant</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={handleClear}
+                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                aria-label="Xóa cuộc trò chuyện"
+                                title="Xóa cuộc trò chuyện"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                aria-label="Thu nhỏ"
+                                title="Thu nhỏ"
+                            >
+                                <Minimize2 size={16} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* ─── Messages Area ─── */}
+                    <div
+                        ref={messagesContainerRef}
+                        onScroll={handleScroll}
+                        className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth"
+                        style={{ scrollbarWidth: 'thin' }}
+                    >
+                        {/* Welcome Screen */}
+                        {!hasInteracted && messages.length === 0 && (
+                            <div className="flex flex-col items-center text-center py-6 animate-fade-in">
+                                <div className="w-16 h-16 bg-gradient-to-br from-[#B91C1C] to-red-700 rounded-2xl flex items-center justify-center mb-4 shadow-xl shadow-red-900/20">
+                                    <Bot size={32} className="text-white" />
+                                </div>
+                                <h4 className="text-lg font-black text-gray-900 dark:text-white mb-1">Xin chào! 👋</h4>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[280px] leading-relaxed mb-6">
+                                    Tôi là <strong className="text-[#B91C1C]">VICO AI</strong> — trợ lý thị trường Việt Nam. Hỏi tôi bất cứ điều gì về doanh nghiệp, thị trường, đối thủ, hoặc tin tức.
+                                </p>
+
+                                {/* Quick Actions Grid */}
+                                <div className="grid grid-cols-2 gap-2 w-full">
+                                    {QUICK_ACTIONS.map((action, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => handleQuickAction(action.prompt)}
+                                            className="flex items-center gap-2.5 p-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 rounded-xl
+                                                hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-600 
+                                                transition-all text-left group"
+                                        >
+                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors
+                                                ${action.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-500' : ''}
+                                                ${action.color === 'green' ? 'bg-green-50 dark:bg-green-900/20 text-green-500' : ''}
+                                                ${action.color === 'orange' ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-500' : ''}
+                                                ${action.color === 'purple' ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-500' : ''}
+                                            `}>
+                                                <action.icon size={16} />
+                                            </div>
+                                            <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors leading-tight">
+                                                {action.label}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Message Bubbles */}
+                        {messages.map(msg => (
+                            <div
+                                key={msg.id}
+                                className={`flex gap-2.5 animate-fade-in ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                            >
+                                {/* Avatar */}
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                                    msg.role === 'user'
+                                        ? 'bg-[#B91C1C] text-white'
+                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                                }`}>
+                                    {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
+                                </div>
+
+                                {/* Bubble */}
+                                <div className={`max-w-[82%] group relative ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+                                    {/* Tool badges */}
+                                    {msg.toolsUsed && msg.toolsUsed.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mb-1.5">
+                                            {msg.toolsUsed.map((tool, i) => (
+                                                <span key={i} className="inline-flex items-center px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[9px] font-bold rounded-full">
+                                                    {TOOL_LABELS[tool] || tool}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <div className={`px-4 py-3 rounded-2xl ${
+                                        msg.role === 'user'
+                                            ? 'bg-[#B91C1C] text-white rounded-tr-md'
+                                            : 'bg-gray-50 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 rounded-tl-md'
+                                    }`}>
+                                        {msg.role === 'assistant' ? (
+                                            <div className="prose-sm max-w-none">
+                                                {renderMarkdown(msg.content)}
+                                            </div>
+                                        ) : (
+                                            <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Footer: time + copy */}
+                                    <div className={`flex items-center gap-2 mt-1 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <span className="text-[10px] text-gray-400">{formatTime(msg.timestamp)}</span>
+                                        {msg.role === 'assistant' && (
+                                            <button
+                                                onClick={() => handleCopy(msg)}
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                                                aria-label="Sao chép"
+                                                title="Sao chép"
+                                            >
+                                                {copiedId === msg.id ? <Check size={12} className="text-green-500" /> : <Copy size={12} className="text-gray-400" />}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Typing Indicator */}
+                        {isLoading && (
+                            <div className="flex gap-2.5 animate-fade-in">
+                                <div className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                                    <Bot size={14} className="text-gray-400" />
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700 rounded-2xl rounded-tl-md px-4 py-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex gap-1">
+                                            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                        </div>
+                                        <span className="text-[10px] text-gray-400 font-medium ml-1">Đang xử lý...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Scroll-to-bottom button */}
+                    {showScrollBtn && (
+                        <button
+                            onClick={() => scrollToBottom()}
+                            className="absolute bottom-[76px] left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-full p-2 z-10 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all animate-fade-in"
+                            aria-label="Cuộn xuống"
+                        >
+                            <ArrowDown size={16} className="text-gray-500" />
+                        </button>
+                    )}
+
+                    {/* ─── Input Area ─── */}
+                    <div className="flex-shrink-0 border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-[#111827] px-4 py-3">
+                        {/* Quick action chips (visible after first interaction) */}
+                        {hasInteracted && messages.length > 0 && !isLoading && (
+                            <div className="flex gap-1.5 mb-2 overflow-x-auto pb-1 scrollbar-hide">
+                                {QUICK_ACTIONS.map((action, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handleQuickAction(action.prompt)}
+                                        className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full text-[10px] font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-500 transition-all whitespace-nowrap flex-shrink-0"
+                                    >
+                                        <action.icon size={11} />
+                                        {action.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="flex items-end gap-2">
+                            <textarea
+                                ref={inputRef}
+                                value={input}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Hỏi VICO AI bất cứ điều gì..."
+                                rows={1}
+                                disabled={isLoading}
+                                className="flex-1 resize-none bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C]/50 transition-all disabled:opacity-50 max-h-[120px]"
+                                style={{ scrollbarWidth: 'none' }}
+                            />
+                            <button
+                                onClick={() => handleSend()}
+                                disabled={!input.trim() || isLoading}
+                                className="w-10 h-10 bg-[#B91C1C] hover:bg-red-700 text-white rounded-xl flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg flex-shrink-0"
+                                aria-label="Gửi tin nhắn"
+                            >
+                                {isLoading ? (
+                                    <Loader2 size={18} className="animate-spin" />
+                                ) : (
+                                    <Send size={16} />
+                                )}
+                            </button>
+                        </div>
+                        <p className="text-[9px] text-gray-400 text-center mt-2 font-medium">
+                            VICO AI có thể không chính xác. Hãy xác minh thông tin quan trọng.
+                        </p>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
