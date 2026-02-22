@@ -1,11 +1,20 @@
 
+import { GoogleGenAI, Type, FunctionDeclaration } from '@google/genai';
 import { RagService } from './ragLayer';
 import { getCompanyNews } from './newsService';
 
-// Access Gemini AI through browser global (loaded via importmap)
-declare const google: any;
-
 const MODEL_NAME = 'gemini-2.0-flash';
+
+// Initialize the AI client with the API key injected by Vite
+function getAI(): GoogleGenAI | null {
+    try {
+        const apiKey = (process.env as any).API_KEY;
+        if (!apiKey) return null;
+        return new GoogleGenAI({ apiKey });
+    } catch {
+        return null;
+    }
+}
 
 const SYSTEM_PROMPT = `Bạn là **VICO AI** — trợ lý trí tuệ nhân tạo của nền tảng VICO (Vietnam Copilot), chuyên về phân tích thị trường Việt Nam.
 
@@ -45,14 +54,14 @@ export interface ChatMessage {
 }
 
 // Tool declarations for Gemini function calling
-const TOOL_DECLARATIONS = [
+const TOOL_DECLARATIONS: FunctionDeclaration[] = [
     {
         name: 'search_companies',
         description: 'Tìm kiếm công ty Việt Nam theo tên, ngành nghề, hoặc từ khóa. Dùng khi user hỏi về một công ty cụ thể, tìm công ty theo ngành, hoặc muốn biết thông tin doanh nghiệp.',
         parameters: {
-            type: 'OBJECT' as const,
+            type: Type.OBJECT,
             properties: {
-                query: { type: 'STRING' as const, description: 'Tên công ty hoặc từ khóa (ví dụ: "VinFast", "công nghệ", "fintech")' }
+                query: { type: Type.STRING, description: 'Tên công ty hoặc từ khóa (ví dụ: "VinFast", "công nghệ", "fintech")' }
             },
             required: ['query']
         }
@@ -61,9 +70,9 @@ const TOOL_DECLARATIONS = [
         name: 'get_latest_news',
         description: 'Lấy tin tức mới nhất từ Google News về một chủ đề, công ty, hoặc ngành nghề tại Việt Nam. Dùng khi user hỏi về tin tức, sự kiện gần đây.',
         parameters: {
-            type: 'OBJECT' as const,
+            type: Type.OBJECT,
             properties: {
-                query: { type: 'STRING' as const, description: 'Chủ đề tin tức (ví dụ: "VinFast IPO", "thị trường bất động sản", "AI Việt Nam")' }
+                query: { type: Type.STRING, description: 'Chủ đề tin tức (ví dụ: "VinFast IPO", "thị trường bất động sản", "AI Việt Nam")' }
             },
             required: ['query']
         }
@@ -72,10 +81,10 @@ const TOOL_DECLARATIONS = [
         name: 'find_competitors',
         description: 'Tìm đối thủ cạnh tranh của một công ty dựa trên similarity scoring đa chiều (ngành, sản phẩm, quy mô, vị trí). Dùng khi user hỏi về đối thủ hoặc cạnh tranh.',
         parameters: {
-            type: 'OBJECT' as const,
+            type: Type.OBJECT,
             properties: {
-                company: { type: 'STRING' as const, description: 'Tên công ty cần tìm đối thủ' },
-                limit: { type: 'NUMBER' as const, description: 'Số lượng đối thủ (mặc định 8)' }
+                company: { type: Type.STRING, description: 'Tên công ty cần tìm đối thủ' },
+                limit: { type: Type.NUMBER, description: 'Số lượng đối thủ (mặc định 8)' }
             },
             required: ['company']
         }
@@ -84,9 +93,9 @@ const TOOL_DECLARATIONS = [
         name: 'search_knowledge_base',
         description: 'Tìm kiếm deep trong kho tri thức VICO bằng vector search. Dùng cho câu hỏi tổng quát về thị trường, xu hướng, chiến lược, hoặc khi cần insight sâu.',
         parameters: {
-            type: 'OBJECT' as const,
+            type: Type.OBJECT,
             properties: {
-                query: { type: 'STRING' as const, description: 'Câu hỏi hoặc chủ đề cần tìm kiếm' }
+                query: { type: Type.STRING, description: 'Câu hỏi hoặc chủ đề cần tìm kiếm' }
             },
             required: ['query']
         }
@@ -186,7 +195,7 @@ class VicoChatService {
         };
         this.history.push(userMsg);
 
-        const ai = typeof google !== 'undefined' ? google.generativeAI : null;
+        const ai = getAI();
         if (!ai) {
             return this.addAssistantMessage(
                 '⚠️ **AI Engine chưa sẵn sàng.** Vui lòng kiểm tra kết nối mạng và đảm bảo API key đã được cấu hình trong file `.env`.',
@@ -221,6 +230,7 @@ class VicoChatService {
             while (response.functionCalls && response.functionCalls.length > 0 && rounds < 3) {
                 rounds++;
                 const fc = response.functionCalls[0];
+                if (!fc || !fc.name) break;
                 toolsUsed.push(fc.name);
 
                 const toolResult = await executeTool(fc.name, fc.args || {});
@@ -228,8 +238,8 @@ class VicoChatService {
                 // Send function result back to Gemini
                 const updatedContents = [
                     ...contents,
-                    { role: 'model', parts: [{ functionCall: { name: fc.name, args: fc.args } }] },
-                    { role: 'function', parts: [{ functionResponse: { name: fc.name, response: toolResult } }] },
+                    { role: 'model' as const, parts: [{ functionCall: { name: fc.name, args: fc.args } }] },
+                    { role: 'function' as const, parts: [{ functionResponse: { name: fc.name, response: toolResult } }] },
                 ];
 
                 response = await ai.models.generateContent({
@@ -251,7 +261,7 @@ class VicoChatService {
 
             // Graceful fallback: try without function calling
             try {
-                const ai2 = typeof google !== 'undefined' ? google.generativeAI : null;
+                const ai2 = getAI();
                 if (ai2) {
                     const simpleContents = this.history
                         .filter(m => !m.isLoading)
