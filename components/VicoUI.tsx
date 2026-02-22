@@ -7,26 +7,26 @@ import {
 } from 'lucide-react';
 
 export const Logo = () => (
-  <div className="flex items-center gap-3 group cursor-pointer select-none">
+  <div className="flex items-center gap-3 group cursor-pointer select-none" role="banner">
     <div className="w-11 h-11 bg-gradient-to-br from-[#B91C1C] to-[#991B1B] rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-red-900/30 group-hover:scale-105 transition-transform duration-300 border border-white/10">V</div>
     <div className="flex flex-col">
         <span className="text-xl font-black tracking-tighter text-gray-900 dark:text-white leading-none">VICO</span>
         <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#B91C1C] animate-pulse"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B91C1C] animate-pulse" aria-hidden="true"></span>
             <span className="text-[10px] font-bold text-[#B91C1C] tracking-[0.1em] uppercase leading-none whitespace-nowrap">Vietnam Copilot</span>
         </div>
     </div>
   </div>
 );
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  icon?: any;
+  icon?: React.ElementType;
   error?: string;
   multiline?: boolean;
 }
 
-export const EnterpriseInput: React.FC<InputProps> = ({ 
+export const EnterpriseInput: React.FC<InputProps & { multiline?: boolean }> = ({ 
   label, 
   icon: Icon, 
   error, 
@@ -37,6 +37,7 @@ export const EnterpriseInput: React.FC<InputProps> = ({
   ...props 
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const inputId = `input-${label.replace(/\s+/g, '-').toLowerCase()}`;
 
   const handleFocus = (e: any) => {
     setIsFocused(true);
@@ -50,7 +51,7 @@ export const EnterpriseInput: React.FC<InputProps> = ({
 
   const containerClasses = `
     relative border rounded-xl bg-white dark:bg-gray-950/40 transition-all duration-300 group
-    ${error ? 'border-red-500 ring-4 ring-red-500/5' : isFocused ? 'border-[#B91C1C] ring-4 ring-[#B91C1C]/5 shadow-sm' : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'}
+    ${error ? 'border-red-500 ring-4 ring-red-500/10' : isFocused ? 'border-[#B91C1C] ring-4 ring-[#B91C1C]/10 shadow-sm' : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'}
     ${className}
   `;
 
@@ -58,44 +59,62 @@ export const EnterpriseInput: React.FC<InputProps> = ({
     <div className="w-full space-y-1.5">
       <div className={containerClasses}>
         <div className="px-4 pt-3">
-          <label className={`text-[10px] font-black uppercase tracking-[0.15em] block transition-colors leading-none select-none ${error ? 'text-red-500' : isFocused ? 'text-[#B91C1C]' : 'text-gray-400 group-hover:text-gray-500'}`}>
+          <label htmlFor={inputId} className={`text-[10px] font-black uppercase tracking-[0.15em] block transition-colors leading-none select-none ${error ? 'text-red-500' : isFocused ? 'text-[#B91C1C]' : 'text-gray-400 group-hover:text-gray-500'}`}>
             {label}
           </label>
         </div>
         <div className="flex items-start px-4 pb-3 pt-1 gap-3">
           {multiline ? (
             <textarea
-              {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+              id={inputId}
+              value={props.value as string}
+              onChange={props.onChange as any}
+              placeholder={props.placeholder}
+              required={props.required}
               onFocus={handleFocus}
               onBlur={handleBlur}
               className="w-full bg-transparent border-none text-gray-900 dark:text-white text-[15px] font-medium p-0 focus:ring-0 outline-none placeholder-gray-300 dark:placeholder-gray-600 resize-none min-h-[80px] custom-scrollbar"
+              aria-label={label}
+              aria-invalid={!!error}
             />
           ) : (
             <input
-              {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
+              id={inputId}
+              {...props}
               onFocus={handleFocus}
               onBlur={handleBlur}
               className="w-full bg-transparent border-none text-gray-900 dark:text-white text-[15px] font-medium p-0 focus:ring-0 outline-none placeholder-gray-300 dark:placeholder-gray-600"
+              aria-label={label}
+              aria-invalid={!!error}
             />
           )}
           {Icon && (
-            <div className={`mt-0.5 transition-colors ${error ? 'text-red-400' : isFocused ? 'text-[#B91C1C]' : 'text-gray-300 group-hover:text-gray-400'}`}>
+            <div className={`mt-0.5 transition-colors ${error ? 'text-red-400' : isFocused ? 'text-[#B91C1C]' : 'text-gray-300 group-hover:text-gray-400'}`} aria-hidden="true">
               <Icon size={18} />
             </div>
           )}
         </div>
       </div>
       {error && (
-        <div className="flex items-center gap-1.5 px-1 animate-fade-in">
+        <div className="flex items-center gap-1.5 px-1 animate-fade-in" role="alert">
           <AlertCircle size={12} className="text-red-500" />
-          <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">{error}</span>
+          <span className="text-[11px] font-bold text-red-500">{error}</span>
         </div>
       )}
     </div>
   );
 };
 
-export const PremiumCard = ({ children, className = "", title, icon: Icon, action, footer }: any) => (
+interface PremiumCardProps {
+  children: React.ReactNode;
+  className?: string;
+  title?: string;
+  icon?: React.ElementType;
+  action?: React.ReactNode;
+  footer?: React.ReactNode;
+}
+
+export const PremiumCard: React.FC<PremiumCardProps> = ({ children, className = "", title, icon: Icon, action, footer }) => (
   <div className={`bg-white dark:bg-[#0F1623] border border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group ${className}`}>
     {(title || Icon) && (
       <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/30 dark:bg-gray-800/20">
@@ -111,8 +130,10 @@ export const PremiumCard = ({ children, className = "", title, icon: Icon, actio
   </div>
 );
 
-export const Badge = ({ children, variant = "default" }: any) => {
-    const variants: any = {
+type BadgeVariant = 'default' | 'danger' | 'success' | 'warning' | 'info';
+
+export const Badge = ({ children, variant = "default" }: { children: React.ReactNode; variant?: BadgeVariant }) => {
+    const variants: Record<BadgeVariant, string> = {
         default: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 font-bold",
         danger: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 font-black",
         success: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 font-black",
@@ -122,33 +143,42 @@ export const Badge = ({ children, variant = "default" }: any) => {
     return <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-widest border border-transparent ${variants[variant]}`}>{children}</span>;
 };
 
-export const StatCard = ({ title, value, change, trend, icon: Icon, color = "red" }: any) => (
-  <div className="bg-white dark:bg-[#0F1623] border border-gray-200 dark:border-gray-800 p-6 rounded-[1.5rem] relative overflow-hidden group hover:border-[#B91C1C]/50 transition-all duration-500 shadow-sm hover:shadow-lg">
-      <div className={`absolute -top-2 -right-2 p-6 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-700 ${color === 'red' ? 'text-[#B91C1C]' : 'text-blue-500'}`}>
-          {Icon && <Icon size={48} />}
-      </div>
-      <div className="flex items-center gap-2 mb-4 text-gray-500 dark:text-gray-400 text-[9px] font-black uppercase tracking-[0.2em]">
-          <div className={`w-1.5 h-1.5 rounded-full ${trend === 'up' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          {title}
-      </div>
-      <div className="flex items-end justify-between">
-          <div className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{value}</div>
-          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black ${trend === 'up' ? 'bg-green-50 dark:bg-green-900/20 text-green-600' : 'bg-red-50 dark:bg-red-900/20 text-red-600'}`}>
-              {trend === 'up' ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-              {change}
-          </div>
-      </div>
-  </div>
-);
+type StatColor = 'red' | 'blue' | 'green' | 'purple' | 'orange';
 
-export const ExpertCard = ({ name, role, tags }: any) => (
+export const StatCard = ({ title, value, change, trend, icon: Icon, color = "red" }: { 
+  title: string; value: React.ReactNode; change: string; trend: 'up' | 'down'; icon?: React.ElementType; color?: StatColor 
+}) => {
+  const colorMap: Record<StatColor, string> = {
+    red: 'text-[#B91C1C]', blue: 'text-blue-500', green: 'text-green-500', purple: 'text-purple-500', orange: 'text-orange-500'
+  };
+  return (
+    <div className="bg-white dark:bg-[#0F1623] border border-gray-200 dark:border-gray-800 p-6 rounded-[1.5rem] relative overflow-hidden group hover:border-[#B91C1C]/50 transition-all duration-500 shadow-sm hover:shadow-lg">
+        <div className={`absolute -top-2 -right-2 p-6 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-700 ${colorMap[color]}`}>
+            {Icon && <Icon size={48} />}
+        </div>
+        <div className="flex items-center gap-2 mb-4 text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">
+            <div className={`w-1.5 h-1.5 rounded-full ${trend === 'up' ? 'bg-green-500' : 'bg-red-500'}`} aria-hidden="true"></div>
+            {title}
+        </div>
+        <div className="flex items-end justify-between">
+            <div className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{value}</div>
+            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black ${trend === 'up' ? 'bg-green-50 dark:bg-green-900/20 text-green-600' : 'bg-red-50 dark:bg-red-900/20 text-red-600'}`}>
+                {trend === 'up' ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                {change}
+            </div>
+        </div>
+    </div>
+  );
+};
+
+export const ExpertCard = ({ name, role, tags }: { name: string; role: string; tags: string[] }) => (
   <div className="bg-white dark:bg-[#0F1623] rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden w-full group hover:border-[#B91C1C] transition-all duration-500">
      <div className="p-4 flex items-start gap-4">
         <div className="relative">
-            <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-800 overflow-hidden border border-gray-100 dark:border-gray-700 group-hover:border-[#B91C1C]/30 transition-colors shadow-inner">
-                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="Expert" className="w-full h-full object-cover" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 overflow-hidden border border-gray-100 dark:border-gray-700 group-hover:border-[#B91C1C]/30 transition-colors shadow-inner flex items-center justify-center">
+                <span className="text-[#B91C1C] font-black text-lg">{name.charAt(0)}</span>
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-[#0F1623] rounded-full"></div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-[#0F1623] rounded-full" aria-label="Online"></div>
         </div>
         <div className="flex-1 min-w-0">
             <h3 className="font-black text-gray-900 dark:text-gray-100 text-sm tracking-tight truncate uppercase">{name}</h3>
@@ -163,19 +193,19 @@ export const ExpertCard = ({ name, role, tags }: any) => (
   </div>
 );
 
-export const NoteCard = () => (
+export const NoteCard = ({ quote, label }: { quote?: string; label?: string }) => (
   <div className="bg-[#FFFBEB] dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-900/30 overflow-hidden shadow-sm hover:shadow-md transition-all group">
     <div className="p-4 border-b border-amber-100 dark:border-amber-900/20 flex justify-between items-center bg-white/30 dark:bg-transparent">
         <div className="flex items-center gap-2">
             <div className="p-1 bg-amber-500 text-white rounded shadow-sm">
                 <Lightbulb size={14} />
             </div>
-            <span className="font-black text-amber-900 dark:text-amber-200 text-[10px] uppercase tracking-widest">Strategy Node</span>
+            <span className="font-black text-amber-900 dark:text-amber-200 text-[10px] uppercase tracking-widest">{label || 'Ghi chú chiến lược'}</span>
         </div>
     </div>
     <div className="p-5">
         <p className="text-sm text-amber-800 dark:text-amber-200/80 leading-relaxed italic font-medium">
-            "The surge in mini-EV searches indicates a burgeoning urban mobility segment prioritizing flexibility."
+            "{quote || 'Sự gia tăng tìm kiếm EV mini cho thấy phân khúc di động đô thị mới nổi tập trung vào tính linh hoạt.'}"
         </p>
     </div>
   </div>

@@ -1,5 +1,12 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+
+// Lazy-init Prisma to prevent crash if DB is unreachable at startup
+let _prisma: PrismaClient | null = null;
+function getPrisma(): PrismaClient {
+    if (!_prisma) _prisma = new PrismaClient();
+    return _prisma;
+}
+
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -33,6 +40,38 @@ declare global {
 
 const app = express();
 const PORT = parseInt(process.env['PORT'] || '3001', 10);
+
+// 🛡️ Basic in-memory rate limiter (per IP, 100 req/min)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+app.use((req, _res, next) => {
+    const ip = req.ip || 'unknown';
+    const now = Date.now();
+    const entry = rateLimitMap.get(ip);
+    if (!entry || now > entry.resetAt) {
+        rateLimitMap.set(ip, { count: 1, resetAt: now + 60_000 });
+    } else {
+        entry.count++;
+        if (entry.count > 100) {
+            _res.status(429).json({ error: 'Too many requests' });
+            return;
+        }
+    }
+    next();
+});
+
+// Clean up rate limit map every 5 minutes
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, val] of rateLimitMap) {
+        if (now > val.resetAt) rateLimitMap.delete(key);
+    }
+}, 300_000);
+
+// Helper: sanitize and limit string input length
+function sanitizeQuery(input: unknown, maxLen = 200): string | null {
+    if (typeof input !== 'string') return null;
+    return input.trim().slice(0, maxLen);
+}
 
 // 🆕 Initialize RSS Parser for Live News
 const rssParser = new Parser();
@@ -273,9 +312,9 @@ app.get('/api/companies/industry/:industry', (req, res) => {
 
 app.get('/api/companies/search', (req, res): void => {
     try {
-        const { q } = req.query;
+        const q = sanitizeQuery(req.query['q']);
         
-        if (!q || typeof q !== 'string') {
+        if (!q) {
             res.status(400).json({ error: 'Query parameter "q" is required' });
             return;
         }
@@ -300,7 +339,8 @@ app.get('/api/companies/competitors', async (req, res): Promise<void> => {
     try {
         const { company, limit = '10', minSimilarity = '20', source = 'all' } = req.query;
         
-        if (!company || typeof company !== 'string') {
+        const companyName = sanitizeQuery(company);
+        if (!companyName) {
             res.status(400).json({ error: 'Query parameter "company" is required' });
             return;
         }
@@ -309,11 +349,10 @@ app.get('/api/companies/competitors', async (req, res): Promise<void> => {
         const validSources = ['ts', 'csv', 'all'];
         const sourceFilter = validSources.includes(source as string) ? (source as 'ts' | 'csv' | 'all') : 'all';
         
-        console.log(`🔍 [Unified Engine] Finding competitors for: ${company} (source: ${sourceFilter})`);
+        console.log(`🔍 [Unified Engine] Finding competitors for: ${companyName} (source: ${sourceFilter})`);
         
-        // 🆕 Use the new unified competitor engine with source filter
         const result = await findTopCompetitors(
-            company.trim(),
+            companyName,
             parseInt(limit as string) || 10,
             parseInt(minSimilarity as string) || 20,
             sourceFilter
@@ -1090,13 +1129,13 @@ app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
 app.get("/api/market-pulse", async (_req, res) => {
   try {
     // 1. Lấy chỉ số Vĩ mô (GDP, CPI, FDI)
-    const macro = await prisma.marketData.findMany({
+    const macro = await getPrisma().marketData.findMany({
       where: { type: 'MACRO' },
       orderBy: { key: 'asc' }
     });
 
     // 2. Lấy chỉ số Tài chính ngành (P/E)
-    const finance = await prisma.marketData.findMany({
+    const finance = await getPrisma().marketData.findMany({
       where: { type: 'FINANCE' },
       orderBy: { value: 'desc' } // Ngành nào P/E cao xếp trên
     });

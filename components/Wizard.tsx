@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import React from 'react';
 import { Logo, ExpertCard, NoteCard, Badge, EnterpriseInput } from './VicoUI';
 import { 
@@ -14,7 +14,6 @@ import { COMPANIES } from '../data/companies';
 interface WizardProps {
   onComplete: (data: any) => void;
   onBack: () => void;
-  onSignInClick: () => void;
 }
 
 const STEPS = [
@@ -95,6 +94,16 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
   const [isSearchingCompetitors, setIsSearchingCompetitors] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false); // Loading intro state
   const [dbEmpty, setDbEmpty] = useState(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup all timers on unmount
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(clearTimeout);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   const features = [
       { icon: Zap, title: "Radar Thị Trường", desc: "Theo dõi biến động đối thủ theo thời gian thực trên toàn Việt Nam." },
@@ -103,19 +112,17 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
   ];
 
   useEffect(() => {
+    let cancelled = false;
     const checkDB = async () => {
         const docs = await loadFromDB('vectors');
+        if (cancelled) return;
         setDbEmpty(docs.length === 0);
-        
-        // 🆕 Auto-seed vectors từ 12,160 công ty CSV khi database trống
         if (docs.length === 0) {
-            console.log('🔄 Vector DB trống, bắt đầu nạp dữ liệu từ 12,160 công ty CSV...');
-            await RagService.autoSeed((progress, message) => {
-                console.log(`[${progress}%] ${message}`);
-            });
+            await RagService.autoSeed(() => {});
         }
     };
     checkDB();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -123,7 +130,7 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
         setActiveFeatureIndex((prev) => (prev + 1) % features.length);
     }, 4500);
     return () => clearInterval(interval);
-  }, []);
+  }, [features.length]);
 
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', jobTitle: '',
@@ -135,50 +142,33 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
   const [orgSuggestions, setOrgSuggestions] = useState<any[]>([]);
 
   useEffect(() => {
-    console.log(`⏰ useEffect triggered: orgName="${formData.orgName}" (length=${formData.orgName.length})`);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     if (formData.orgName.length > 1) {
-      fetchOrgSuggestions(formData.orgName);
+      debounceRef.current = setTimeout(() => {
+        fetchOrgSuggestions(formData.orgName);
+      }, 300);
     } else { 
       setOrgSuggestions([]);
     }
   }, [formData.orgName]);
 
-  const fetchOrgSuggestions = async (query: string) => {
-    console.log(`🔍 Fetching suggestions for: "${query}"`);
+  const fetchOrgSuggestions = useCallback(async (query: string) => {
     try {
-      // Gọi API qua proxy Vite
       const url = `/api/companies/search?q=${encodeURIComponent(query)}`;
-      console.log(`📡 API call: ${url}`);
-      
       const response = await fetch(url);
-      console.log(`📊 Response status: ${response.status}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      console.log(`✅ API returned ${data.companies?.length || 0} companies`);
-      
       if (data.companies && Array.isArray(data.companies) && data.companies.length > 0) {
-        console.log('📋 Setting suggestions from API');
         setOrgSuggestions(data.companies.slice(0, 5));
       } else {
-        console.log('📚 API empty, using local fallback');
-        // Fallback sang dữ liệu cứng nếu API không có
         const filtered = COMPANIES.filter(c => c.name?.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
-        console.log(`💾 Local fallback found ${filtered.length} companies`);
         setOrgSuggestions(filtered);
       }
-    } catch (error) {
-      // Fallback nếu backend không chạy
-      console.error('❌ API Error:', error);
-      console.log('⚙️ Using local data fallback');
+    } catch {
       const filtered = COMPANIES.filter(c => c.name?.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
-      console.log(`💾 Local fallback found ${filtered.length} companies`);
       setOrgSuggestions(filtered);
     }
-  };
+  }, []);
 
   const handleSelectOrg = (company: any) => {
     // Ưu tiên dữ liệu "mới" từ CSV nếu có, nếu không dùng dữ liệu cũ
@@ -227,7 +217,6 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
           if (response.ok) {
             const data = await response.json();
             if (data.competitors && data.competitors.length > 0) {
-              console.log(`✅ Found ${data.competitors.length} competitors via Unified Engine (source: all - CSV + TS)`);
               results = data.competitors.map((c: any) => ({
                 name: c.name,
                 intro: c.about || '',
@@ -240,13 +229,11 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
               }));
             }
           }
-        } catch (apiError) {
-          console.warn('Competitor API failed:', apiError);
+        } catch {
+          // API failed, will use fallback below
         }
 
-        // Fallback: Dữ liệu cứng từ companies.ts nếu API thất bại
         if (results.length < 3) {
-          console.log('⚠️ Using hardcoded companies as fallback');
           results = COMPANIES.slice(0, 12).map(c => ({
             name: c.name,
             intro: c.intro,
@@ -265,9 +252,7 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
           }))
         );
         
-        console.log(`🎯 Final: ${results.length} competitors to display`);
     } catch (e) {
-        console.error("❌ Failed to find competitors", e);
         // Fallback cuối cùng
         setSuggestedCompetitors(
           COMPANIES.slice(0, 8).map(c => ({
@@ -292,11 +277,11 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
 
   const finalizeAndComplete = () => {
     setIsLaunching(true);
-    // Hiển thị loading intro trong 2.5 giây trước khi chuyển sang phòng tác chiến
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       const selected = suggestedCompetitors.filter(c => c.selected);
       onComplete({ ...formData, competitors: selected });
     }, 2500);
+    timersRef.current.push(timer);
   };
 
   return (
@@ -453,7 +438,7 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
                         <EnterpriseInput label="Email công việc" value={formData.email} onChange={(e:any)=>setFormData({...formData, email: e.target.value})} placeholder="an.nguyen@vico.vn" icon={Mail} />
                         
                         <div className="pt-10">
-                            <button onClick={nextStep} className="w-full py-5 bg-[#B91C1C] hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-red-900/20 transition-all text-sm transform active:scale-[0.98] flex items-center justify-center gap-3 group">
+                            <button onClick={nextStep} disabled={!formData.firstName.trim() || !formData.email.trim()} className="w-full py-5 bg-[#B91C1C] hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-red-900/20 transition-all text-sm transform active:scale-[0.98] flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed">
                                 Tiếp tục <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button onClick={onBack} className="w-full mt-6 text-[10px] font-black text-gray-300 hover:text-gray-600 dark:hover:text-white flex items-center justify-center gap-2 transition-colors uppercase tracking-[0.3em]">
@@ -608,7 +593,7 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
             
             <footer className="mt-24 text-center">
                 <p className="text-[9px] font-black text-gray-300 dark:text-gray-700 uppercase tracking-[0.5em]">
-                    © 2024 VICO INTEL • VIETNAM STRATEGIC COPILOT
+                    © 2025 VICO INTEL • VIETNAM STRATEGIC COPILOT
                 </p>
             </footer>
           </div>

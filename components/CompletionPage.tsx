@@ -2,14 +2,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import React from 'react';
 import { 
-    LayoutDashboard, Globe, Database, Swords, 
-    LogOut, ExternalLink, ArrowUpRight, ArrowDownRight, Zap, 
-    Newspaper, ShieldCheck, Sparkles, MapPin, Building,
-    Target, LineChart, Shield, TrendingUp, AlertTriangle, FileText, ChevronRight,
-    Loader2, Terminal, Link as LinkIcon, Calendar, Rocket
+    Database, Swords, LogOut, ExternalLink, 
+    Newspaper, Target, LineChart, FileText,
+    Loader2, Calendar, Rocket
 } from 'lucide-react';
-import { RagService, SearchResult } from '../services/ragLayer';
-import { CopilotService, GlobalCopilotReport } from '../services/CopilotService';
 import { getCompanyNews } from '../services/newsService';
 import { DataPipeline } from './DataPipeline';
 import { loadFromDB } from '../utils/db';
@@ -42,7 +38,7 @@ export const NewsFeed = ({ query, limit = 6 }: { query: string, limit?: number }
                 setNews(liveNews.slice(0, limit));
             } catch (e) { 
                 console.error('❌ News fetch error:', e);
-                setError('Unable to fetch news at this moment');
+                setError('Không thể tải tin tức lúc này');
             } finally { 
                 setLoading(false); 
             }
@@ -50,9 +46,9 @@ export const NewsFeed = ({ query, limit = 6 }: { query: string, limit?: number }
         fetchNews();
     }, [query, limit]);
 
-    if (loading) return <div className="flex items-center gap-3 p-8 text-gray-400 font-bold uppercase text-[10px] tracking-widest"><Loader2 className="animate-spin" size={16}/> Đang quét tin tức mới nhất từ Google News...</div>;
+    if (loading) return <div className="flex items-center gap-3 p-8 text-gray-400 font-bold uppercase text-[10px] tracking-widest"><Loader2 className="animate-spin" size={16}/> Đang quét tin tức mới nhất...</div>;
     
-    if (error) return <div className="flex items-center gap-3 p-8 text-amber-600 font-bold uppercase text-[10px] tracking-widest">⚠️ {error}</div>;
+    if (error) return <div className="flex items-center gap-3 p-8 text-amber-600 font-bold uppercase text-[10px] tracking-widest" role="alert">⚠️ {error}</div>;
     
     if (news.length === 0) return null;
 
@@ -68,7 +64,7 @@ export const NewsFeed = ({ query, limit = 6 }: { query: string, limit?: number }
                             <h5 className="text-xs font-black dark:text-white group-hover:text-blue-500 transition-colors line-clamp-2 flex-1">{item.title}</h5>
                             {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500 ml-2 flex-shrink-0"><ExternalLink size={12}/></a>}
                         </div>
-                        <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed mb-3">{item.content || 'No preview available'}</p>
+                        <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed mb-3">{item.content || 'Không có bản xem trước'}</p>
                         <div className="flex items-center gap-4 text-[9px] font-black text-gray-400 uppercase tracking-widest">
                             <span className="flex items-center gap-1"><Calendar size={10}/> {new Date(item.pubDate).toLocaleDateString('vi-VN')}</span>
                             <span className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 px-2 py-0.5 rounded text-[8px]">{item.source || 'Google News'}</span>
@@ -80,68 +76,10 @@ export const NewsFeed = ({ query, limit = 6 }: { query: string, limit?: number }
     );
 };
 
-// Strategy Matrix for visualization
-const StrategyMatrix = ({ data }: { data: any[] }) => {
-    return (
-        <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-3xl p-8 relative overflow-hidden h-[450px]">
-             <h3 className="absolute top-6 left-8 font-black text-sm uppercase text-gray-500 tracking-widest z-10">Strategic Positioning Matrix</h3>
-             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Market Presence (0-100)</div>
-             <div className="absolute left-4 top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Innovation Index (0-100)</div>
-             <div className="absolute inset-16 border-l-2 border-b-2 border-gray-100 dark:border-gray-800 grid grid-cols-2 grid-rows-2">
-                 <div className="border-r border-dashed border-gray-100 dark:border-gray-800/50"></div>
-                 <div className="border-b border-dashed border-gray-100 dark:border-gray-800/50 col-start-2 row-start-1"></div>
-             </div>
-             <div className="absolute inset-16">
-                 {data.map((item, i) => (
-                    <div 
-                        key={i}
-                        className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer transition-all duration-700 hover:scale-125 hover:z-30"
-                        style={{ bottom: `${item.y}%`, left: `${item.x}%` }}
-                    >
-                        <div className={`w-4 h-4 rounded-lg border-2 border-white dark:border-[#0F1623] shadow-xl rotate-45 ${i === 0 ? 'bg-[#B91C1C] ring-4 ring-[#B91C1C]/10' : 'bg-gray-800'}`}></div>
-                        <div className="mt-4 bg-gray-950 text-white px-3 py-1.5 rounded-lg shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-black uppercase whitespace-nowrap z-20 border border-white/10">
-                            {item.name}
-                            <div className="text-[8px] text-gray-400 font-bold mt-0.5">{item.label}</div>
-                        </div>
-                    </div>
-                 ))}
-             </div>
-        </div>
-    );
-};
-
-const CompetitiveMap = ({ competitors }: { competitors: any[] }) => {
-    return (
-        <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-3xl p-8 relative overflow-hidden h-[400px]">
-             <h3 className="absolute top-6 left-8 font-black text-sm uppercase text-gray-500 tracking-widest z-10">Competitive Landscape Matrix</h3>
-             <div className="absolute inset-12 border-l-2 border-b-2 border-gray-100 dark:border-gray-800 grid grid-cols-2 grid-rows-2">
-                 <div className="border-r border-dashed border-gray-50 dark:border-gray-800/50"></div>
-             </div>
-             <div className="absolute inset-12">
-                 {competitors.map((c, i) => {
-                     const y = Math.max(0, Math.min(100, (c.similarity - 50) * 2));
-                     let yearVal = 2015;
-                     if (c.year) yearVal = parseInt(c.year) || 2015;
-                     const x = Math.max(5, Math.min(95, ((yearVal - 1990) / 35) * 100));
-                     return (
-                         <div key={i} className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer transition-all duration-500 hover:scale-110" style={{ bottom: `${y}%`, left: `${x}%` }}>
-                             <div className={`w-3 h-3 rounded-full border-2 border-white dark:border-[#0F1623] shadow-lg ${i===0 ? 'bg-[#B91C1C] w-4 h-4' : 'bg-blue-500'}`}></div>
-                             <div className="mt-2 bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-[9px] font-black uppercase whitespace-nowrap z-10">{c.name}</div>
-                         </div>
-                     );
-                 })}
-             </div>
-        </div>
-    );
-};
-
 export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack }) => {
-  const [activeView, setActiveView] = useState('overview');
-  const [activeTab, setActiveTab] = useState('market-industry'); // For top navigation tabs
-  const [isSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState('market-industry');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [dbCount, setDbCount] = useState(0);
-  const [report, setReport] = useState<GlobalCopilotReport | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     const hydrate = async () => {
@@ -151,15 +89,15 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
     hydrate();
   }, []);
 
-  // Top navigation tabs (GlobalCopilot style)
-  const topTabs = [
-    { id: 'market-industry', label: 'Market & Industry' },
-    { id: 'news-intelligence', label: 'News Intelligence' },
-    { id: 'competitor-analysis', label: 'Competitor Analysis' },
-    { id: 'customer-insights', label: 'Customer Insights' },
-    { id: 'go-to-market', label: 'Go-To-Market' },
-    { id: 'operational', label: 'Operational' },
-  ];
+  const tabLabels: Record<string, string> = {
+    'market-industry': 'Thị trường & Ngành',
+    'news-intelligence': 'Tin tức Thông minh',
+    'competitor-analysis': 'Phân tích Đối thủ',
+    'customer-insights': 'Hiểu biết Khách hàng',
+    'go-to-market': 'Chiến lược GTM',
+    'operational': 'Vận hành',
+    'pipeline': 'Kho Tri thức',
+  };
 
   const pulseList = useMemo(() => {
       const list = [
@@ -184,22 +122,13 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
       return list;
   }, [userData]);
 
-  const generateReport = async () => {
-      setIsGenerating(true);
-      const competitorNames = pulseList.slice(1).map(c => c.name);
-      const res = await CopilotService.generateFullReport(
-          userData.orgName,
-          "Technology",
-          competitorNames,
-          userData.companyDescription + "\n" + userData.productsServices
-      );
-      if (res) setReport(res);
-      setIsGenerating(false);
-  };
-
   return (
     <div className="flex h-screen bg-[#FDFCFB] dark:bg-[#0B101B] transition-colors duration-300 font-sans">
-      <aside className={`bg-white dark:bg-[#0F1623] border-r border-gray-100 dark:border-gray-800 transition-all duration-500 flex flex-col z-30 ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}>
+      {/* Mobile sidebar overlay */}
+      {!isSidebarCollapsed && (
+        <div className="fixed inset-0 bg-black/30 z-20 lg:hidden" onClick={() => setIsSidebarCollapsed(true)} />
+      )}
+      <aside className={`bg-white dark:bg-[#0F1623] border-r border-gray-100 dark:border-gray-800 transition-all duration-500 flex flex-col z-30 fixed lg:relative h-full ${isSidebarCollapsed ? '-translate-x-full lg:translate-x-0 lg:w-20 w-0' : 'translate-x-0 w-64'}`}>
         <div className="p-6 h-20 flex items-center justify-between border-b dark:border-gray-800">
             {!isSidebarCollapsed ? <Logo /> : <div className="w-10 h-10 bg-[#B91C1C] rounded-xl mx-auto flex items-center justify-center text-white font-black text-xl shadow-lg">V</div>}
         </div>
@@ -209,7 +138,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
             <div className="mb-6">
                 <div className="px-3 mb-2">
                     <span className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em]">
-                        Market Discovery & Research
+                        Nghiên cứu Thị trường
                     </span>
                 </div>
                 <button 
@@ -221,7 +150,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                     }`}
                 >
                     <FileText size={16} className="text-gray-500" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Market Report</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Báo cáo Thị trường</span>
                 </button>
                 <button 
                     onClick={() => setActiveTab('competitor-analysis')} 
@@ -232,7 +161,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                     }`}
                 >
                     <Swords size={16} className="text-gray-500" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Competitor Analysis</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Phân tích Đối thủ</span>
                 </button>
                 <button 
                     onClick={() => setActiveTab('customer-insights')} 
@@ -243,7 +172,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                     }`}
                 >
                     <LineChart size={16} className="text-gray-500" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Customer Insights</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Hiểu biết Khách hàng</span>
                 </button>
                 <button 
                     onClick={() => setActiveTab('news-intelligence')} 
@@ -254,7 +183,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                     }`}
                 >
                     <Newspaper size={16} className="text-gray-500" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">News Intelligence</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Tin tức Thông minh</span>
                 </button>
             </div>
             
@@ -262,7 +191,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
             <div className="mb-6">
                 <div className="px-3 mb-2">
                     <span className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em]">
-                        Strategy
+                        Chiến lược
                     </span>
                 </div>
                 <button 
@@ -274,7 +203,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                     }`}
                 >
                     <Rocket size={16} className="text-gray-500" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Go-To-Market</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Chiến lược GTM</span>
                 </button>
                 <button 
                     onClick={() => setActiveTab('operational')} 
@@ -285,7 +214,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                     }`}
                 >
                     <Target size={16} className="text-gray-500" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Operational</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Vận hành</span>
                 </button>
             </div>
             
@@ -293,19 +222,19 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
             <div className="mb-6">
                 <div className="px-3 mb-2">
                     <span className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em]">
-                        Resources
+                        Tài nguyên
                     </span>
                 </div>
                 <button 
-                    onClick={() => setActiveView('pipeline')} 
+                    onClick={() => setActiveTab('pipeline')} 
                     className={`w-full p-2.5 rounded-lg flex items-center gap-3 transition-all ${
-                        activeView === 'pipeline' 
+                        activeTab === 'pipeline' 
                             ? 'bg-gray-100 dark:bg-gray-800 border-l-2 border-[#B91C1C]' 
                             : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
                     }`}
                 >
                     <Database size={16} className="text-gray-500" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Knowledge Base</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Kho Tri thức</span>
                 </button>
             </div>
         </nav>
@@ -329,27 +258,15 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-          {/* Top Navigation Tabs - GlobalCopilot Style */}
-          <div className="h-14 border-b dark:border-gray-800 bg-white dark:bg-[#0F1623] px-6 flex items-center gap-1 overflow-x-auto">
-              {topTabs.map((tab) => (
-                  <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`px-5 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
-                          activeTab === tab.id
-                              ? 'bg-blue-600 text-white shadow-lg'
-                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                      }`}
-                  >
-                      {tab.label}
+          <header className="h-16 border-b dark:border-gray-800 bg-white/70 dark:bg-[#0B101B]/70 backdrop-blur-xl px-6 lg:px-10 flex items-center justify-between z-20">
+              <div className="flex items-center gap-3">
+                  <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="lg:hidden p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white" aria-label="Menu">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
                   </button>
-              ))}
-          </div>
-          
-          <header className="h-16 border-b dark:border-gray-800 bg-white/70 dark:bg-[#0B101B]/70 backdrop-blur-xl px-10 flex items-center justify-between z-20">
-              <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter">
-                  {topTabs.find(t => t.id === activeTab)?.label || activeView}
-              </h2>
+                  <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+                      {tabLabels[activeTab] || activeTab}
+                  </h2>
+              </div>
               <div className="flex items-center gap-6">
                   <ThemeToggle />
                   <div className="flex items-center gap-3">
@@ -406,22 +323,26 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                       <div className="space-y-8 animate-fade-in">
                           <div>
                               <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                                  Operational Intelligence
+                                  Vận hành Thông minh
                               </h1>
                               <p className="text-gray-500 text-sm mt-1">
-                                  Operational metrics and knowledge management
+                                  Chỉ số vận hành và quản lý tri thức
                               </p>
                           </div>
                           
-                          <div className="grid grid-cols-4 gap-6">
-                              <StatCard title="Knowledge Nodes" value={dbCount.toLocaleString()} icon={Database} trend="up" change="Records" color="blue" />
-                              <StatCard title="Competitors Tracked" value={pulseList.length - 1} icon={Swords} trend="up" change="Active" />
-                              <StatCard title="Data Coverage" value="100%" icon={Target} trend="up" change="Complete" color="green" />
-                              <StatCard title="Last Updated" value="Now" icon={Calendar} trend="up" change="Real-time" color="purple" />
+                          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                              <StatCard title="Nút Tri thức" value={dbCount.toLocaleString()} icon={Database} trend="up" change="Bản ghi" color="blue" />
+                              <StatCard title="Đối thủ Theo dõi" value={pulseList.length - 1} icon={Swords} trend="up" change="Đang hoạt động" />
+                              <StatCard title="Phủ sóng Dữ liệu" value="100%" icon={Target} trend="up" change="Hoàn tất" color="green" />
+                              <StatCard title="Cập nhật lần cuối" value="Hiện tại" icon={Calendar} trend="up" change="Thời gian thực" color="purple" />
                           </div>
                           
                           <DataPipeline />
                       </div>
+                  )}
+                  
+                  {activeTab === 'pipeline' && (
+                      <DataPipeline />
                   )}
               </div>
           </div>
