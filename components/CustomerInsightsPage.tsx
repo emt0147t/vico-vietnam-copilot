@@ -14,6 +14,7 @@ import {
     Lightbulb, Flag, BarChart3, PieChart, Activity, Award, AlertCircle,
     HelpCircle, Volume2, Search, Filter, ChevronRight
 } from 'lucide-react';
+import { sessionCacheGet, sessionCacheSet } from '../utils/sessionCache';
 
 // ==================== INTERFACES ====================
 interface CustomerInsightsReport {
@@ -617,7 +618,7 @@ const VoiceOfCustomerSection: React.FC<{
 // ==================== MAIN PAGE COMPONENT ====================
 export const CustomerInsightsPage: React.FC<CustomerInsightsPageProps> = ({ userData }) => {
     const [activeSection, setActiveSection] = useState('overview');
-    const [report, setReport] = useState<CustomerInsightsReport | null>(null);
+    const [report, setReport] = useState<CustomerInsightsReport | null>(() => sessionCacheGet<CustomerInsightsReport>('customer_report'));
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [inputCompany, setInputCompany] = useState(userData?.orgName || '');
@@ -646,6 +647,7 @@ export const CustomerInsightsPage: React.FC<CustomerInsightsPageProps> = ({ user
             
             const data = await response.json();
             setReport(data);
+            sessionCacheSet('customer_report', data);
             isMountedRef.current = true;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load');

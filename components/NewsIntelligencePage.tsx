@@ -12,15 +12,48 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { getCompanyNews } from '../services/newsService';
-import { RagService, SearchResult } from '../services/ragLayer';
+// import { RagService, SearchResult } from '../services/ragLayer';
 
-// Stable sentiment from string hash (deterministic, no Math.random)
-const hashSentiment = (str: string): 'positive' | 'neutral' | 'negative' => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    const mod = Math.abs(hash) % 10;
-    if (mod < 3) return 'positive';
-    if (mod < 5) return 'negative';
+/**
+ * Content-based sentiment analysis with Vietnamese negation awareness
+ * Handles clause boundaries (commas, periods) to avoid over-negation
+ * Replaces old hash-based approach that was completely random
+ */
+const analyzeSentiment = (text: string): 'positive' | 'neutral' | 'negative' => {
+    if (!text) return 'neutral';
+    const t = text.toLowerCase();
+    
+    const negationRe = /(phủ nhận|không|chưa|chẳng|không hề|bác bỏ|phản bác|bất chấp|vượt qua|khắc phục|\bnot\b|\bno\b|\bdon'?t\b|\bdespite\b|\bdeny\b|\bdenies\b|\bdenied\b|\bnever\b|\bovercome\b)/i;
+    const clauseBoundary = /[,;.!?]|\bnhưng\b|\btuy nhiên\b|\bsong\b|\bbut\b|\bhowever\b/;
+    
+    const negativeRe = /(\bfall\b|\bdrop\b|\bdecline\b|\bloss\b|\blayoff\b|\blawsuit\b|\bscandal\b|\bcrisis\b|\bcrash\b|\bbankruptcy\b|giảm|sụt giảm|thua lỗ|phá sản|khủng hoảng|cắt giảm|sa thải|vi phạm|thu hồi|cảnh báo|thất bại|nợ xấu|suy thoái|đóng cửa|bê bối|lao dốc|thiệt hại)/gi;
+    const positiveRe = /(\bsurge\b|\bjump\b|\bsoar\b|\bgrowth\b|\bsuccess\b|\brecord\b|\binnovation\b|\bprofit\b|\bgain\b|\brecover\b|tăng trưởng|tăng|đột phá|thành công|kỷ lục|dẫn đầu|mở rộng|lợi nhuận|phát triển|giải thưởng|khởi sắc|đầu tư|ra mắt|bứt phá|phục hồi)/gi;
+    
+    const isNegatedAt = (idx: number): boolean => {
+        const windowStart = Math.max(0, idx - 40);
+        let preceding = t.substring(windowStart, idx);
+        // Only check within current clause
+        const bm = preceding.match(clauseBoundary);
+        if (bm && bm.index !== undefined) preceding = preceding.substring(bm.index + bm[0].length);
+        return negationRe.test(preceding);
+    };
+    
+    let netPos = 0, netNeg = 0;
+    let match: RegExpExecArray | null;
+    
+    negativeRe.lastIndex = 0;
+    while ((match = negativeRe.exec(t)) !== null) {
+        if (isNegatedAt(match.index)) { netPos++; } else { netNeg++; }
+    }
+    
+    positiveRe.lastIndex = 0;
+    while ((match = positiveRe.exec(t)) !== null) {
+        if (isNegatedAt(match.index)) { netNeg++; } else { netPos++; }
+    }
+    
+    if (netPos === 0 && netNeg === 0) return 'neutral';
+    if (netNeg > netPos) return 'negative';
+    if (netPos > netNeg) return 'positive';
     return 'neutral';
 };
 const hashScore = (str: string, min: number, range: number): number => {
@@ -58,27 +91,43 @@ interface AIAnalysis {
 const AISummaryCard: React.FC<{ article: NewsArticle }> = ({ article }) => {
     const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [_isExpanded, _setIsExpanded] = useState(false);
 
     const generateAnalysis = async () => {
         setIsLoading(true);
         try {
-            // Parse AI analysis from content
-            const keyPoints = [
-                "Điểm chính thứ nhất từ bài viết",
-                "Điểm chính thứ hai từ bài viết",
-                "Điểm chính thứ ba từ bài viết"
-            ];
+            // Call real AI analysis endpoint
+            const response = await fetch('/api/news/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: article.title,
+                    content: article.content,
+                    source: article.source,
+                }),
+            });
+
+            if (!response.ok) throw new Error('Analysis API failed');
+
+            const result = await response.json();
             
             setAnalysis({
-                summary: article.content?.substring(0, 200) + "...",
-                keyPoints,
-                sentiment: (article.sentiment || 'neutral') as 'positive' | 'neutral' | 'negative',
-                relevance: 85,
-                suggestedReading: true
+                summary: result.summary || article.content?.substring(0, 200) + "...",
+                keyPoints: result.keyPoints || ['Không thể phân tích'],
+                sentiment: result.sentiment || (article.sentiment || 'neutral'),
+                relevance: result.relevance ?? 50,
+                suggestedReading: result.suggestedReading ?? false,
             });
         } catch (e) {
             console.error('Analysis error:', e);
+            // Minimal fallback on network error
+            setAnalysis({
+                summary: article.content?.substring(0, 200) + "... [⚠️ AI không khả dụng]",
+                keyPoints: ['Không thể kết nối đến AI analysis service'],
+                sentiment: (article.sentiment || 'neutral') as 'positive' | 'neutral' | 'negative',
+                relevance: 0,
+                suggestedReading: false,
+            });
         } finally {
             setIsLoading(false);
         }
@@ -154,7 +203,7 @@ const AISummaryCard: React.FC<{ article: NewsArticle }> = ({ article }) => {
 };
 
 // ==================== NEWS CARD ====================
-const NewsCard: React.FC<{ article: NewsArticle; onAnalyze?: () => void }> = ({ article, onAnalyze }) => {
+const NewsCard: React.FC<{ article: NewsArticle; onAnalyze?: () => void }> = ({ article, onAnalyze: _onAnalyze }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isBookmarked, setIsBookmarked] = useState(false);
 
@@ -293,7 +342,7 @@ const HighlightsSection: React.FC<{ articles: NewsArticle[] }> = ({ articles }) 
 };
 
 // ==================== AI READING ASSISTANT ====================
-const AIReadingAssistant: React.FC<{ article: NewsArticle }> = ({ article }) => {
+const AIReadingAssistant: React.FC<{ article: NewsArticle }> = ({ article: _article }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [analysis, setAnalysis] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -468,7 +517,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({ user
                 const companyNews = await getCompanyNews(userData.orgName);
                 allNews = allNews.concat(companyNews.map((item: any) => ({
                     ...item,
-                    sentiment: hashSentiment(item.guid || item.title || ''),
+                    sentiment: analyzeSentiment(`${item.title || ''} ${item.content || ''}`),
                     relevanceScore: hashScore(item.guid || item.title || '', 60, 40),
                     keywords: ['công ty', 'kinh doanh', 'thị trường']
                 })));
@@ -480,7 +529,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({ user
                             const compNews = await getCompanyNews(competitor.name);
                             return compNews.map((item: any) => ({
                                 ...item,
-                                sentiment: hashSentiment(item.guid || item.title || ''),
+                                sentiment: analyzeSentiment(`${item.title || ''} ${item.content || ''}`),
                                 relevanceScore: hashScore(item.guid || item.title || '', 50, 40),
                                 keywords: ['cạnh tranh', 'công nghệ', 'phát triển']
                             }));
@@ -496,7 +545,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({ user
                 const industryNews = await getCompanyNews('công nghệ');
                 allNews = allNews.concat(industryNews.map((item: any) => ({
                     ...item,
-                    sentiment: hashSentiment(item.guid || item.title || ''),
+                    sentiment: analyzeSentiment(`${item.title || ''} ${item.content || ''}`),
                     relevanceScore: hashScore(item.guid || item.title || '', 40, 40),
                     keywords: ['ngành', 'thị trường', 'xu hướng']
                 })));

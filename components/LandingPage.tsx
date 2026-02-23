@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Activity, Database, MessageSquare, X, CheckCircle2, ChevronDown, BarChart3, Sparkles } from 'lucide-react';
+import { Play, Activity, Database, MessageSquare, X, CheckCircle2, ChevronDown, BarChart3, Sparkles, Loader2 } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { EnterpriseInput, Logo } from './VicoUI';
 
@@ -11,14 +11,48 @@ interface LandingPageProps {
 export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLoginClick }) => {
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [demoSubmitted, setDemoSubmitted] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [demoError, setDemoError] = useState('');
 
-  const handleDemoSubmit = (e: React.FormEvent) => {
+  const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setDemoSubmitted(true);
-    setTimeout(() => {
-      setShowDemoModal(false);
-      setDemoSubmitted(false);
-    }, 2500);
+    setDemoError('');
+    setDemoLoading(true);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const payload = {
+      lastName: (formData.get('lastName') as string || '').trim(),
+      firstName: (formData.get('firstName') as string || '').trim(),
+      email: (formData.get('email') as string || '').trim(),
+      jobTitle: (formData.get('jobTitle') as string || '').trim(),
+      phone: (formData.get('phone') as string || '').trim(),
+    };
+
+    try {
+      const res = await fetch('/api/demo-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setDemoError(data.error || 'Gửi thất bại. Vui lòng thử lại.');
+        setDemoLoading(false);
+        return;
+      }
+
+      setDemoSubmitted(true);
+      setDemoLoading(false);
+      setTimeout(() => {
+        setShowDemoModal(false);
+        setDemoSubmitted(false);
+      }, 2500);
+    } catch {
+      setDemoError('Không thể kết nối server. Vui lòng thử lại sau.');
+      setDemoLoading(false);
+    }
   };
 
   return (
@@ -152,14 +186,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLoginClick 
 
         {/* Trust indicators */}
         <div className="pb-16 flex flex-col items-center gap-6">
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Được tin tưởng bởi các doanh nghiệp hàng đầu Việt Nam</p>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Dữ liệu thực từ database VICO</p>
           <div className="flex items-center gap-8 text-gray-300 dark:text-gray-600">
             <Sparkles size={16} />
-            <span className="text-xs font-bold text-gray-400">10,000+ công ty</span>
+            <span className="text-xs font-bold text-gray-400">10,289 công ty</span>
             <span className="text-gray-300 dark:text-gray-700">•</span>
-            <span className="text-xs font-bold text-gray-400">Real-time data</span>
+            <span className="text-xs font-bold text-gray-400">9 ngành công nghiệp</span>
             <span className="text-gray-300 dark:text-gray-700">•</span>
-            <span className="text-xs font-bold text-gray-400">AI-powered</span>
+            <span className="text-xs font-bold text-gray-400">Gemini AI + RSS</span>
           </div>
         </div>
       </main>
@@ -233,13 +267,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLoginClick 
                     ) : (
                     <form className="space-y-5 md:space-y-6" onSubmit={handleDemoSubmit}>
                         <div className="grid grid-cols-2 gap-4 md:gap-6">
-                            <EnterpriseInput label="Họ" required type="text" placeholder="Nguyễn" />
-                            <EnterpriseInput label="Tên" required type="text" placeholder="An" />
+                            <EnterpriseInput label="Họ" name="lastName" required type="text" placeholder="Nguyễn" />
+                            <EnterpriseInput label="Tên" name="firstName" required type="text" placeholder="An" />
                         </div>
                         
-                        <EnterpriseInput label="Email công việc" required type="email" placeholder="ceo@company.com.vn" />
+                        <EnterpriseInput label="Email công việc" name="email" required type="email" placeholder="ceo@company.com.vn" />
 
-                        <EnterpriseInput label="Chức vụ" required type="text" placeholder="Giám đốc chiến lược" />
+                        <EnterpriseInput label="Chức vụ" name="jobTitle" required type="text" placeholder="Giám đốc chiến lược" />
 
                         <div className="grid grid-cols-[120px_1fr] md:grid-cols-[140px_1fr] gap-4 md:gap-6">
                             <div className="relative border rounded-xl bg-white dark:bg-gray-950/40 border-gray-200 dark:border-gray-800 p-3 px-4 h-[64px] hover:border-gray-300 transition-all group">
@@ -249,11 +283,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLoginClick 
                                   <ChevronDown size={14} className="text-gray-400" />
                                 </div>
                             </div>
-                            <EnterpriseInput label="Số điện thoại" type="tel" placeholder="090 123 4567" />
+                            <EnterpriseInput label="Số điện thoại" name="phone" type="tel" placeholder="090 123 4567" />
                         </div>
 
-                        <button className="w-full bg-[#B91C1C] hover:bg-[#991B1B] text-white font-black py-5 md:py-6 rounded-[1.5rem] text-lg md:text-xl transition-all shadow-[0_20px_40px_rgba(185,28,28,0.25)] hover:shadow-[0_24px_48px_rgba(185,28,28,0.35)] transform active:scale-95 mt-4 md:mt-6 uppercase tracking-widest">
-                            Đặt lịch ngay
+                        {demoError && (
+                          <p className="text-red-500 text-sm font-semibold text-center">{demoError}</p>
+                        )}
+
+                        <button 
+                            disabled={demoLoading}
+                            className="w-full bg-[#B91C1C] hover:bg-[#991B1B] disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-5 md:py-6 rounded-[1.5rem] text-lg md:text-xl transition-all shadow-[0_20px_40px_rgba(185,28,28,0.25)] hover:shadow-[0_24px_48px_rgba(185,28,28,0.35)] transform active:scale-95 mt-4 md:mt-6 uppercase tracking-widest flex items-center justify-center gap-3"
+                        >
+                            {demoLoading ? (
+                              <>
+                                <Loader2 size={20} className="animate-spin" />
+                                Đang gửi...
+                              </>
+                            ) : 'Đặt lịch ngay'}
                         </button>
                         
                         <p className="text-center text-[11px] font-bold text-[#9CA3AF] uppercase tracking-[0.15em] mt-4 md:mt-6">

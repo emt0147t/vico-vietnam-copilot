@@ -20,10 +20,12 @@ import {
     ChevronDown, ChevronUp, TrendingUp, Globe, Building2,
     Scale, Leaf, Cpu, Shield, BarChart3, PieChart, Users,
     DollarSign, Target, Zap, AlertTriangle, CheckCircle, Info,
-    Download, Edit3, Activity, Briefcase, Factory, ShoppingCart,
+    Download, Activity, Briefcase, Factory, ShoppingCart,
     Repeat, Gauge, BarChart2, Lightbulb, Handshake, Coins, Rocket,
-    Loader2, RefreshCw, Database
+    RefreshCw, Database
 } from 'lucide-react';
+import { exportMarketReport } from '../utils/exportReport';
+import { sessionCacheGet, sessionCacheSet } from '../utils/sessionCache';
 
 interface MarketIndustryPageProps {
     userData: any;
@@ -102,6 +104,7 @@ interface MarketIntelligenceReport {
         competitorsAnalyzed: number;
         industryPeersFound: number;
         similarityThreshold: number;
+        dataSources?: string[];
     };
 }
 
@@ -469,19 +472,23 @@ const PESTLEItem: React.FC<{
 
 export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData, industry = 'Technology', market = 'Vietnam' }) => {
     const [activeSection, setActiveSection] = useState('overview');
-    const [report, setReport] = useState<MarketIntelligenceReport | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [report, setReport] = useState<MarketIntelligenceReport | null>(() => sessionCacheGet<MarketIntelligenceReport>('market_report'));
+    const [isLoading, setIsLoading] = useState(!sessionCacheGet('market_report'));
     const [error, setError] = useState<string | null>(null);
     
-    // Fetch market intelligence from backend
+    // Fetch market intelligence from backend (with 30s timeout)
     const fetchMarketIntelligence = useCallback(async () => {
         setIsLoading(true);
         setError(null);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
         
         try {
             const response = await fetch('/api/market-intelligence', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                signal: controller.signal,
                 body: JSON.stringify({
                     userCompany: {
                         name: userData?.orgName || 'Unknown Company',
@@ -496,22 +503,29 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             });
             
             if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
+                throw new Error(`Lỗi API: ${response.status}`);
             }
             
             const data = await response.json();
             setReport(data);
+            sessionCacheSet('market_report', data);
         } catch (err) {
             console.error('Market Intelligence fetch error:', err);
-            setError(err instanceof Error ? err.message : 'Failed to load market intelligence');
+            if (err instanceof DOMException && err.name === 'AbortError') {
+                setError('Quá thời gian chờ (30s). Server có thể đang quá tải.');
+            } else {
+                setError(err instanceof Error ? err.message : 'Không thể tải dữ liệu thị trường');
+            }
         } finally {
+            clearTimeout(timeoutId);
             setIsLoading(false);
         }
     }, [userData, industry]);
     
     useEffect(() => {
-        fetchMarketIntelligence();
-    }, [fetchMarketIntelligence]);
+        // Skip fetch if we already have cached data
+        if (!report) fetchMarketIntelligence();
+    }, [fetchMarketIntelligence, report]);
     
     const sections = [
         { id: 'overview', label: 'Executive Summary' },
@@ -550,9 +564,13 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                         <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
                         Refresh Data
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <button
+                        onClick={() => report && exportMarketReport(report)}
+                        disabled={!report}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
                         <Download size={16} />
-                        Export Report
+                        Xuất báo cáo
                     </button>
                 </div>
             </div>
@@ -591,15 +609,18 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             {isLoading && <LoadingSkeleton />}
             
             {/* Error State */}
-            {error && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6 text-center">
-                    <AlertTriangle className="mx-auto text-red-500 mb-3" size={32} />
-                    <p className="text-red-600 font-medium">{error}</p>
+            {error && !isLoading && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+                    <AlertTriangle className="mx-auto text-red-500 mb-4" size={40} />
+                    <h3 className="text-red-700 dark:text-red-400 font-bold text-lg mb-2">Không thể tải dữ liệu</h3>
+                    <p className="text-red-600 dark:text-red-300 text-sm mb-1">{error}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs mb-5">Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.</p>
                     <button 
                         onClick={fetchMarketIntelligence}
-                        className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 transition-colors"
                     >
-                        Retry
+                        <RefreshCw size={16} />
+                        Thử lại
                     </button>
                 </div>
             )}
@@ -910,6 +931,21 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                     Based on analysis of {report.sources.industryPeersFound.toLocaleString()} industry players and {report.sources.competitorsAnalyzed} direct competitors. 
                                     Overall rivalry score: {report.portersForces.rivalry.score}/5 - {report.portersForces.rivalry.description}
                                 </p>
+                                {report.sources.dataSources && report.sources.dataSources.length > 0 && (
+                                    <div className="mt-3 pt-3 border-t border-indigo-200 dark:border-indigo-800">
+                                        <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 mb-1 flex items-center gap-1">
+                                            <Database size={12} />
+                                            Nguồn dữ liệu / Data Sources:
+                                        </p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {report.sources.dataSources.map((src, idx) => (
+                                                <span key={idx} className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded text-[10px] font-medium">
+                                                    {src}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

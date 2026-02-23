@@ -1,4 +1,5 @@
-import React, { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
+import React, { useState, useEffect, Component, ErrorInfo, ReactNode, useCallback } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { Wizard } from './components/Wizard';
@@ -8,6 +9,7 @@ import { Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { RagService } from './services/ragLayer';
 import { logger } from './utils/logger';
 import type { UserSession, WizardData } from './types/index';
+import { useAuth, useUser, useClerk } from '@clerk/clerk-react';
 
 // --- Error Boundary ---
 interface ErrorBoundaryState { hasError: boolean; error?: Error }
@@ -33,7 +35,21 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryS
   }
 }
 
-type ViewType = 'landing' | 'login' | 'wizard' | 'completion';
+// Session storage key for wizard data persistence across refresh
+const WIZARD_DATA_KEY = 'vico_wizard_data';
+
+function saveWizardData(data: WizardData) {
+  try { sessionStorage.setItem(WIZARD_DATA_KEY, JSON.stringify(data)); } catch {}
+}
+function loadWizardData(): WizardData | null {
+  try {
+    const raw = sessionStorage.getItem(WIZARD_DATA_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function clearWizardData() {
+  try { sessionStorage.removeItem(WIZARD_DATA_KEY); } catch {}
+}
 
 interface AppState {
   completedData: WizardData | null;
@@ -44,18 +60,26 @@ interface AppState {
 
 /**
  * Main VICO Application Component
- * Full routing: Landing → Login → Wizard → Dashboard
+ * URL-based routing: / → /login → /setup → /dashboard/*
+ * Auth: Clerk
  */
 function App() {
-  const [view, setView] = useState<ViewType>('landing');
+  const navigate = useNavigate();
+  const location = useLocation();
   const [appState, setAppState] = useState<AppState>({
-    completedData: null,
+    completedData: loadWizardData(),
     isSeeding: false,
     seedProgress: { p: 0, msg: '' },
     user: null,
   });
 
+  // Clerk hooks for auth state
+  const { isSignedIn, isLoaded: isAuthLoaded, userId } = useAuth();
+  const { user: clerkUser } = useUser();
+  const clerk = useClerk();
+
   // Initialize knowledge base on mount (with abort on unmount)
+  // ALL hooks must be called before any conditional return (Rules of Hooks)
   useEffect(() => {
     let cancelled = false;
     const initializeKnowledge = async (): Promise<void> => {
@@ -88,29 +112,59 @@ function App() {
     return () => { cancelled = true; };
   }, []);
 
-  const handleLoginSuccess = (userData: any): void => {
+  // Auto-redirect to dashboard if wizard data exists and user lands on /
+  useEffect(() => {
+    if (appState.completedData && location.pathname === '/') {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [appState.completedData, location.pathname, navigate]);
+
+  const handleLoginSuccess = useCallback((userData: any): void => {
     logger.info('User logged in', { email: userData.email });
     setAppState(prev => ({ ...prev, user: userData }));
-    setView('wizard');
-  };
+    navigate('/setup');
+  }, [navigate]);
 
-  const handleWizardComplete = (data: WizardData): void => {
-    logger.info('Wizard completed', { companyName: data.companyName });
+  const handleWizardComplete = useCallback((data: WizardData): void => {
+    logger.info('Wizard completed', { companyName: data.orgName });
+    saveWizardData(data);
     setAppState(prev => ({ ...prev, completedData: data }));
-    setView('completion');
-  };
+    navigate('/dashboard');
+  }, [navigate]);
 
-  const handleBackToHome = (): void => {
+  const handleBackToHome = useCallback((): void => {
     logger.info('Returning to home');
+    clearWizardData();
     setAppState(prev => ({ ...prev, completedData: null, user: null }));
-    setView('landing');
-  };
+    navigate('/');
+  }, [navigate]);
 
-  const handleLogout = (): void => {
+  const handleLogout = useCallback(async (): Promise<void> => {
     logger.info('User logged out');
+    
+    try {
+      await clerk.signOut();
+    } catch (err) {
+      logger.error('Clerk signOut failed', err as Error);
+    }
+    
+    clearWizardData();
     setAppState(prev => ({ ...prev, completedData: null, user: null }));
-    setView('landing');
-  };
+    navigate('/');
+  }, [clerk, navigate]);
+
+  // While Clerk is still loading session from cookies, show a minimal spinner
+  // to prevent flash-redirect to /login on refresh
+  if (!isAuthLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#FDFCFB] dark:bg-[#0B101B]">
+        <div className="text-center">
+          <Loader2 className="animate-spin text-[#B91C1C] mx-auto mb-3" size={32} />
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Đang khôi phục phiên...</p>
+        </div>
+      </div>
+    );
+  }
 
   const loadingOverlay = appState.isSeeding && (
     <div className="fixed bottom-6 left-6 z-[100] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-fade-in max-w-xs">
@@ -134,34 +188,61 @@ function App() {
       <div className="relative">
         {loadingOverlay}
 
-        {view === 'landing' && (
-          <LandingPage 
-            onStart={() => setView('wizard')}
-            onLoginClick={() => setView('login')}
-          />
-        )}
+        <Routes>
+          <Route path="/" element={
+            <LandingPage 
+              onStart={() => isSignedIn ? navigate('/setup') : navigate('/login')}
+              onLoginClick={() => navigate('/login')}
+            />
+          } />
 
-        {view === 'login' && (
-          <LoginPage 
-            onLoginSuccess={handleLoginSuccess}
-            onSignupClick={() => setView('wizard')}
-            onBack={handleBackToHome}
-          />
-        )}
+          <Route path="/login" element={
+            isSignedIn 
+              ? <Navigate to={appState.completedData ? '/dashboard' : '/setup'} replace />
+              : <LoginPage 
+                  onLoginSuccess={handleLoginSuccess}
+                  onBack={() => navigate('/')}
+                />
+          } />
 
-        {view === 'wizard' && (
-          <Wizard 
-            onComplete={handleWizardComplete}
-            onBack={handleBackToHome}
-          />
-        )}
+          <Route path="/setup" element={
+            !isSignedIn 
+              ? <Navigate to="/login" replace />
+              : <Wizard 
+                  onComplete={handleWizardComplete}
+                  onBack={() => navigate('/')}
+                />
+          } />
 
-        {view === 'completion' && appState.completedData && (
-          <CompletionPage 
-            userData={appState.completedData}
-            onBack={handleLogout}
-          />
-        )}
+          <Route path="/dashboard" element={
+            !isSignedIn ? (
+              <Navigate to="/login" replace />
+            ) : appState.completedData ? (
+              <CompletionPage 
+                userData={appState.completedData}
+                onBack={handleLogout}
+              />
+            ) : (
+              <Navigate to="/setup" replace />
+            )
+          } />
+
+          <Route path="/dashboard/:tab" element={
+            !isSignedIn ? (
+              <Navigate to="/login" replace />
+            ) : appState.completedData ? (
+              <CompletionPage 
+                userData={appState.completedData}
+                onBack={handleLogout}
+              />
+            ) : (
+              <Navigate to="/setup" replace />
+            )
+          } />
+
+          {/* Fallback: redirect unknown routes to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
       <VicoChatBot />
     </AppErrorBoundary>

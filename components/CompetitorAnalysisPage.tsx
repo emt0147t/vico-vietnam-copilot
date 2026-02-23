@@ -19,6 +19,8 @@ import {
     Facebook, Twitter, FileText, TrendingDown as TrendDown, Activity, Layers,
     Swords, ThumbsUp, ThumbsDown, Crosshair, Flag, AlertCircle, Minus, PieChart
 } from 'lucide-react';
+import { exportCompetitorReport } from '../utils/exportReport';
+import { sessionCacheGet, sessionCacheSet } from '../utils/sessionCache';
 
 interface CompetitorAnalysisPageProps {
     userData: any;
@@ -78,15 +80,90 @@ interface CompetitorIntelligenceReport {
 }
 
 // ==================== LOADING SKELETON ====================
-const LoadingSkeleton = () => (
-    <div className="animate-pulse space-y-6">
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
-        <div className="grid grid-cols-4 gap-4">
-            {[1,2,3,4].map(i => (<div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>))}
+const ANALYSIS_PHASES = [
+    { label: "Đang thu thập dữ liệu công ty...", icon: "🔍", duration: "~5s" },
+    { label: "Phân tích firmographics đối thủ...", icon: "🏢", duration: "~8s" },
+    { label: "So sánh positioning & thị phần...", icon: "📊", duration: "~10s" },
+    { label: "Tạo battlecard chiến lược...", icon: "⚔️", duration: "~12s" },
+    { label: "Quét tín hiệu digital footprint...", icon: "🌐", duration: "~15s" },
+];
+
+const LoadingSkeleton = () => {
+    const [phase, setPhase] = React.useState(0);
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            setPhase(p => (p < ANALYSIS_PHASES.length - 1 ? p + 1 : p));
+        }, 4000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="space-y-6">
+            {/* AI Analysis Progress */}
+            <div className="bg-white dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/50 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center gap-4 mb-5">
+                    <div className="relative">
+                        <div className="w-12 h-12 border-3 border-blue-200 dark:border-blue-500/30 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
+                        <span className="absolute inset-0 flex items-center justify-center text-lg">🤖</span>
+                    </div>
+                    <div>
+                        <h3 className="text-gray-900 dark:text-white font-bold text-lg">AI đang phân tích đối thủ cạnh tranh</h3>
+                        <p className="text-gray-500 text-sm">Gemini 2.0 Flash đang tổng hợp dữ liệu từ nhiều nguồn...</p>
+                    </div>
+                </div>
+
+                {/* Phase Steps */}
+                <div className="space-y-2.5">
+                    {ANALYSIS_PHASES.map((p, i) => (
+                        <div key={i} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-500 ${
+                            i < phase ? 'bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/30' :
+                            i === phase ? 'bg-blue-50 dark:bg-blue-900/15 border border-blue-200 dark:border-blue-700/40' :
+                            'bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/20 opacity-50'
+                        }`}>
+                            <span className="text-lg w-7 text-center">{i < phase ? '✅' : i === phase ? p.icon : '⏳'}</span>
+                            <span className={`text-sm font-medium flex-1 ${
+                                i < phase ? 'text-green-700 dark:text-green-400' :
+                                i === phase ? 'text-blue-700 dark:text-blue-300' :
+                                'text-gray-400 dark:text-gray-500'
+                            }`}>{p.label}</span>
+                            {i === phase && (
+                                <span className="flex gap-1">
+                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                </span>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Progress bar */}
+                <div className="mt-5">
+                    <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+                        <span>Tiến trình phân tích</span>
+                        <span>{Math.min(Math.round(((phase + 1) / ANALYSIS_PHASES.length) * 100), 100)}%</span>
+                    </div>
+                    <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
+                            style={{ width: `${((phase + 1) / ANALYSIS_PHASES.length) * 100}%` }}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Skeleton preview of what's coming */}
+            <div className="animate-pulse grid grid-cols-2 md:grid-cols-4 gap-4">
+                {['Competitors', 'Market Share', 'Threat Level', 'Similarity'].map((label, i) => (
+                    <div key={i} className="bg-white dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/30 rounded-xl p-4">
+                        <div className="text-xs text-gray-400 mb-2">{label}</div>
+                        <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                    </div>
+                ))}
+            </div>
         </div>
-        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
-    </div>
-);
+    );
+};
 
 // ==================== TIER 1: FIRMOGRAPHICS ====================
 const FirmographicsCard: React.FC<{ competitor: CompetitorProfile }> = ({ competitor }) => {
@@ -789,8 +866,8 @@ const DigitalFootprint: React.FC<{ competitor: CompetitorProfile }> = ({ competi
 export const CompetitorAnalysisPage: React.FC<CompetitorAnalysisPageProps> = ({ userData, competitors = [] }) => {
     const [activeSection, setActiveSection] = useState('overview');
     const [selectedCompetitor, setSelectedCompetitor] = useState<number>(0);
-    const [report, setReport] = useState<CompetitorIntelligenceReport | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [report, setReport] = useState<CompetitorIntelligenceReport | null>(() => sessionCacheGet<CompetitorIntelligenceReport>('competitor_report'));
+    const [isLoading, setIsLoading] = useState(!sessionCacheGet('competitor_report'));
     const [error, setError] = useState<string | null>(null);
     
     // Use refs to avoid closure stale values
@@ -839,6 +916,7 @@ export const CompetitorAnalysisPage: React.FC<CompetitorAnalysisPageProps> = ({ 
             
             const data = await response.json();
             setReport(data);
+            sessionCacheSet('competitor_report', data);
             isMountedRef.current = true;
         } catch (err) {
             console.error('Competitor Intelligence fetch error:', err);
@@ -848,10 +926,10 @@ export const CompetitorAnalysisPage: React.FC<CompetitorAnalysisPageProps> = ({ 
         }
     }, []);
     
-    // Only fetch on initial mount
+    // Only fetch on initial mount (skip if cached)
     useEffect(() => {
-        fetchCompetitorIntelligence();
-    }, [fetchCompetitorIntelligence]);
+        if (!report) fetchCompetitorIntelligence();
+    }, [fetchCompetitorIntelligence, report]);
     
     const sections = useMemo(() => [
         { id: 'overview', label: 'Executive Summary' },
@@ -884,9 +962,13 @@ export const CompetitorAnalysisPage: React.FC<CompetitorAnalysisPageProps> = ({ 
                         <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
                         Refresh
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <button
+                        onClick={() => report && exportCompetitorReport(report)}
+                        disabled={!report}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
                         <Download size={16} />
-                        Export
+                        Xuất báo cáo
                     </button>
                 </div>
             </div>

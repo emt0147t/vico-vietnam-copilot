@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.22",
-    "@clerk/express": "^1.2.0",
-    "@clerk/react": "^5.54.0",
+    "@clerk/clerk-react": "^5.61.1",
+    "@clerk/express": "^1.7.73",
     "@google/genai": "^1.31.0",
     "ai": "^6.0.77",
     "axios": "^1.13.5",
@@ -38,6 +38,7 @@
     "puppeteer": "^24.37.2",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
+    "react-router-dom": "^7.13.0",
     "recharts": "^2.10.3",
     "rss-parser": "^3.13.0",
     "zod": "^3.22.4"

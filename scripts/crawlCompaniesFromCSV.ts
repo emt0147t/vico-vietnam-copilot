@@ -183,8 +183,8 @@ class CompaniesCSVCrawler {
       this.industries[enriched.industry] = (this.industries[enriched.industry] || 0) + 1;
     }
 
-    // Estimate growth rate based on company age and size
-    enriched.growth = this.estimateGrowth(company);
+    // Growth rate: null (unknown) — no fabricated numbers
+    enriched.growth = this.estimateGrowth(company) ?? undefined;
 
     // Estimate sentiment from intro text
     enriched.sentiment = this.analyzeSentiment(company.intro || '');
@@ -197,54 +197,91 @@ class CompaniesCSVCrawler {
 
   /**
    * Infer industry from products and introduction
+   * Uses Vietnamese keyword matching aligned with VSIC (Vietnam Standard Industrial Classification)
+   * Expanded from 8 to 16 industries with comprehensive Vietnamese keywords
    */
   private inferIndustry(company: CompanyFromCSV): string | undefined {
     const text = (company.intro + ' ' + company.products + ' ' + (company.intro_new || '')).toLowerCase();
 
-    if (text.includes('phần mềm') || text.includes('công nghệ') || text.includes('phát triển') || text.includes('software')) {
+    // Technology / CNTT
+    if (text.match(/(phần mềm|công nghệ thông tin|cntt|lập trình|website|app|ứng dụng|software|digital|it |ai |machine learning|data|cloud|saas|blockchain|fintech|internet|e-commerce|thương mại điện tử)/))
       return 'Technology';
-    } else if (text.includes('thương mại') || text.includes('commerce') || text.includes('bán hàng') || text.includes('retail')) {
-      return 'Retail';
-    } else if (text.includes('xây dựng') || text.includes('kyu hạ tầng') || text.includes('construction')) {
-      return 'Construction';
-    } else if (text.includes('tài chính') || text.includes('ngân hàng') || text.includes('finance')) {
+
+    // Finance & Banking / Tài chính Ngân hàng
+    if (text.match(/(tài chính|ngân hàng|chứng khoán|bảo hiểm|đầu tư|quỹ|tín dụng|cho vay|finance|banking|insurance|securities|investment|fintech|ví điện tử|thanh toán)/))
       return 'Finance';
-    } else if (text.includes('sản xuất') || text.includes('manufacturing') || text.includes('nhà máy')) {
+
+    // Real Estate / Bất động sản
+    if (text.match(/(bất động sản|nhà đất|chung cư|khu đô thị|dự án|căn hộ|biệt thự|real estate|property|housing|quy hoạch|phân lô|mặt bằng|cho thuê.*nhà|văn phòng cho thuê)/))
+      return 'Real Estate';
+
+    // Construction / Xây dựng
+    if (text.match(/(xây dựng|xây lắp|thi công|kiến trúc|kết cấu|bê tông|xi măng|cốt thép|vật liệu xây|construction|cầu đường|hạ tầng|công trình|nền móng)/))
+      return 'Construction';
+
+    // Manufacturing / Sản xuất
+    if (text.match(/(sản xuất|nhà máy|gia công|chế biến|manufacturing|factory|dây chuyền|lắp ráp|công nghiệp|khu công nghiệp|linh kiện|nguyên liệu|bao bì|đóng gói)/))
       return 'Manufacturing';
-    } else if (text.includes('giáo dục') || text.includes('đào tạo') || text.includes('education')) {
-      return 'Education';
-    } else if (text.includes('healthcare') || text.includes('y tế') || text.includes('bệnh viện')) {
+
+    // Healthcare / Y tế
+    if (text.match(/(y tế|bệnh viện|phòng khám|dược|thuốc|sức khỏe|healthcare|medical|pharmaceutical|hospital|clinic|chẩn đoán|điều trị|nha khoa|thẩm mỹ|thiết bị y tế)/))
       return 'Healthcare';
-    } else if (text.includes('logistics') || text.includes('vận chuyển') || text.includes('delivery')) {
+
+    // Education / Giáo dục  
+    if (text.match(/(giáo dục|đào tạo|trường|đại học|học viện|education|training|university|trung tâm.*dạy|ngoại ngữ|tiếng anh|du học|luyện thi|mầm non|tiểu học)/))
+      return 'Education';
+
+    // Retail & Trade / Bán lẻ & Thương mại
+    if (text.match(/(thương mại|bán lẻ|bán hàng|siêu thị|cửa hàng|retail|shop|showroom|marketplace|phân phối|đại lý|cung (ứng|cấp)|bán buôn|nhập khẩu|xuất khẩu)/))
+      return 'Retail';
+
+    // Food & Beverage / Thực phẩm & Đồ uống
+    if (text.match(/(thực phẩm|đồ uống|nước giải khát|bia|rượu|nhà hàng|quán|café|coffee|food|beverage|restaurant|nông sản|thủy sản|hải sản|chế biến.*thực phẩm|bánh|sữa)/))
+      return 'Food & Beverage';
+
+    // Logistics & Transportation / Vận tải & Logistics
+    if (text.match(/(logistics|vận chuyển|vận tải|giao hàng|delivery|shipping|kho bãi|warehouse|cảng|hàng hải|container|freight|chuyển phát|bưu chính|taxi|xe tải)/))
       return 'Logistics';
-    }
+
+    // Agriculture / Nông nghiệp
+    if (text.match(/(nông nghiệp|nông sản|trồng trọt|chăn nuôi|thủy sản|nuôi trồng|agriculture|farming|phân bón|thuốc trừ sâu|giống|lâm nghiệp|cao su|cà phê|lúa gạo)/))
+      return 'Agriculture';
+
+    // Energy / Năng lượng
+    if (text.match(/(điện|năng lượng|energy|solar|pin|dầu khí|gas|xăng|petroleum|điện tử|năng lượng tái tạo|thủy điện|nhiệt điện|điện gió|điện mặt trời)/))
+      return 'Energy';
+
+    // Tourism & Hospitality / Du lịch & Khách sạn
+    if (text.match(/(du lịch|khách sạn|resort|hotel|tourism|travel|tour|lữ hành|nghỉ dưỡng|spa|villa|booking|homestay)/))
+      return 'Tourism & Hospitality';
+
+    // Media & Entertainment / Truyền thông & Giải trí
+    if (text.match(/(truyền thông|quảng cáo|media|marketing|sự kiện|event|giải trí|entertainment|game|phim|truyền hình|báo chí|pr |digital marketing|seo)/))
+      return 'Media & Entertainment';
+
+    // Textiles & Garment / Dệt may
+    if (text.match(/(dệt may|may mặc|thời trang|vải|garment|textile|fashion|quần áo|giày dép|da giày|footwear|sợi)/))
+      return 'Textiles & Garment';
+
+    // Consulting & Professional Services / Tư vấn
+    if (text.match(/(tư vấn|consultant|consulting|luật|law|kiểm toán|audit|kế toán|accounting|nhân sự|hr |headhunt|tuyển dụng|recruitment|thiết kế|design)/))
+      return 'Consulting & Services';
 
     return 'Other';
   }
 
   /**
-   * Estimate growth rate based on company age and size signals
+   * Growth estimation - returns null (unknown) since we don't have real revenue data.
+   * Only real growth data from verified financial reports should be used.
+   * Previous implementation used charCodeAt() pseudo-random which produced fake numbers.
    */
-  private estimateGrowth(company: CompanyFromCSV): number {
-    let baseGrowth = 5; // Default 5% baseline
-
-    // Older companies (>10 years) = more stable growth
-    if (company.yearFounded) {
-      const age = new Date().getFullYear() - company.yearFounded;
-      if (age < 5) baseGrowth += 20; // Startup growth
-      else if (age < 10) baseGrowth += 12; // Growth phase
-      else if (age < 20) baseGrowth += 8; // Mature
-      else baseGrowth += 3; // Established
-    }
-
-    // Larger companies = steady growth
-    const employees = company.employees.toLowerCase();
-    if (employees.includes('> 500')) baseGrowth += 2;
-    else if (employees.includes('> 100')) baseGrowth += 1;
-
-    // Add some variance based on deterministic pseudo-random
-    const variance = (company.name.charCodeAt(0) % 10) - 5; // -5 to +5
-    return Math.max(1, baseGrowth + variance);
+  private estimateGrowth(_company: CompanyFromCSV): number | null {
+    // DO NOT fabricate growth numbers. Return null to indicate "data not available".
+    // Real growth data should come from:
+    // - Company financial reports (báo cáo tài chính)
+    // - GSO (Tổng cục Thống kê) industry averages
+    // - Stock exchange filings (HOSE, HNX, UPCOM)
+    return null;
   }
 
   /**
@@ -279,8 +316,8 @@ class CompaniesCSVCrawler {
    * NOTE: Revenue estimation removed to maintain data authenticity
    * Only real revenue data will be used when CSV source is available
    */
-  private estimateRevenueFromSize(employeeStr: string): string {
-    // Keeping this method for reference, but using "NOT FOUND" in enrichment
+  // @ts-ignore - Kept for future reference
+  private _estimateRevenueFromSize(_employeeStr: string): string {
     return 'NOT FOUND';
   }
 
@@ -288,7 +325,7 @@ class CompaniesCSVCrawler {
    * Enrich companies with real-time data from APIs (optional)
    */
   async enrichWithAPIs(options?: { useNewsAPI?: boolean; limit?: number }): Promise<void> {
-    const newsApiKey = process.env.NEWSAPI_KEY;
+    const newsApiKey = process.env['NEWSAPI_KEY'];
     const useNews = options?.useNewsAPI && newsApiKey;
     const limit = options?.limit || this.enrichedCompanies.length;
 
@@ -297,6 +334,7 @@ class CompaniesCSVCrawler {
 
       for (let i = 0; i < Math.min(limit, this.enrichedCompanies.length); i++) {
         const company = this.enrichedCompanies[i];
+        if (!company) continue;
 
         try {
           // Fetch latest news about company
@@ -334,7 +372,7 @@ class CompaniesCSVCrawler {
   private async fetchNewsForCompany(companyName: string, apiKey: string, limit: number = 5): Promise<any[]> {
     try {
       const response = await fetch(`https://newsapi.org/v2/everything?q="${companyName}"&language=en&sortBy=publishedAt&pageSize=${limit}&apiKey=${apiKey}`, {
-        timeout: 5000,
+        signal: AbortSignal.timeout(5000),
       });
 
       if (!response.ok) return [];
@@ -431,7 +469,7 @@ class CompaniesCSVCrawler {
     try {
       // Parse CSV
       console.log('📖 Parsing companies.csv...\n');
-      const companies = await this.parseCSV();
+      await this.parseCSV();
 
       console.log(`\n✅ Successfully parsed ${this.companiesProcessed} companies from CSV\n`);
 

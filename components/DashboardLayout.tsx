@@ -14,10 +14,12 @@ import React, { useState, useEffect, useCallback, createContext, useContext, Rea
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard, Search, Command, Settings, LogOut,
-    ChevronLeft, ChevronRight, Bell, User, Moon, Sun,
+    ChevronLeft, ChevronRight, User, Moon, Sun,
     Building2, Newspaper, Target, Database, Zap, X,
     ArrowRight, Clock, TrendingUp, FileText, Globe
 } from 'lucide-react';
+import { NotificationCenter } from './NotificationCenter';
+import { useNotifications } from '../hooks/useNotifications';
 
 // ============================================================================
 // TYPES
@@ -299,6 +301,12 @@ export const DashboardLayout = ({
     const [isCommandCenterOpen, setIsCommandCenterOpen] = useState(false);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
+    // 🔔 Notification system
+    const {
+        notifications, unreadCount, isLoading: notifsLoading,
+        markAsRead, markAllAsRead, dismiss, clearAll, refresh: refreshNotifs,
+    } = useNotifications(orgName);
+
     const navItems: NavItem[] = [
         { id: 'overview', label: 'Dashboard', icon: LayoutDashboard, shortcut: '⌘D' },
         { id: 'companies', label: 'Companies', icon: Building2, badge: 10224, shortcut: '⌘C' },
@@ -504,10 +512,16 @@ export const DashboardLayout = ({
                         </div>
                         
                         <div className="flex items-center gap-3">
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors relative">
-                                <Bell className="w-5 h-5 text-gray-500" />
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                            </button>
+                            <NotificationCenter
+                                notifications={notifications}
+                                unreadCount={unreadCount}
+                                isLoading={notifsLoading}
+                                onMarkAsRead={markAsRead}
+                                onMarkAllAsRead={markAllAsRead}
+                                onDismiss={dismiss}
+                                onClearAll={clearAll}
+                                onRefresh={refreshNotifs}
+                            />
                             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors">
                                 <Settings className="w-5 h-5 text-gray-500" />
                             </button>

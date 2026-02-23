@@ -28,6 +28,7 @@ export default defineConfig(({ mode }) => {
       define: {
         // Fix: Standardize injection of API_KEY from external hard requirement environment variables.
         'process.env.API_KEY': JSON.stringify(finalApiKey),
+        'process.env.VITE_CLERK_PUBLISHABLE_KEY': JSON.stringify(env.VITE_CLERK_PUBLISHABLE_KEY || ''),
       },
       resolve: {
         alias: {

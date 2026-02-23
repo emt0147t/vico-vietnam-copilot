@@ -56,9 +56,9 @@ export const GTMStrategyViewer: React.FC<GTMStrategyViewerProps> = ({ playbook }
   const feasibilityScore = getFeasibilityScore();
 
   return (
-    <div className="bg-gray-900 text-white rounded-2xl border border-gray-700/50 overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-2xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
       {/* ═══ PLAYBOOK HEADER ═══ */}
-      <div className="bg-gradient-to-r from-gray-800 via-gray-800 to-gray-900 p-6 border-b border-gray-700/50">
+      <div className="bg-gradient-to-r from-gray-100 via-white to-gray-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 p-6 border-b border-gray-200 dark:border-gray-700/50">
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -123,7 +123,7 @@ export const GTMStrategyViewer: React.FC<GTMStrategyViewerProps> = ({ playbook }
       </div>
 
       {/* ═══ TABS ═══ */}
-      <div className="border-b border-gray-700/50 px-4 overflow-x-auto">
+      <div className="border-b border-gray-200 dark:border-gray-700/50 px-4 overflow-x-auto">
         <div className="flex gap-1 min-w-max">
           {TAB_CONFIG.map((tab) => (
             <button
@@ -131,8 +131,8 @@ export const GTMStrategyViewer: React.FC<GTMStrategyViewerProps> = ({ playbook }
               onClick={() => setActiveTab(tab.key)}
               className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
                 activeTab === tab.key
-                  ? "border-red-500 text-white bg-red-500/5"
-                  : "border-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+                  ? "border-red-500 text-red-600 dark:text-white bg-red-100 dark:bg-red-500/5"
+                  : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/50"
               }`}
             >
               {tab.icon} {tab.label}
@@ -157,17 +157,17 @@ export const GTMStrategyViewer: React.FC<GTMStrategyViewerProps> = ({ playbook }
       </div>
 
       {/* ═══ NEXT STEPS FOOTER ═══ */}
-      <div className="border-t border-gray-700/50 p-6 bg-gray-800/30">
-        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+      <div className="border-t border-gray-200 dark:border-gray-700/50 p-6 bg-gray-100 dark:bg-gray-800/30">
+        <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
           Các bước tiếp theo
         </h3>
         <div className="grid md:grid-cols-2 gap-2">
           {playbook.nextSteps.map((step, idx) => (
-            <div key={idx} className="flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
+            <div key={idx} className="flex items-start gap-3 bg-white dark:bg-gray-800/50 rounded-lg p-3 border border-gray-100 dark:border-gray-700/30">
               <span className="w-6 h-6 bg-red-500/20 rounded-full flex items-center justify-center text-red-400 text-xs font-bold shrink-0">
                 {idx + 1}
               </span>
-              <span className="text-gray-300 text-sm">{step}</span>
+              <span className="text-gray-700 dark:text-gray-300 text-sm">{step}</span>
             </div>
           ))}
         </div>
@@ -182,8 +182,8 @@ export const GTMStrategyViewer: React.FC<GTMStrategyViewerProps> = ({ playbook }
 
 function MetricCard({ label, value, color, small }: { label: string; value: string; color: string; small?: boolean }) {
   return (
-    <div className="bg-gray-800/50 backdrop-blur rounded-lg p-3 border border-gray-700/30">
-      <p className="text-gray-500 text-xs mb-1">{label}</p>
+    <div className="bg-white dark:bg-gray-800/50 backdrop-blur rounded-lg p-3 border border-gray-100 dark:border-gray-700/30">
+      <p className="text-gray-500 dark:text-gray-400 text-xs mb-1">{label}</p>
       <p className={`${small ? "text-sm" : "text-xl"} font-bold ${color}`}>{value}</p>
     </div>
   );
@@ -191,18 +191,18 @@ function MetricCard({ label, value, color, small }: { label: string; value: stri
 
 function SWOTMiniCell({ icon, label, items, color, bg }: { icon: string; label: string; items: string[]; color: string; bg: string }) {
   return (
-    <div className={`p-4 ${bg} border-r border-gray-700/30 last:border-r-0`}>
+    <div className={`p-4 ${bg} border-r border-gray-100 dark:border-gray-700/30 last:border-r-0`}>
       <div className="flex items-center gap-1.5 mb-2">
         <span className="text-sm">{icon}</span>
         <span className={`text-xs font-semibold ${color}`}>{label}</span>
-        <span className="text-gray-600 text-xs">({items.length})</span>
+        <span className="text-gray-600 dark:text-gray-400 text-xs">({items.length})</span>
       </div>
       <ul className="space-y-1">
         {items.slice(0, 2).map((item, i) => (
-          <li key={i} className="text-gray-400 text-xs truncate">• {item}</li>
+          <li key={i} className="text-gray-500 dark:text-gray-400 text-xs truncate">• {item}</li>
         ))}
         {items.length > 2 && (
-          <li className="text-gray-600 text-xs">+{items.length - 2} more</li>
+          <li className="text-gray-600 dark:text-gray-400 text-xs">+{items.length - 2} more</li>
         )}
       </ul>
     </div>
@@ -217,33 +217,33 @@ function SegmentationTab({ data }: { data: LivingPlaybook["customerSegmentation"
     <div className="space-y-6">
       {/* TAM/SAM/SOM */}
       <div className="grid md:grid-cols-3 gap-4">
-        <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/30">
+        <div className="bg-white dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700/30">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-3 h-3 rounded-full bg-blue-500" />
-            <span className="text-gray-400 text-sm">Total Addressable Market</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm">Total Addressable Market</span>
           </div>
           <p className="text-2xl font-bold text-blue-400">{data.totalAddressableMarket}</p>
         </div>
-        <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/30">
+        <div className="bg-white dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700/30">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            <span className="text-gray-400 text-sm">Serviceable Available Market</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm">Serviceable Available Market</span>
           </div>
           <p className="text-2xl font-bold text-emerald-400">{data.serviceableMarket}</p>
         </div>
-        <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/30">
+        <div className="bg-white dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700/30">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-3 h-3 rounded-full bg-amber-500" />
-            <span className="text-gray-400 text-sm">Target Market Share</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm">Target Market Share</span>
           </div>
           <p className="text-2xl font-bold text-amber-400">{data.targetMarketShare}%</p>
         </div>
       </div>
 
       {/* ICP Summary */}
-      <div className="bg-gradient-to-r from-red-500/10 to-transparent border border-red-500/20 rounded-xl p-5">
-        <h4 className="text-sm font-semibold text-red-400 uppercase tracking-wider mb-2">Ideal Customer Profile</h4>
-        <p className="text-gray-300">{data.icpSummary}</p>
+      <div className="bg-gradient-to-r from-red-100 dark:from-red-500/10 to-transparent border border-red-200 dark:border-red-500/20 rounded-xl p-5">
+        <h4 className="text-sm font-semibold text-red-500 dark:text-red-400 uppercase tracking-wider mb-2">Ideal Customer Profile</h4>
+        <p className="text-gray-700 dark:text-gray-300">{data.icpSummary}</p>
       </div>
 
       {/* Segment Breakdown */}

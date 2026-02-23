@@ -10,7 +10,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ComprehensiveMarketReport } from '@/app/api/market/marketIndustryController';
 
 interface MarketReportProps {
@@ -22,34 +22,46 @@ export default function MarketIndustryDashboard({ industry }: MarketReportProps)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchReport = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/market/industry/${encodeURIComponent(industry)}`);
+  const fetchReport = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch market report: ${response.status}`);
-        }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-        const data = await response.json();
-        setReport(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch data');
-      } finally {
-        setLoading(false);
+    try {
+      const response = await fetch(`/api/market/industry/${encodeURIComponent(industry)}`, {
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Lỗi API: ${response.status}`);
       }
-    };
 
-    fetchReport();
+      const data = await response.json();
+      setReport(data);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setError('Quá thời gian chờ (30s). Server có thể đang quá tải.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Không thể tải dữ liệu thị trường');
+      }
+    } finally {
+      clearTimeout(timeoutId);
+      setLoading(false);
+    }
   }, [industry]);
+
+  useEffect(() => {
+    fetchReport();
+  }, [fetchReport]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center p-12">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading {industry} market intelligence...</p>
+          <p className="text-gray-600 dark:text-gray-400">Đang tải thông tin thị trường {industry}...</p>
         </div>
       </div>
     );
@@ -57,15 +69,25 @@ export default function MarketIndustryDashboard({ industry }: MarketReportProps)
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-red-800">
-        <h3 className="font-semibold mb-2">Error Loading Market Report</h3>
-        <p>{error}</p>
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+        <svg className="mx-auto text-red-500 mb-4 w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86l-8.03 14A2 2 0 0012 19.84h0a2 2 0 001.74-1l8.03-14a2 2 0 00-1.74-3H12.03a2 2 0 00-1.74 1z" />
+        </svg>
+        <h3 className="text-red-700 dark:text-red-400 font-bold text-lg mb-2">Không thể tải dữ liệu</h3>
+        <p className="text-red-600 dark:text-red-300 text-sm mb-1">{error}</p>
+        <p className="text-gray-500 dark:text-gray-400 text-xs mb-5">Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.</p>
+        <button
+          onClick={fetchReport}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 transition-colors"
+        >
+          ↻ Thử lại
+        </button>
       </div>
     );
   }
 
   if (!report) {
-    return <div className="text-center p-8 text-gray-500">No data available</div>;
+    return <div className="text-center p-8 text-gray-500 dark:text-gray-400">Không có dữ liệu</div>;
   }
 
   return (

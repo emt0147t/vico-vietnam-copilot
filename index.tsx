@@ -1,8 +1,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { ThemeProvider } from './context/ThemeContext';
+import { ClerkProvider } from '@clerk/clerk-react';
+
+const CLERK_PUBLISHABLE_KEY = (process.env as any).VITE_CLERK_PUBLISHABLE_KEY || '';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -10,10 +14,20 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
+
 root.render(
   <React.StrictMode>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
+    <ClerkProvider 
+      publishableKey={CLERK_PUBLISHABLE_KEY}
+      appearance={{
+        variables: { colorPrimary: '#B91C1C' },
+      }}
+    >
+      <BrowserRouter>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </BrowserRouter>
+    </ClerkProvider>
   </React.StrictMode>
 );
