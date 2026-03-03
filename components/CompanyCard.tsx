@@ -49,6 +49,8 @@ export interface CompanyCardData {
     // Data quality tier (from companyFilter)
     dataTier?: 'premium' | 'standard' | 'basic';
     dataScore?: number;
+    // Verified-first flag (from verifiedCompanies.ts)
+    _isVerifiedFirst?: boolean;
 }
 
 interface CompanyCardProps {
@@ -175,16 +177,16 @@ const SentimentBadge = ({ sentiment }: { sentiment?: 'Positive' | 'Neutral' | 'N
 // DATA TIER BADGE COMPONENT
 // ============================================================================
 
-const DataTierBadge = ({ tier, score }: { tier?: 'premium' | 'standard' | 'basic'; score?: number }) => {
+const DataTierBadge = ({ tier, score, isVerifiedFirst }: { tier?: 'premium' | 'standard' | 'basic'; score?: number; isVerifiedFirst?: boolean }) => {
     if (!tier) return null;
 
     const config = {
         premium: {
-            bg: 'bg-amber-100',
-            text: 'text-amber-700',
-            border: 'border-amber-200',
-            label: '⭐ Premium',
-            ringColor: '#f59e0b',
+            bg: isVerifiedFirst ? 'bg-green-100' : 'bg-amber-100',
+            text: isVerifiedFirst ? 'text-green-700' : 'text-amber-700',
+            border: isVerifiedFirst ? 'border-green-200' : 'border-amber-200',
+            label: isVerifiedFirst ? '🏆 Verified' : '⭐ Premium',
+            ringColor: isVerifiedFirst ? '#22c55e' : '#f59e0b',
         },
         standard: {
             bg: 'bg-blue-100',
@@ -312,7 +314,7 @@ export const CompanyCard = ({
                                     {company.industry}
                                 </span>
                             )}
-                            <DataTierBadge tier={company.dataTier} score={company.dataScore} />
+                            <DataTierBadge tier={company.dataTier} score={company.dataScore} isVerifiedFirst={(company as any)._isVerifiedFirst} />
                             <SentimentBadge sentiment={company.latestNewsSentiment} />
                             {company.newsCount !== undefined && company.newsCount > 0 && (
                                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-lg">

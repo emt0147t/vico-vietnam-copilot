@@ -553,6 +553,161 @@ app.get('/api/data-quality', (_req, res) => {
         res.status(500).json({ error: "Failed to generate data quality report" });
     }
 });
+
+// ============================================================================
+// 🏆 VERIFIED COMPANIES API — 15 showcase companies with full data provenance
+// Each field tagged with source, confidence, and verification status
+// ============================================================================
+
+// GET /api/verified-companies — List all 15 verified companies
+app.get('/api/verified-companies', async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const { getAllVerifiedCompanies, getStats } = await import('./services/verifiedDataService');
+        const companies = getAllVerifiedCompanies();
+        const stats = getStats();
+
+        res.json({
+            success: true,
+            total: companies.length,
+            stats,
+            dataPolicy: 'verified-first',
+            companies: companies.map(c => ({
+                id: c.company.id,
+                name: c.company.name.value,
+                legalName: c.company.legalName.value,
+                industry: c.company.industry,
+                subIndustry: c.company.subIndustry,
+                isListed: c.company.isListed,
+                ticker: c.company.ticker.value,
+                overallDataScore: c.company.overallDataScore,
+                provenanceSummary: c.provenanceSummary,
+                legacyProfile: c.legacyProfile,
+            })),
+        });
+    } catch (error) {
+        console.error('❌ API Error (verified-companies):', error);
+        res.status(500).json({ error: 'Failed to fetch verified companies' });
+    }
+});
+
+// GET /api/verified-companies/:id — Single company with full provenance metadata
+app.get('/api/verified-companies/:id', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const companyId = req.params['id'];
+        if (!companyId) {
+            res.status(400).json({ error: 'Company ID is required' });
+            return;
+        }
+
+        const { getVerifiedCompanyById } = await import('./services/verifiedDataService');
+        const result = getVerifiedCompanyById(companyId);
+
+        if (!result) {
+            res.status(404).json({ error: `Verified company "${companyId}" not found` });
+            return;
+        }
+
+        res.json({
+            success: true,
+            company: result.company,
+            legacyProfile: result.legacyProfile,
+            provenanceSummary: result.provenanceSummary,
+        });
+    } catch (error) {
+        console.error('❌ API Error (verified-companies/:id):', error);
+        res.status(500).json({ error: 'Failed to fetch verified company' });
+    }
+});
+
+// GET /api/verified-companies/:id/live — Single company with live CafeF data (listed only)
+app.get('/api/verified-companies/:id/live', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const companyId = req.params['id'];
+        if (!companyId) {
+            res.status(400).json({ error: 'Company ID is required' });
+            return;
+        }
+
+        const { getVerifiedCompanyWithLiveData } = await import('./services/verifiedDataService');
+        const result = await getVerifiedCompanyWithLiveData(companyId);
+
+        if (!result) {
+            res.status(404).json({ error: `Verified company "${companyId}" not found` });
+            return;
+        }
+
+        res.json({
+            success: true,
+            company: result.company,
+            liveData: result.liveData,
+            legacyProfile: result.legacyProfile,
+            provenanceSummary: result.provenanceSummary,
+        });
+    } catch (error) {
+        console.error('❌ API Error (verified-companies/:id/live):', error);
+        res.status(500).json({ error: 'Failed to fetch live company data' });
+    }
+});
+
+// GET /api/verified-companies/search/:query — Search verified companies
+app.get('/api/verified-companies/search/:query', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const query = sanitizeQuery(req.params['query']);
+        if (!query) {
+            res.status(400).json({ error: 'Search query is required' });
+            return;
+        }
+
+        const { searchVerifiedCompanies } = await import('./services/verifiedDataService');
+        const results = searchVerifiedCompanies(query);
+
+        res.json({
+            success: true,
+            query,
+            total: results.length,
+            companies: results.map(c => ({
+                id: c.company.id,
+                name: c.company.name.value,
+                industry: c.company.industry,
+                overallDataScore: c.company.overallDataScore,
+                provenanceSummary: c.provenanceSummary,
+            })),
+        });
+    } catch (error) {
+        console.error('❌ API Error (verified-companies/search):', error);
+        res.status(500).json({ error: 'Search failed' });
+    }
+});
+
+// POST /api/verified-companies/refresh — Force-refresh CafeF live data cache
+app.post('/api/verified-companies/refresh', async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const { forceRefreshLiveData } = await import('./services/verifiedDataService');
+        const result = await forceRefreshLiveData();
+
+        res.json({
+            success: result.success,
+            message: result.success ? 'Live data refreshed' : 'Refresh failed',
+            tickers: result.tickers,
+            timestamp: result.timestamp,
+        });
+    } catch (error) {
+        console.error('❌ API Error (verified-companies/refresh):', error);
+        res.status(500).json({ error: 'Refresh failed' });
+    }
+});
+
+// GET /api/verified-companies/stats — Overall verified data statistics
+app.get('/api/verified-stats', async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const { getStats } = await import('./services/verifiedDataService');
+        res.json({ success: true, ...getStats() });
+    } catch (error) {
+        console.error('❌ API Error (verified-stats):', error);
+        res.status(500).json({ error: 'Failed to fetch stats' });
+    }
+});
+
 // ðŸ†• New endpoint: Get pre-computed vectors from cache (FAST!)
 app.get('/api/vectors/cache', (_req, res) => {
     try {

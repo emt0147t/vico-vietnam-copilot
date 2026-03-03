@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { EnterpriseInput } from './VicoUI';
 import { COMPANIES } from '../data/companies';
+import { getVerifiedCompanyProfiles } from '../data/verifiedCompanies';
 import { RagService } from '../services/ragLayer';
 import { loadFromDB } from '../utils/db';
 
@@ -105,8 +106,13 @@ const GOAL_CARDS = [
 
 const STEP_LABELS = ['Your Profile', 'Company Context', 'ICP Outline', 'Competitors', 'Your Goals'] as const;
 
-/** Hero companies (premium-enriched only) for ICP & competitor screens */
-const HERO_COMPANIES = COMPANIES.filter(c => c.dataTier === 'premium');
+/** Hero companies: verified-first companies take priority, then premium-enriched legacy */
+const VERIFIED_PROFILES = getVerifiedCompanyProfiles();
+const VERIFIED_NAMES_SET = new Set(VERIFIED_PROFILES.map((vp: any) => vp.name.toLowerCase()));
+const HERO_COMPANIES = [
+  ...VERIFIED_PROFILES,
+  ...COMPANIES.filter(c => c.dataTier === 'premium' && !VERIFIED_NAMES_SET.has(c.name.toLowerCase())),
+];
 
 /** 15 hero company names for competitor autocomplete */
 const HERO_COMPANY_NAMES = [

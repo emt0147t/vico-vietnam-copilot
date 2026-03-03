@@ -1,5 +1,6 @@
 import { CompanyProfile, COMPANIES } from '../data/companies';
 import { scoreAllCompanies } from '../services/companyFilter';
+import { getVerifiedCompanyProfilesForMerge } from '../services/verifiedDataService';
 
 let MERGED_COMPANIES: CompanyProfile[] | null = null;
 
@@ -12,6 +13,24 @@ export async function initializeCompanies(): Promise<CompanyProfile[]> {
   try {
     console.log(`📥 Loading ${COMPANIES.length} companies from companies.ts`);
     MERGED_COMPANIES = [...COMPANIES];
+
+    // 🏆 Merge verified-first companies: replace legacy duplicates with verified versions
+    try {
+      const verifiedProfiles = getVerifiedCompanyProfilesForMerge();
+      const verifiedNames = new Set(verifiedProfiles.map((vp: any) => vp.name.toLowerCase()));
+
+      // Remove legacy duplicates
+      const beforeCount = MERGED_COMPANIES.length;
+      MERGED_COMPANIES = MERGED_COMPANIES.filter(c => !verifiedNames.has(c.name.toLowerCase()));
+      const removedCount = beforeCount - MERGED_COMPANIES.length;
+
+      // Add verified companies at the front (they appear first in search / browse)
+      MERGED_COMPANIES = [...verifiedProfiles, ...MERGED_COMPANIES];
+
+      console.log(`🏆 Verified-first merge: ${verifiedProfiles.length} verified companies loaded, ${removedCount} legacy duplicates replaced`);
+    } catch (verifiedError) {
+      console.warn('⚠️ Could not load verified companies, continuing with legacy data:', verifiedError instanceof Error ? verifiedError.message : verifiedError);
+    }
 
     // Log industry distribution
     const industryCount = MERGED_COMPANIES.reduce((acc, c) => {

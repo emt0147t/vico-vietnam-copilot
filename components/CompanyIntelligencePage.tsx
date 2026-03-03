@@ -277,11 +277,13 @@ const Header = ({ companyName, data, onClose, profile }: { companyName: string; 
                                 </span>
                             )}
                             {profile?.dataTier && (
-                                <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${profile.dataTier === 'premium' ? 'bg-amber-100 text-amber-700' :
+                                <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${
+                                    (profile as any)._isVerifiedFirst ? 'bg-green-100 text-green-700' :
+                                    profile.dataTier === 'premium' ? 'bg-amber-100 text-amber-700' :
                                     profile.dataTier === 'standard' ? 'bg-blue-100 text-blue-700' :
                                         'bg-[#F4F4F5] text-[#71717A]'
                                     }`}>
-                                    {profile.dataTier.toUpperCase()}
+                                    {(profile as any)._isVerifiedFirst ? '🏆 VERIFIED' : profile.dataTier.toUpperCase()}
                                 </span>
                             )}
                         </div>
@@ -673,11 +675,13 @@ const CompetitorsPanel = ({ competitors }: { competitors: CompetitorInfo[] }) =>
                             <p className="text-[#18181B] text-sm font-semibold truncate">{comp.name}</p>
                             <p className="text-[#A1A1AA] text-xs">{comp.size || 'Unknown size'}</p>
                         </div>
-                        <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded uppercase ${comp.dataTier === 'premium' ? 'bg-amber-100 text-amber-600' :
+                        <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded uppercase ${
+                            (comp as any)._isVerifiedFirst ? 'bg-green-100 text-green-600' :
+                            comp.dataTier === 'premium' ? 'bg-amber-100 text-amber-600' :
                             comp.dataTier === 'standard' ? 'bg-blue-100 text-blue-600' :
                                 'bg-[#F4F4F5] text-[#A1A1AA]'
                             }`}>
-                            {comp.dataTier || 'basic'}
+                            {(comp as any)._isVerifiedFirst ? '🏆 verified' : (comp.dataTier || 'basic')}
                         </span>
                     </motion.div>
                 ))}
