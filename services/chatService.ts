@@ -12,17 +12,31 @@ async function proxyGenerateContent(config: {
     temperature?: number;
     maxOutputTokens?: number;
 }): Promise<{ text: string; functionCalls: any[] }> {
-    const MAX_RETRIES = 2;
+    const MAX_RETRIES = 3;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-        const res = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(config),
-        });
+        // Abort after 30 s so the UI never hangs forever
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 30_000);
 
-        // Retry on 429 with exponential backoff (3 s, 6 s)
+        let res: Response;
+        try {
+            res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config),
+                signal: controller.signal,
+            });
+        } catch (err: any) {
+            clearTimeout(timer);
+            if (err.name === 'AbortError') throw new Error('⏳ Yêu cầu quá lâu. Vui lòng thử lại.');
+            throw err;
+        } finally {
+            clearTimeout(timer);
+        }
+
+        // Retry on 429 with exponential backoff (2 s, 4 s, 8 s)
         if (res.status === 429 && attempt < MAX_RETRIES) {
-            const delay = (attempt + 1) * 3000;
+            const delay = Math.pow(2, attempt + 1) * 1000;
             console.warn(`⏳ Chat rate-limited (429), retry ${attempt + 1}/${MAX_RETRIES} in ${delay / 1000}s…`);
             await new Promise(r => setTimeout(r, delay));
             continue;
@@ -34,8 +48,15 @@ async function proxyGenerateContent(config: {
         }
         return res.json();
     }
-    // All retries exhausted — surface a user-friendly message
     throw new Error('⚠️ Quá nhiều yêu cầu. Vui lòng đợi vài giây và thử lại.');
+}
+
+/** Run a tool with a 15-second timeout so a broken endpoint never blocks AI */
+async function executeToolWithTimeout(name: string, args: any, timeoutMs = 15_000): Promise<any> {
+    return Promise.race([
+        executeTool(name, args),
+        new Promise((_, reject) => setTimeout(() => reject(new Error(`Tool "${name}" timed out after ${timeoutMs / 1000}s`)), timeoutMs)),
+    ]).catch(err => ({ error: err instanceof Error ? err.message : 'Tool failed' }));
 }
 
 const SYSTEM_PROMPT = `Bạn là **VICO AI** — trợ lý trí tuệ nhân tạo của nền tảng VICO (Vietnam Copilot), chuyên về phân tích thị trường Việt Nam.
@@ -480,13 +501,14 @@ class VicoChatService {
         this.history.push(userMsg);
 
         try {
+            // Limit context to last 24 messages to prevent token overflow
+            const recentHistory = this.history.filter(m => !m.isLoading).slice(-24);
+
             // Build conversation contents for Gemini multi-turn
-            const contents = this.history
-                .filter(m => !m.isLoading)
-                .map(m => ({
-                    role: m.role === 'assistant' ? 'model' : 'user',
-                    parts: [{ text: m.content }],
-                }));
+            const contents = recentHistory.map(m => ({
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: m.content }],
+            }));
 
             // Call Gemini via server proxy with function calling tools
             let response = await proxyGenerateContent({
@@ -497,27 +519,40 @@ class VicoChatService {
                 maxOutputTokens: 2048,
             });
 
-            // Function calling loop (max 3 rounds)
+            // Function calling loop (max 5 rounds) — accumulate contents
             const toolsUsed: string[] = [];
             let rounds = 0;
+            let runningContents: any[] = [...contents];
 
-            while (response.functionCalls && response.functionCalls.length > 0 && rounds < 3) {
+            while (response.functionCalls && response.functionCalls.length > 0 && rounds < 5) {
                 rounds++;
-                const fc = response.functionCalls[0];
-                if (!fc || !fc.name) break;
-                toolsUsed.push(fc.name);
 
-                const toolResult = await executeTool(fc.name, fc.args || {});
+                // Process ALL function calls in this response (parallel execution)
+                const calls = response.functionCalls.filter((fc: any) => fc?.name);
+                if (calls.length === 0) break;
 
-                // Send function result back to Gemini
-                const updatedContents = [
-                    ...contents,
-                    { role: 'model' as const, parts: [{ functionCall: { name: fc.name, args: fc.args } }] },
-                    { role: 'function' as const, parts: [{ functionResponse: { name: fc.name, response: toolResult } }] },
+                const results = await Promise.all(
+                    calls.map((fc: any) => {
+                        toolsUsed.push(fc.name);
+                        return executeToolWithTimeout(fc.name, fc.args || {});
+                    }),
+                );
+
+                // Append model function-call parts then function-response parts
+                runningContents = [
+                    ...runningContents,
+                    {
+                        role: 'model' as const,
+                        parts: calls.map((fc: any) => ({ functionCall: { name: fc.name, args: fc.args } })),
+                    },
+                    ...calls.map((fc: any, i: number) => ({
+                        role: 'function' as const,
+                        parts: [{ functionResponse: { name: fc.name, response: results[i] } }],
+                    })),
                 ];
 
                 response = await proxyGenerateContent({
-                    contents: updatedContents,
+                    contents: runningContents,
                     systemInstruction: SYSTEM_PROMPT,
                     tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
                     temperature: 0.7,
@@ -526,14 +561,15 @@ class VicoChatService {
             }
 
             const text = response.text || 'Xin lỗi, tôi không thể xử lý yêu cầu này lúc này.';
-            return this.addAssistantMessage(text, toolsUsed.length > 0 ? toolsUsed : undefined);
+            return this.addAssistantMessage(text, toolsUsed.length > 0 ? [...new Set(toolsUsed)] : undefined);
         } catch (error) {
             console.error('[VicoChatService] Error:', error);
 
-            // Graceful fallback: try without function calling
+            // Graceful fallback: try simple chat without function calling
             try {
                 const simpleContents = this.history
                     .filter(m => !m.isLoading)
+                    .slice(-12)
                     .map(m => ({
                         role: m.role === 'assistant' ? 'model' : 'user',
                         parts: [{ text: m.content }],
@@ -549,12 +585,23 @@ class VicoChatService {
                 if (fallbackResponse.text) {
                     return this.addAssistantMessage(fallbackResponse.text);
                 }
-            } catch {
-                // Both approaches failed
+            } catch (fallbackErr) {
+                console.warn('[VicoChatService] Fallback also failed:', fallbackErr);
             }
 
+            // Specific error messages
+            const msg = error instanceof Error ? error.message : '';
+            if (msg.includes('429') || msg.includes('rate') || msg.includes('RESOURCE_EXHAUSTED')) {
+                return this.addAssistantMessage('⚠️ Hệ thống đang bận. Vui lòng đợi 5–10 giây rồi thử lại.');
+            }
+            if (msg.includes('timeout') || msg.includes('quá lâu') || msg.includes('AbortError')) {
+                return this.addAssistantMessage('⏳ Yêu cầu mất quá lâu. Vui lòng thử câu hỏi ngắn hơn hoặc thử lại.');
+            }
+            if (msg.includes('503') || msg.includes('not configured')) {
+                return this.addAssistantMessage('⚠️ AI engine chưa sẵn sàng. Vui lòng thử lại sau.');
+            }
             return this.addAssistantMessage(
-                '⚠️ Đã xảy ra lỗi khi xử lý. Vui lòng thử lại hoặc đặt câu hỏi khác.',
+                '⚠️ Đã xảy ra lỗi khi xử lý. Vui lòng thử lại hoặc đặt câu hỏi khác.\n\n💡 **Thử:** Đặt câu hỏi ngắn gọn hơn hoặc nhấn nút 🗑️ để xóa lịch sử rồi hỏi lại.',
             );
         }
     }

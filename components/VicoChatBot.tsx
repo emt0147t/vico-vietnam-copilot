@@ -3,7 +3,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
     MessageCircle, X, Send, Trash2, Search, Newspaper,
     Swords, Brain, Sparkles, Copy, Check,
-    Bot, User, Loader2, Minimize2, ArrowDown
+    Bot, User, Loader2, Minimize2, ArrowDown,
+    RotateCcw
 } from 'lucide-react';
 import { chatService, type ChatMessage } from '../services/chatService';
 
@@ -18,12 +19,15 @@ const QUICK_ACTIONS = [
 ];
 
 const TOOL_LABELS: Record<string, string> = {
-    search_companies: '🔍 Company lookup',
-    get_latest_news: '📰 Search news',
-    find_competitors: '⚔️ Competitor analysis',
-    search_knowledge_base: '🧠 Knowledge search',
-    get_pestel_analysis: '🧠 PESTEL Analysis',
-    get_vietnam_macro: '📊 Vietnam macro data',
+    search_companies: '🔍 Tra cứu công ty',
+    get_latest_news: '📰 Tìm tin tức',
+    find_competitors: '⚔️ Phân tích đối thủ',
+    search_knowledge_base: '🧠 Tra cứu tri thức',
+    get_pestel_analysis: '🏛️ PESTEL Analysis',
+    get_vietnam_macro: '📊 Dữ liệu vĩ mô VN',
+    generate_customer_insights: '👤 Customer Insights',
+    get_trade_data: '📦 Dữ liệu thương mại',
+    get_industry_analytics: '📈 Phân tích ngành',
 };
 
 // ─── Markdown Renderer ───
@@ -116,6 +120,7 @@ export const VicoChatBot: React.FC = () => {
     const [showScrollBtn, setShowScrollBtn] = useState<boolean>(false);
     const [unreadCount, setUnreadCount] = useState<number>(0);
     const [hasInteracted, setHasInteracted] = useState<boolean>(false);
+    const [activeTools, setActiveTools] = useState<string[]>([]);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -160,6 +165,7 @@ export const VicoChatBot: React.FC = () => {
         setInput('');
         setHasInteracted(true);
         setIsLoading(true);
+        setActiveTools([]);
 
         // Add user message immediately
         const userMsg: ChatMessage = {
@@ -171,7 +177,9 @@ export const VicoChatBot: React.FC = () => {
         setMessages((prev: ChatMessage[]) => [...prev, userMsg]);
 
         try {
-            await chatService.sendMessage(messageText);
+            const result = await chatService.sendMessage(messageText);
+            // Show which tools were used
+            if (result.toolsUsed?.length) setActiveTools(result.toolsUsed);
             setMessages(chatService.getHistory().filter(m => !m.isLoading));
 
             // If chat is closed, increment unread
@@ -182,8 +190,27 @@ export const VicoChatBot: React.FC = () => {
             setMessages(chatService.getHistory().filter(m => !m.isLoading));
         } finally {
             setIsLoading(false);
+            setTimeout(() => setActiveTools([]), 3000);
         }
     }, [input, isLoading, isOpen]);
+
+    // Retry last failed message
+    const handleRetry = useCallback(() => {
+        const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+        if (!lastUserMsg) return;
+        // Remove the error response
+        const lastAssistant = messages[messages.length - 1];
+        if (lastAssistant?.role === 'assistant' && lastAssistant.content.includes('⚠️')) {
+            chatService.clearHistory();
+            // Re-add all messages except the last assistant error
+            const cleaned = messages.slice(0, -1);
+            cleaned.forEach(m => {
+                (chatService as any).history = [...(chatService as any).history || [], m];
+            });
+            setMessages(cleaned);
+        }
+        handleSend(lastUserMsg.content);
+    }, [messages, handleSend]);
 
     // Handle Enter key (Shift+Enter for newline)
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -266,9 +293,9 @@ export const VicoChatBot: React.FC = () => {
             {/* ─── Chat Panel ─── */}
             {isOpen && (
                 <div
-                    className="fixed bottom-24 right-6 z-[9998] w-[400px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-8rem)]
+                    className="fixed bottom-24 right-6 z-[9998] w-[420px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-8rem)]
                         bg-white border border-[#E4E4E7]
-                        rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.15)](0,0,0,0.5)]
+                        rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.15)]
                         flex flex-col overflow-hidden
                         animate-slide-up"
                     role="dialog"
@@ -339,8 +366,8 @@ export const VicoChatBot: React.FC = () => {
                                                 ${action.color === 'blue' ? 'bg-blue-50 text-blue-500' : ''}
                                                 ${action.color === 'green' ? 'bg-green-50 text-green-500' : ''}
                                                 ${action.color === 'orange' ? 'bg-orange-50 text-orange-500' : ''}
-                                                ${action.color === 'purple' ? 'bg-purple-50 text-purple-500' : ''}
-                                            `}>
+                                                ${action.color === 'purple' ? 'bg-purple-50 text-purple-500' : ''}                                                ${action.color === 'indigo' ? 'bg-indigo-50 text-indigo-500' : ''}
+                                                ${action.color === 'emerald' ? 'bg-emerald-50 text-emerald-500' : ''}                                            `}>
                                                 <action.icon size={16} />
                                             </div>
                                             <span className="text-[11px] font-bold text-[#18181B] group-hover:text-[#18181B] transition-colors leading-tight">
@@ -392,18 +419,29 @@ export const VicoChatBot: React.FC = () => {
                                         )}
                                     </div>
 
-                                    {/* Footer: time + copy */}
+                                    {/* Footer: time + copy + retry */}
                                     <div className={`flex items-center gap-2 mt-1 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                         <span className="text-[10px] text-[#A1A1AA]">{formatTime(msg.timestamp)}</span>
                                         {msg.role === 'assistant' && (
-                                            <button
-                                                onClick={() => handleCopy(msg)}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-[#F4F4F5] rounded"
-                                                aria-label="Copy"
-                                                title="Copy"
-                                            >
-                                                {copiedId === msg.id ? <Check size={12} className="text-green-500" /> : <Copy size={12} className="text-[#A1A1AA]" />}
-                                            </button>
+                                            <>
+                                                <button
+                                                    onClick={() => handleCopy(msg)}
+                                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-[#F4F4F5] rounded"
+                                                    aria-label="Copy"
+                                                    title="Copy"
+                                                >
+                                                    {copiedId === msg.id ? <Check size={12} className="text-green-500" /> : <Copy size={12} className="text-[#A1A1AA]" />}
+                                                </button>
+                                                {msg.content.includes('⚠️') && (
+                                                    <button
+                                                        onClick={handleRetry}
+                                                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-[#FFF1F2] rounded flex items-center gap-1 text-[10px] text-[#E11D48] font-medium"
+                                                        title="Thử lại"
+                                                    >
+                                                        <RotateCcw size={11} /> Thử lại
+                                                    </button>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 </div>
@@ -419,11 +457,16 @@ export const VicoChatBot: React.FC = () => {
                                 <div className="bg-[#FAFAFA] border border-[#E4E4E7] rounded-2xl rounded-tl-md px-4 py-3">
                                     <div className="flex items-center gap-2">
                                         <div className="flex gap-1">
-                                            <span className="w-2 h-2 bg-[#A1A1AA] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                            <span className="w-2 h-2 bg-[#A1A1AA] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                            <span className="w-2 h-2 bg-[#A1A1AA] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                            <span className="w-2 h-2 bg-[#E11D48] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                            <span className="w-2 h-2 bg-[#E11D48] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                            <span className="w-2 h-2 bg-[#E11D48] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                         </div>
-                                        <span className="text-[10px] text-[#A1A1AA] font-medium ml-1">Processing...</span>
+                                        <span className="text-[10px] text-[#71717A] font-medium ml-1">
+                                            {activeTools.length > 0
+                                                ? activeTools.map(t => TOOL_LABELS[t] || t).join(' → ')
+                                                : 'Đang xử lý...'
+                                            }
+                                        </span>
                                     </div>
                                 </div>
                             </div>

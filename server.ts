@@ -1132,12 +1132,17 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
             },
         });
 
-        res.json({
-            text: response.text || '',
-            functionCalls: response.functionCalls || [],
-        });
+        // response.text THROWS when the response is a pure function-call
+        // (no text parts). Guard both accessors so we never crash.
+        let text = '';
+        let functionCalls: any[] = [];
+        try { text = response.text ?? ''; } catch { /* function-call-only response */ }
+        try { functionCalls = response.functionCalls ?? []; } catch { /* text-only response */ }
+
+        res.json({ text, functionCalls });
     } catch (error: any) {
-        const is429 = error?.status === 429 || error?.message?.includes('429');
+        const status = error?.status ?? error?.httpStatusCode;
+        const is429 = status === 429 || error?.message?.includes('429') || error?.message?.includes('RESOURCE_EXHAUSTED');
         if (is429) {
             res.status(429).json({ error: 'Rate limited', text: '⚠️ Quá nhiều yêu cầu. Vui lòng đợi vài giây.' });
             return;
