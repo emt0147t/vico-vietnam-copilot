@@ -1,9 +1,22 @@
-import { PrismaClient } from '@prisma/client';
-
 // Lazy-init Prisma to prevent crash if DB is unreachable at startup
-let _prisma: PrismaClient | null = null;
-function getPrisma(): PrismaClient {
-    if (!_prisma) _prisma = new PrismaClient();
+let PrismaClientClass: any = null;
+try {
+    const mod = await import('@prisma/client');
+    PrismaClientClass = mod.PrismaClient;
+} catch (_e) {
+    console.warn('Prisma client not available');
+}
+
+let _prisma: any = null;
+function getPrisma() {
+    if (!_prisma && PrismaClientClass && process.env['DATABASE_URL']) {
+        try {
+            _prisma = new PrismaClientClass();
+        } catch (e) {
+            console.warn('Prisma init failed:', e);
+            return null;
+        }
+    }
     return _prisma;
 }
 
@@ -16,7 +29,6 @@ import { fileURLToPath } from 'url';
 
 const __filename_esm = fileURLToPath(import.meta.url);
 const __dirname_esm = path.dirname(__filename_esm);
-import { clerkMiddleware } from '@clerk/express';
 import { initializeCompanies, getAllCompanies, searchCompanies, getCompaniesByIndustry } from './utils/companyLoader';
 import { seedVectorDatabase, loadVectorsFromCache } from './utils/vectorSeeder';
 // REMOVED: import { COMPANIES } from './data/companies'; — was only used by old fake GTM endpoint
@@ -115,9 +127,19 @@ app.use('/api/companies', cacheMiddleware(300));
 app.use('/api/vectors', cacheMiddleware(3600));
 
 // ðŸ” Clerk auth middleware
-// clerkMiddleware() parses JWT when present (sets req.auth) but does NOT block unauthenticated requests.
-// Each strategy endpoint handler checks req.auth?.userId and returns 401 JSON if missing.
-app.use(clerkMiddleware());
+
+// Clerk auth middleware (optional)
+if (process.env['CLERK_SECRET_KEY']) {
+    try {
+        const { clerkMiddleware: clerk } = await import('@clerk/express');
+        app.use(clerk());
+        console.log('Clerk auth enabled');
+    } catch (_e) {
+        console.warn('Clerk middleware failed, continuing without auth');
+    }
+} else {
+    console.warn('CLERK_SECRET_KEY not set, auth disabled');
+}
 
 // Initialize companies from CSV on startup
 let companiesLoaded = false;
@@ -1198,13 +1220,14 @@ app.get('/api/analytics/compare', async (_req: Request, res: Response): Promise<
 app.get("/api/market-pulse", async (_req, res) => {
     try {
         // 1. Láº¥y chá»‰ sá»‘ VÄ© mÃ´ (GDP, CPI, FDI)
-        const macro = await getPrisma().marketData.findMany({
+        const prisma = getPrisma(); if (!prisma) { res.status(503).json({ error: 'Database not configured' }); return; }
+        const macro = await prisma.marketData.findMany({
             where: { type: 'MACRO' },
             orderBy: { key: 'asc' }
         });
 
         // 2. Láº¥y chá»‰ sá»‘ TÃ i chÃ­nh ngÃ nh (P/E)
-        const finance = await getPrisma().marketData.findMany({
+        const finance = await prisma.marketData.findMany({
             where: { type: 'FINANCE' },
             orderBy: { value: 'desc' } // NgÃ nh nÃ o P/E cao xáº¿p trÃªn
         });
