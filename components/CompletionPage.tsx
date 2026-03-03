@@ -188,7 +188,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
         <div className="p-4 lg:p-6 h-16 lg:h-20 flex items-center justify-between border-b border-[#E4E4E7]">
             {(!isSidebarCollapsed || isMobileMenuOpen) 
               ? <Logo /> 
-              : <div className="w-10 h-10 bg-gradient-to-br from-[#E11D48] to-[#F97316] rounded-xl mx-auto flex items-center justify-center text-white font-black text-xl shadow-md">V</div>
+              : <img src="/logo.png" alt="VICO" className="w-10 h-10 rounded-xl object-cover shadow-md mx-auto" />
             }
             {/* Close button on mobile */}
             <button 

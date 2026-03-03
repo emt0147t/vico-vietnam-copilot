@@ -413,12 +413,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLoginClick 
                 {/* Mock saved-reports stack */}
                 <div className="flex items-center gap-3 bg-[#FAFAFA] rounded-2xl p-4 border border-[#E4E4E7]/60 shrink-0">
                   <div className="flex -space-x-2">
-                    {['📊', '📈', '📋', '🎯'].map((emoji, i) => (
+                    {[
+                      <ChartLineUp key={0} weight="duotone" size={18} className="text-[#E11D48]" />,
+                      <Funnel key={1} weight="duotone" size={18} className="text-[#7C3AED]" />,
+                      <Buildings key={2} weight="duotone" size={18} className="text-[#2563EB]" />,
+                      <ShieldCheck key={3} weight="duotone" size={18} className="text-[#059669]" />,
+                    ].map((icon, i) => (
                       <div
                         key={i}
-                        className="w-10 h-10 rounded-xl bg-white border border-[#E4E4E7] flex items-center justify-center text-base shadow-sm"
+                        className="w-10 h-10 rounded-xl bg-white border border-[#E4E4E7] flex items-center justify-center shadow-sm"
                       >
-                        {emoji}
+                        {icon}
                       </div>
                     ))}
                   </div>
@@ -505,9 +510,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLoginClick 
       <footer className="border-t border-[#E4E4E7] py-8 px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-gradient-to-br from-[#E11D48] to-[#F97316] rounded-lg flex items-center justify-center text-white font-extrabold text-xs">
-              V
-            </div>
+            <img src="/logo.png" alt="VICO" className="w-7 h-7 rounded-lg object-cover" />
             <span className="text-sm font-bold text-[#18181B]">VICO</span>
             <span className="text-xs text-[#A1A1AA]">&copy; 2026</span>
           </div>
