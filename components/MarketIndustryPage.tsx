@@ -15,17 +15,21 @@
  * 5. Deals & Investments (M&A, VC/PE Funding)
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     ChevronDown, ChevronUp, TrendingUp, Globe, Building2,
     Scale, Leaf, Cpu, Shield, BarChart3, PieChart, Users,
     DollarSign, Target, Zap, AlertTriangle, CheckCircle, Info,
     Download, Activity, Briefcase, Factory, ShoppingCart,
     Repeat, Gauge, BarChart2, Lightbulb, Handshake, Coins, Rocket,
-    RefreshCw, Database
+    RefreshCw, Database, X, FileText, FileJson, Highlighter,
+    StickyNote, Copy, Check, Printer, Bookmark, BookmarkCheck,
+    Eye
 } from 'lucide-react';
 import { exportMarketReport } from '../utils/exportReport';
+import { exportMarketReportHTML, exportMarketReportJSON } from '../utils/exportMarketReportHTML';
 import { sessionCacheGet, sessionCacheSet } from '../utils/sessionCache';
+import { parseSimpleMarkdown } from '../utils/parseSimpleMarkdown';
 
 interface MarketIndustryPageProps {
     userData: any;
@@ -110,16 +114,31 @@ interface MarketIntelligenceReport {
 
 // ==================== SECTION COMPONENTS ====================
 
-// Loading Skeleton
+// Loading Skeleton — Executive Crimson
 const LoadingSkeleton = () => (
-    <div className="animate-pulse space-y-6">
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
-        <div className="grid grid-cols-4 gap-4">
-            {[1,2,3,4].map(i => (
-                <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
-            ))}
+    <div className="space-y-8 animate-fade-in">
+        {/* Premium branded loader */}
+        <div className="flex flex-col items-center justify-center py-16 gap-6">
+            <div className="relative w-16 h-16">
+                <div className="absolute inset-0 rounded-full border-4 border-[#FFF1F2]" />
+                <div className="absolute inset-0 rounded-full border-4 border-t-[#E11D48] animate-spin" />
+                <div className="absolute inset-3 rounded-full bg-gradient-to-br from-[#E11D48] to-[#F97316] animate-pulse" />
+            </div>
+            <div className="text-center space-y-1.5">
+                <p className="text-sm font-semibold text-[#18181B]">Crunching real-time market data…</p>
+                <p className="text-xs text-[#A1A1AA]">Analyzing 10,000+ companies across Vietnam</p>
+            </div>
         </div>
-        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+        {/* Skeleton blocks */}
+        <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-[#E4E4E7] rounded w-1/3"></div>
+            <div className="grid grid-cols-4 gap-4">
+                {[1,2,3,4].map(i => (
+                    <div key={i} className="h-24 bg-[#E4E4E7] rounded-xl"></div>
+                ))}
+            </div>
+            <div className="h-64 bg-[#E4E4E7] rounded-xl"></div>
+        </div>
     </div>
 );
 
@@ -128,7 +147,7 @@ const MarketSizeFunnel = ({ tam, sam, som }: { tam: string; sam: string; som: st
     <div className="relative py-8">
         <div className="flex flex-col items-center gap-1">
             <div className="relative w-full max-w-md">
-                <div className="h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-3xl flex items-center justify-center shadow-lg">
+                <div className="h-16 bg-gradient-to-r from-[#E11D48] to-[#BE123C] rounded-t-3xl flex items-center justify-center shadow-lg">
                     <div className="text-center text-white">
                         <p className="text-xs font-medium opacity-80">TAM - Total Addressable Market</p>
                         <p className="text-xl font-black">{tam}</p>
@@ -136,7 +155,7 @@ const MarketSizeFunnel = ({ tam, sam, som }: { tam: string; sam: string; som: st
                 </div>
             </div>
             <div className="relative w-4/5 max-w-sm">
-                <div className="h-16 bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <div className="h-16 bg-gradient-to-r from-[#F97316] to-[#EA580C] flex items-center justify-center shadow-lg">
                     <div className="text-center text-white">
                         <p className="text-xs font-medium opacity-80">SAM - Serviceable Available Market</p>
                         <p className="text-xl font-black">{sam}</p>
@@ -166,32 +185,32 @@ const RevenueChart = ({ data, years }: { data: number[]; years: string[] }) => {
                     const isCurrent = idx === 3;
                     return (
                         <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                            <span className="text-xs font-bold text-gray-900 dark:text-white">${value.toFixed(1)}B</span>
+                            <span className="text-xs font-bold text-[#18181B]">${value.toFixed(1)}B</span>
                             <div 
                                 className={`w-full rounded-t-lg transition-all ${
                                     isCurrent ? 'bg-gradient-to-t from-blue-600 to-blue-400 shadow-lg shadow-blue-500/30' :
-                                    isHistorical ? 'bg-gray-300 dark:bg-gray-600' : 
+                                    isHistorical ? 'bg-[#D4D4D8]' : 
                                     'bg-gradient-to-t from-green-500 to-green-400'
                                 }`}
                                 style={{ height: `${(value / maxValue) * 100}%`, minHeight: '20px' }}
                             />
-                            <span className={`text-[10px] ${isCurrent ? 'font-bold text-blue-600' : 'text-gray-500'}`}>{years[idx]}</span>
+                            <span className={`text-[10px] ${isCurrent ? 'font-bold text-[#E11D48]' : 'text-[#71717A]'}`}>{years[idx]}</span>
                         </div>
                     );
                 })}
             </div>
             <div className="flex justify-center gap-6 text-xs">
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded bg-gray-300 dark:bg-gray-600"></div>
-                    <span className="text-gray-500">Historical</span>
+                    <div className="w-3 h-3 rounded bg-[#D4D4D8]"></div>
+                    <span className="text-[#71717A]">Historical</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded bg-blue-500"></div>
-                    <span className="text-gray-500">Current</span>
+                    <div className="w-3 h-3 rounded bg-[#FFF1F2]0"></div>
+                    <span className="text-[#71717A]">Current</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded bg-green-500"></div>
-                    <span className="text-gray-500">Forecast</span>
+                    <span className="text-[#71717A]">Forecast</span>
                 </div>
             </div>
         </div>
@@ -207,15 +226,15 @@ const DynamicsCard = ({ type, items, icon: Icon, color }: {
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const impactColors = {
-        High: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-        Medium: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-        Low: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+        High: 'bg-red-100 text-red-700',
+        Medium: 'bg-amber-100 text-amber-700',
+        Low: 'bg-green-100 text-green-700'
     };
     
     return (
-        <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+        <div className="bg-white border border-[#E4E4E7] rounded-2xl overflow-hidden">
             <div 
-                className="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                className="p-5 flex items-center justify-between cursor-pointer hover:bg-[#FAFAFA]"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center gap-3">
@@ -223,21 +242,21 @@ const DynamicsCard = ({ type, items, icon: Icon, color }: {
                         <Icon className="text-white" size={20} />
                     </div>
                     <div>
-                        <h4 className="font-bold text-gray-900 dark:text-white">{type}</h4>
-                        <p className="text-xs text-gray-500">{items.length} factors identified</p>
+                        <h4 className="font-bold text-[#18181B]">{type}</h4>
+                        <p className="text-xs text-[#71717A]">{items.length} factors identified</p>
                     </div>
                 </div>
-                {isExpanded ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
+                {isExpanded ? <ChevronUp size={20} className="text-[#A1A1AA]" /> : <ChevronDown size={20} className="text-[#A1A1AA]" />}
             </div>
             
             {isExpanded && (
-                <div className="px-5 pb-5 space-y-3 border-t border-gray-100 dark:border-gray-800 pt-4">
+                <div className="px-5 pb-5 space-y-3 border-t border-[#E4E4E7] pt-4">
                     {items.map((item, idx) => (
-                        <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                        <div key={idx} className="p-4 bg-[#FAFAFA] rounded-xl">
                             <div className="flex items-start justify-between gap-3">
                                 <div className="flex-1">
-                                    <h5 className="font-semibold text-gray-900 dark:text-white text-sm">{item.title}</h5>
-                                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                                    <h5 className="font-semibold text-[#18181B] text-sm">{item.title}</h5>
+                                    <p className="text-xs text-[#71717A] mt-1">{item.description}</p>
                                 </div>
                                 <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${impactColors[item.impact]}`}>
                                     {item.impact}
@@ -263,7 +282,7 @@ const PortersFiveForces = ({ forces }: { forces: MarketIntelligenceReport['porte
     return (
         <div className="relative">
             <div className="flex justify-center mb-8">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-xl">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#FFF1F2]0 to-purple-600 flex items-center justify-center shadow-xl">
                     <div className="text-center text-white">
                         <Activity size={28} className="mx-auto mb-1" />
                         <p className="text-xs font-bold">Rivalry<br/>{forces.rivalry.score}/5</p>
@@ -274,23 +293,23 @@ const PortersFiveForces = ({ forces }: { forces: MarketIntelligenceReport['porte
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {forcesList.map((force, idx) => {
                     const scoreColor = force.score >= 4 ? 'text-red-600' : force.score >= 3 ? 'text-amber-600' : 'text-green-600';
-                    const bgColor = force.score >= 4 ? 'bg-red-50 dark:bg-red-900/20' : force.score >= 3 ? 'bg-amber-50 dark:bg-amber-900/20' : 'bg-green-50 dark:bg-green-900/20';
+                    const bgColor = force.score >= 4 ? 'bg-red-50' : force.score >= 3 ? 'bg-amber-50' : 'bg-green-50';
                     return (
-                        <div key={idx} className={`p-4 rounded-xl ${bgColor} border border-gray-100 dark:border-gray-800`}>
+                        <div key={idx} className={`p-4 rounded-xl ${bgColor} border border-[#E4E4E7]`}>
                             <div className="flex items-center gap-2 mb-2">
                                 <force.icon size={18} className={scoreColor} />
-                                <h5 className="font-bold text-gray-900 dark:text-white text-sm">{force.name}</h5>
+                                <h5 className="font-bold text-[#18181B] text-sm">{force.name}</h5>
                             </div>
                             <div className="flex items-center gap-2 mb-2">
                                 {[1,2,3,4,5].map(i => (
                                     <div 
                                         key={i} 
-                                        className={`w-4 h-2 rounded-full ${i <= force.score ? (force.score >= 4 ? 'bg-red-500' : force.score >= 3 ? 'bg-amber-500' : 'bg-green-500') : 'bg-gray-200 dark:bg-gray-700'}`}
+                                        className={`w-4 h-2 rounded-full ${i <= force.score ? (force.score >= 4 ? 'bg-red-500' : force.score >= 3 ? 'bg-amber-500' : 'bg-green-500') : 'bg-[#E4E4E7]'}`}
                                     />
                                 ))}
                                 <span className={`text-sm font-bold ${scoreColor}`}>{force.score}/5</span>
                             </div>
-                            <p className="text-[11px] text-gray-500">{force.description}</p>
+                            <p className="text-[11px] text-[#71717A]">{force.description}</p>
                         </div>
                     );
                 })}
@@ -303,32 +322,32 @@ const PortersFiveForces = ({ forces }: { forces: MarketIntelligenceReport['porte
 const CompetitorMatrix = ({ companies }: { companies: MarketIntelligenceReport['competitiveLandscape']['marketShare'] }) => {
     const typeColors = {
         Leader: 'bg-green-500',
-        Challenger: 'bg-blue-500', 
+        Challenger: 'bg-[#FFF1F2]0', 
         Follower: 'bg-amber-500',
-        Niche: 'bg-purple-500'
+        Niche: 'bg-[#FFF1F2]0'
     };
     
     return (
-        <div className="relative h-80 bg-gray-50 dark:bg-gray-800/30 rounded-2xl p-6">
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-medium text-gray-400 whitespace-nowrap">
+        <div className="relative h-80 bg-[#FAFAFA] rounded-2xl p-6">
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-medium text-[#A1A1AA] whitespace-nowrap">
                 Market Growth Rate →
             </div>
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs font-medium text-gray-400">
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs font-medium text-[#A1A1AA]">
                 Relative Market Share →
             </div>
             
             <div className="absolute inset-8 grid grid-cols-2 grid-rows-2 gap-1">
-                <div className="bg-green-100/50 dark:bg-green-900/20 rounded-tl-xl flex items-center justify-center">
+                <div className="bg-green-100/50 rounded-tl-xl flex items-center justify-center">
                     <span className="text-xs text-green-600 font-medium">Stars</span>
                 </div>
-                <div className="bg-amber-100/50 dark:bg-amber-900/20 rounded-tr-xl flex items-center justify-center">
+                <div className="bg-amber-100/50 rounded-tr-xl flex items-center justify-center">
                     <span className="text-xs text-amber-600 font-medium">Question Marks</span>
                 </div>
-                <div className="bg-blue-100/50 dark:bg-blue-900/20 rounded-bl-xl flex items-center justify-center">
-                    <span className="text-xs text-blue-600 font-medium">Cash Cows</span>
+                <div className="bg-[#FFF1F2]/50 rounded-bl-xl flex items-center justify-center">
+                    <span className="text-xs text-[#E11D48] font-medium">Cash Cows</span>
                 </div>
-                <div className="bg-gray-200/50 dark:bg-gray-700/30 rounded-br-xl flex items-center justify-center">
-                    <span className="text-xs text-gray-500 font-medium">Dogs</span>
+                <div className="bg-[#E4E4E7]/50 rounded-br-xl flex items-center justify-center">
+                    <span className="text-xs text-[#71717A] font-medium">Dogs</span>
                 </div>
             </div>
             
@@ -353,26 +372,26 @@ const CompetitorMatrix = ({ companies }: { companies: MarketIntelligenceReport['
 // Deal Card Component
 const DealCard: React.FC<{ deal: { type: string; title: string; parties: string; value: string; date: string; description: string } }> = ({ deal }) => {
     const typeColors: Record<string, string> = {
-        'M&A': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-        'Series A': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-        'Series B': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-        'Series C': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-        'IPO': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-        'PE': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+        'M&A': 'bg-[#FFF1F2] text-[#E11D48]',
+        'Series A': 'bg-green-100 text-green-700',
+        'Series B': 'bg-[#FFF1F2] text-[#E11D48]',
+        'Series C': 'bg-[#FFF1F2] text-[#BE123C]',
+        'IPO': 'bg-amber-100 text-amber-700',
+        'PE': 'bg-red-100 text-red-700'
     };
     
     return (
-        <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:shadow-lg transition-all">
+        <div className="p-4 bg-[#FAFAFA] rounded-xl hover:shadow-lg transition-all">
             <div className="flex items-start justify-between gap-3 mb-3">
-                <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${typeColors[deal.type] || 'bg-gray-100 text-gray-700'}`}>
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${typeColors[deal.type] || 'bg-[#F4F4F5] text-[#18181B]'}`}>
                     {deal.type}
                 </span>
-                <span className="text-xs text-gray-500">{deal.date}</span>
+                <span className="text-xs text-[#71717A]">{deal.date}</span>
             </div>
-            <h5 className="font-bold text-gray-900 dark:text-white text-sm mb-1">{deal.title}</h5>
-            <p className="text-xs text-gray-500 mb-2">{deal.parties}</p>
+            <h5 className="font-bold text-[#18181B] text-sm mb-1">{deal.title}</h5>
+            <p className="text-xs text-[#71717A] mb-2">{deal.parties}</p>
             <span className="text-lg font-black text-green-600">{deal.value}</span>
-            <p className="text-[11px] text-gray-400 mt-2">{deal.description}</p>
+            <p className="text-[11px] text-[#A1A1AA] mt-2">{deal.description}</p>
         </div>
     );
 };
@@ -389,7 +408,7 @@ const ConcentrationGauge = ({ level, hhi }: { level: string; hhi: number }) => {
         <div className="text-center">
             <div className="relative inline-flex items-center justify-center w-32 h-32">
                 <svg className="w-32 h-32 transform -rotate-90">
-                    <circle cx="64" cy="64" r="56" fill="none" stroke="currentColor" strokeWidth="12" className="text-gray-200 dark:text-gray-700" />
+                    <circle cx="64" cy="64" r="56" fill="none" stroke="currentColor" strokeWidth="12" className="text-[#A1A1AA]" />
                     <circle 
                         cx="64" cy="64" r="56" fill="none" stroke="currentColor" strokeWidth="12" 
                         className={getColor()}
@@ -399,23 +418,23 @@ const ConcentrationGauge = ({ level, hhi }: { level: string; hhi: number }) => {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className={`text-2xl font-black ${getColor()}`}>{hhi}</span>
-                    <span className="text-[10px] text-gray-500">HHI Index</span>
+                    <span className="text-[10px] text-[#71717A]">HHI Index</span>
                 </div>
             </div>
             <p className={`mt-3 font-bold ${getColor()}`}>{level}</p>
-            <p className="text-xs text-gray-500">Market Concentration</p>
+            <p className="text-xs text-[#71717A]">Market Concentration</p>
         </div>
     );
 };
 
 // PESTLE data (static for now, could be dynamic based on industry)
-const getPESTLEData = (industry: string) => [
-    { letter: 'P', title: 'Political', icon: Scale, color: 'bg-blue-600', score: 4, impact: 'Positive' as const, details: ['Chính phủ hỗ trợ chuyển đổi số', 'Chính sách ưu đãi thuế cho công nghệ cao', 'Môi trường chính trị ổn định', 'FTA: RCEP, CPTPP'] },
-    { letter: 'E', title: 'Economic', icon: DollarSign, color: 'bg-green-600', score: 4, impact: 'Positive' as const, details: ['GDP tăng 6.5%', 'Tầng lớp trung lưu 45 triệu', 'FDI tăng 32% YoY', 'Lạm phát kiểm soát 3.5%'] },
-    { letter: 'S', title: 'Social', icon: Users, color: 'bg-purple-600', score: 5, impact: 'Positive' as const, details: ['70% dân số dưới 35 tuổi', 'Internet 78%, Smartphone 85%', 'Social commerce tăng 65%', 'E-learning tăng 150%'] },
-    { letter: 'T', title: 'Technological', icon: Cpu, color: 'bg-orange-600', score: 4, impact: 'Positive' as const, details: ['5G phủ 63 tỉnh thành', '3,800+ tech startups', 'AI adoption 45%', 'Cloud migration 78%'] },
-    { letter: 'L', title: 'Legal', icon: Shield, color: 'bg-red-600', score: 3, impact: 'Neutral' as const, details: ['Luật An ninh mạng 2018', 'PDPD có hiệu lực 2024', 'Fintech sandbox', 'IP protection cần cải thiện'] },
-    { letter: 'E', title: 'Environmental', icon: Leaf, color: 'bg-emerald-600', score: 3, impact: 'Neutral' as const, details: ['Net Zero 2050', 'Green financing $15B', 'ESG requirements tăng', 'Renewable 30% by 2030'] }
+const getPESTLEData = (_industry: string) => [
+    { letter: 'P', title: 'Political', icon: Scale, color: 'bg-rose-600', score: 4, impact: 'Positive' as const, details: ['Government supports digital transformation', 'Tax incentives for high-tech industries', 'Stable political environment', 'FTA: RCEP, CPTPP'] },
+    { letter: 'E', title: 'Economic', icon: DollarSign, color: 'bg-green-600', score: 4, impact: 'Positive' as const, details: ['GDP growth 6.5%', 'Middle class of 45 million', 'FDI up 32% YoY', 'Inflation controlled at 3.5%'] },
+    { letter: 'S', title: 'Social', icon: Users, color: 'bg-orange-600', score: 5, impact: 'Positive' as const, details: ['70% population under 35', 'Internet 78%, Smartphone 85%', 'Social commerce up 65%', 'E-learning up 150%'] },
+    { letter: 'T', title: 'Technological', icon: Cpu, color: 'bg-orange-600', score: 4, impact: 'Positive' as const, details: ['5G coverage across 63 provinces', '3,800+ tech startups', 'AI adoption 45%', 'Cloud migration 78%'] },
+    { letter: 'L', title: 'Legal', icon: Shield, color: 'bg-red-600', score: 3, impact: 'Neutral' as const, details: ['Cybersecurity Law 2018', 'PDPD effective 2024', 'Fintech sandbox', 'IP protection needs improvement'] },
+    { letter: 'E', title: 'Environmental', icon: Leaf, color: 'bg-emerald-600', score: 3, impact: 'Neutral' as const, details: ['Net Zero 2050', 'Green financing $15B', 'ESG requirements rising', 'Renewable 30% by 2030'] }
 ];
 
 // PESTLE Item Component
@@ -425,43 +444,281 @@ const PESTLEItem: React.FC<{
 }> = ({ letter, title, icon: Icon, color, score, impact, details }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const impactColors = {
-        Positive: 'text-green-600 bg-green-100 dark:bg-green-900/30',
-        Negative: 'text-red-600 bg-red-100 dark:bg-red-900/30',
-        Neutral: 'text-amber-600 bg-amber-100 dark:bg-amber-900/30'
+        Positive: 'text-green-600 bg-green-100',
+        Negative: 'text-red-600 bg-red-100',
+        Neutral: 'text-amber-600 bg-amber-100'
     };
     
     return (
-        <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
-            <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50" onClick={() => setIsExpanded(!isExpanded)}>
+        <div className="bg-white border border-[#E4E4E7] rounded-2xl overflow-hidden">
+            <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-[#FAFAFA]" onClick={() => setIsExpanded(!isExpanded)}>
                 <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center`}>
                         <Icon size={24} className="text-white" />
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <span className="text-lg font-black text-gray-400">{letter}</span>
-                            <h4 className="font-bold text-gray-900 dark:text-white">{title}</h4>
+                            <span className="text-lg font-black text-[#A1A1AA]">{letter}</span>
+                            <h4 className="font-bold text-[#18181B]">{title}</h4>
                         </div>
                         <div className="flex items-center gap-3 mt-1">
                             <div className="flex items-center gap-1">
                                 {[1,2,3,4,5].map(i => (
-                                    <div key={i} className={`w-2 h-2 rounded-full ${i <= score ? color : 'bg-gray-200 dark:bg-gray-700'}`} />
+                                    <div key={i} className={`w-2 h-2 rounded-full ${i <= score ? color : 'bg-[#E4E4E7]'}`} />
                                 ))}
                             </div>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${impactColors[impact]}`}>{impact}</span>
                         </div>
                     </div>
                 </div>
-                {isExpanded ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
+                {isExpanded ? <ChevronUp size={20} className="text-[#A1A1AA]" /> : <ChevronDown size={20} className="text-[#A1A1AA]" />}
             </div>
             {isExpanded && (
-                <div className="px-5 pb-5 space-y-3 border-t border-gray-100 dark:border-gray-800 pt-4">
+                <div className="px-5 pb-5 space-y-3 border-t border-[#E4E4E7] pt-4">
                     {details.map((detail, idx) => (
-                        <div key={idx} className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div key={idx} className="flex items-start gap-3 text-sm text-[#71717A]">
                             <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
                             <span>{detail}</span>
                         </div>
                     ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+// ==================== EXPORT MODAL ====================
+
+const ExportModal: React.FC<{
+    report: MarketIntelligenceReport;
+    companyName?: string;
+    onClose: () => void;
+}> = ({ report, companyName, onClose }) => {
+    const [exporting, setExporting] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
+    }, [onClose]);
+
+    const handleExport = async (type: 'html' | 'txt' | 'json') => {
+        setExporting(type);
+        setSuccess(null);
+        // Small delay for UX
+        await new Promise(r => setTimeout(r, 400));
+        try {
+            if (type === 'html') exportMarketReportHTML(report, companyName);
+            else if (type === 'json') exportMarketReportJSON(report);
+            else exportMarketReport(report);
+            setSuccess(type);
+        } catch (e) {
+            console.error('Export failed:', e);
+        } finally {
+            setExporting(null);
+        }
+    };
+
+    const formats = [
+        {
+            key: 'html' as const,
+            title: 'Premium HTML Report',
+            desc: 'Báo cáo đẹp, có thương hiệu VICO — mở bằng trình duyệt hoặc in PDF',
+            icon: FileText,
+            color: 'bg-gradient-to-br from-[#E11D48] to-[#BE123C]',
+            recommended: true,
+        },
+        {
+            key: 'txt' as const,
+            title: 'Plain Text Report',
+            desc: 'Định dạng văn bản thuần — dễ copy/paste vào email hoặc tài liệu',
+            icon: FileText,
+            color: 'bg-gradient-to-br from-[#3F3F46] to-[#18181B]',
+            recommended: false,
+        },
+        {
+            key: 'json' as const,
+            title: 'JSON (Machine-Readable)',
+            desc: 'Dữ liệu thô — dùng cho tích hợp hệ thống hoặc phân tích nâng cao',
+            icon: FileJson,
+            color: 'bg-gradient-to-br from-[#7C3AED] to-[#6D28D9]',
+            recommended: false,
+        },
+    ];
+
+    return (
+        <>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={onClose} />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-[#E4E4E7] dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] dark:bg-[#E11D48]/10 flex items-center justify-center">
+                                <Download size={20} className="text-[#E11D48]" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-[#18181B] dark:text-white">Export Report</h3>
+                                <p className="text-xs text-[#A1A1AA]">Chọn định dạng xuất báo cáo</p>
+                            </div>
+                        </div>
+                        <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA] hover:text-[#18181B] transition-colors">
+                            <X size={18} />
+                        </button>
+                    </div>
+
+                    {/* Format Options */}
+                    <div className="p-6 space-y-3">
+                        {formats.map(fmt => {
+                            const Icon = fmt.icon;
+                            const isExporting = exporting === fmt.key;
+                            const isDone = success === fmt.key;
+                            return (
+                                <button
+                                    key={fmt.key}
+                                    onClick={() => handleExport(fmt.key)}
+                                    disabled={!!exporting}
+                                    className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left group ${
+                                        isDone
+                                            ? 'border-green-300 bg-green-50 dark:bg-green-500/10 dark:border-green-500/30'
+                                            : 'border-[#E4E4E7] dark:border-gray-700 hover:border-[#E11D48]/30 hover:bg-[#FFF1F2]/50 dark:hover:bg-[#E11D48]/5'
+                                    } disabled:opacity-50`}
+                                >
+                                    <div className={`w-12 h-12 rounded-xl ${fmt.color} flex items-center justify-center shrink-0`}>
+                                        {isExporting ? (
+                                            <RefreshCw size={20} className="text-white animate-spin" />
+                                        ) : isDone ? (
+                                            <Check size={20} className="text-white" />
+                                        ) : (
+                                            <Icon size={20} className="text-white" />
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-sm text-[#18181B] dark:text-white">{fmt.title}</span>
+                                            {fmt.recommended && (
+                                                <span className="px-2 py-0.5 rounded-full bg-[#FFF1F2] dark:bg-[#E11D48]/10 text-[#E11D48] text-[9px] font-bold">Khuyên dùng</span>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-[#71717A] dark:text-zinc-400 mt-0.5">{fmt.desc}</p>
+                                    </div>
+                                    {isDone && (
+                                        <Check size={16} className="text-green-600 shrink-0" />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="px-6 py-3 bg-[#FAFAFA] dark:bg-gray-800/50 border-t border-[#E4E4E7] dark:border-gray-700 flex items-center justify-between">
+                        <span className="text-[10px] text-[#A1A1AA]">VICO Intelligence · {report.industry} · {report.market}</span>
+                        <button onClick={onClose} className="text-xs font-semibold text-[#71717A] hover:text-[#18181B] dark:hover:text-white transition-colors">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+// ==================== COPY METRIC BUTTON ====================
+
+const CopyMetricBtn: React.FC<{ value: string; label?: string }> = ({ value, label }) => {
+    const [copied, setCopied] = useState(false);
+    const handleCopy = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            await navigator.clipboard.writeText(`${label ? label + ': ' : ''}${value}`);
+        } catch {
+            const ta = document.createElement('textarea');
+            ta.value = `${label ? label + ': ' : ''}${value}`;
+            document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+    };
+    return (
+        <button
+            onClick={handleCopy}
+            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA] hover:text-[#E11D48] transition-all ml-1"
+            title="Sao chép"
+        >
+            {copied ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+        </button>
+    );
+};
+
+// ==================== SECTION NOTE COMPONENT ====================
+
+const SectionNote: React.FC<{ sectionId: string }> = ({ sectionId }) => {
+    const storageKey = `vico_market_note_${sectionId}`;
+    const [isOpen, setIsOpen] = useState(false);
+    const [note, setNote] = useState(() => {
+        try { return localStorage.getItem(storageKey) || ''; } catch { return ''; }
+    });
+    const [saved, setSaved] = useState(false);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (isOpen && textareaRef.current) textareaRef.current.focus();
+    }, [isOpen]);
+
+    const handleSave = () => {
+        try { localStorage.setItem(storageKey, note); } catch {}
+        setSaved(true);
+        setTimeout(() => setSaved(false), 1500);
+    };
+
+    const handleClear = () => {
+        setNote('');
+        try { localStorage.removeItem(storageKey); } catch {}
+    };
+
+    return (
+        <div className="inline-flex items-center">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`p-1.5 rounded-lg transition-colors ${
+                    note
+                        ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500'
+                        : 'hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA] hover:text-[#71717A]'
+                }`}
+                title={note ? 'Xem ghi chú' : 'Thêm ghi chú'}
+            >
+                <StickyNote size={14} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute z-40 mt-1 right-0 top-full w-72 bg-white dark:bg-gray-900 rounded-xl border border-[#E4E4E7] dark:border-gray-700 shadow-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#18181B] dark:text-white flex items-center gap-1.5">
+                            <StickyNote size={12} className="text-amber-500" /> Ghi chú cá nhân
+                        </span>
+                        <button onClick={() => setIsOpen(false)} className="p-1 rounded hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA]">
+                            <X size={12} />
+                        </button>
+                    </div>
+                    <textarea
+                        ref={textareaRef}
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Ghi chú riêng cho phần này..."
+                        className="w-full h-20 text-xs text-[#18181B] dark:text-white bg-[#FAFAFA] dark:bg-gray-800 rounded-lg border border-[#E4E4E7] dark:border-gray-700 p-2.5 resize-none focus:outline-none focus:ring-1 focus:ring-[#E11D48]/30 placeholder:text-[#A1A1AA]"
+                    />
+                    <div className="flex items-center justify-between">
+                        <button onClick={handleClear} className="text-[10px] text-[#A1A1AA] hover:text-[#991B1B] transition-colors">
+                            Xóa
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#E11D48] text-white text-[10px] font-semibold hover:bg-[#BE123C] transition-colors"
+                        >
+                            {saved ? <><Check size={10} /> Đã lưu</> : 'Lưu ghi chú'}
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
@@ -475,6 +732,31 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
     const [report, setReport] = useState<MarketIntelligenceReport | null>(() => sessionCacheGet<MarketIntelligenceReport>('market_report'));
     const [isLoading, setIsLoading] = useState(!sessionCacheGet('market_report'));
     const [error, setError] = useState<string | null>(null);
+    const [isPageReady, setIsPageReady] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [highlightMode, setHighlightMode] = useState(false);
+    const [bookmarkedSections, setBookmarkedSections] = useState<Set<string>>(() => {
+        try {
+            const saved = localStorage.getItem('vico_market_bookmarks');
+            return saved ? new Set(JSON.parse(saved)) : new Set<string>();
+        } catch { return new Set<string>(); }
+    });
+
+    const toggleBookmarkSection = useCallback((sectionId: string) => {
+        setBookmarkedSections(prev => {
+            const next = new Set(prev);
+            if (next.has(sectionId)) next.delete(sectionId);
+            else next.add(sectionId);
+            try { localStorage.setItem('vico_market_bookmarks', JSON.stringify([...next])); } catch {}
+            return next;
+        });
+    }, []);
+    
+    // Artificial minimum load time — "crunching data" feel
+    useEffect(() => {
+        const t = setTimeout(() => setIsPageReady(true), 1800);
+        return () => clearTimeout(t);
+    }, []);
     
     // Fetch market intelligence from backend (with 30s timeout)
     const fetchMarketIntelligence = useCallback(async () => {
@@ -503,7 +785,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             });
             
             if (!response.ok) {
-                throw new Error(`Lỗi API: ${response.status}`);
+                throw new Error(`API Error: ${response.status}`);
             }
             
             const data = await response.json();
@@ -512,9 +794,9 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
         } catch (err) {
             console.error('Market Intelligence fetch error:', err);
             if (err instanceof DOMException && err.name === 'AbortError') {
-                setError('Quá thời gian chờ (30s). Server có thể đang quá tải.');
+                setError('Request timed out (30s). The server may be overloaded.');
             } else {
-                setError(err instanceof Error ? err.message : 'Không thể tải dữ liệu thị trường');
+                setError(err instanceof Error ? err.message : 'Unable to load market data');
             }
         } finally {
             clearTimeout(timeoutId);
@@ -542,10 +824,10 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             {/* Header with Actions */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                    <h1 className="text-3xl font-black text-[#18181B] dark:text-white uppercase tracking-tight">
                         Market & Industry
                     </h1>
-                    <p className="text-gray-500 text-sm mt-1">
+                    <p className="text-[#71717A] dark:text-zinc-400 text-sm mt-1">
                         Dynamic analysis for {report?.industry || industry} in {market}
                         {report && (
                             <span className="ml-2 text-green-600">
@@ -555,30 +837,57 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     </p>
                 </div>
                 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                    {/* Highlight mode toggle */}
+                    <button
+                        onClick={() => setHighlightMode(!highlightMode)}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                            highlightMode
+                                ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 shadow-sm'
+                                : 'bg-[#F4F4F5] dark:bg-gray-800 text-[#71717A] dark:text-zinc-400 hover:bg-[#E4E4E7] dark:hover:bg-gray-700 border border-transparent'
+                        }`}
+                        title={highlightMode ? 'Tắt highlight' : 'Bật highlight số liệu quan trọng'}
+                    >
+                        <Highlighter size={14} />
+                        {highlightMode ? 'Highlight ON' : 'Highlight'}
+                    </button>
+
+                    {/* Print button */}
+                    <button
+                        onClick={() => window.print()}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-[#F4F4F5] dark:bg-gray-800 rounded-xl text-xs font-semibold text-[#71717A] dark:text-zinc-400 hover:bg-[#E4E4E7] dark:hover:bg-gray-700 transition-colors"
+                        title="In trang"
+                    >
+                        <Printer size={14} />
+                        In
+                    </button>
+
+                    {/* Refresh */}
                     <button 
                         onClick={fetchMarketIntelligence}
                         disabled={isLoading}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] hover:bg-[#BE123C] text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
                     >
                         <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-                        Refresh Data
+                        Refresh
                     </button>
+
+                    {/* Export — opens modal */}
                     <button
-                        onClick={() => report && exportMarketReport(report)}
+                        onClick={() => setShowExportModal(true)}
                         disabled={!report}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#E11D48] to-[#BE123C] hover:from-[#BE123C] hover:to-[#991B1B] text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
                     >
                         <Download size={16} />
-                        Xuất báo cáo
+                        Export Report
                     </button>
                 </div>
             </div>
             
             {/* Data Source Badge */}
             {report && (
-                <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl">
-                    <Database size={14} className="text-blue-500" />
+                <div className="flex items-center gap-2 text-xs text-[#71717A] bg-[#FAFAFA] p-3 rounded-xl">
+                    <Database size={14} className="text-[#E11D48]" />
                     <span>
                         Data from <strong>{report.sources.competitorsAnalyzed}</strong> selected competitors and <strong>{report.sources.industryPeersFound.toLocaleString()}</strong> industry peers • 
                         Similarity threshold: {(report.sources.similarityThreshold * 100).toFixed(0)}% • 
@@ -589,89 +898,120 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             
             {/* Section Navigation */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-                <span className="text-sm text-gray-500 mr-2 flex-shrink-0">≡ Table of Contents</span>
+                <span className="text-sm text-[#71717A] dark:text-zinc-400 mr-2 flex-shrink-0">≡ Table of Contents</span>
                 {sections.map(section => (
                     <button
                         key={section.id}
                         onClick={() => setActiveSection(section.id)}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
+                        className={`relative px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
                             activeSection === section.id 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                ? 'bg-[#E11D48] text-white' 
+                                : 'bg-[#F4F4F5] dark:bg-gray-800 text-[#71717A] dark:text-zinc-400 hover:bg-[#E4E4E7] dark:hover:bg-gray-700'
                         }`}
                     >
+                        {bookmarkedSections.has(section.id) && (
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full border border-white dark:border-gray-900" />
+                        )}
                         {section.label}
                     </button>
                 ))}
             </div>
             
             {/* Loading State */}
-            {isLoading && <LoadingSkeleton />}
+            {(!isPageReady || isLoading) && <LoadingSkeleton />}
             
             {/* Error State */}
-            {error && !isLoading && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+            {isPageReady && error && !isLoading && (
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
                     <AlertTriangle className="mx-auto text-red-500 mb-4" size={40} />
-                    <h3 className="text-red-700 dark:text-red-400 font-bold text-lg mb-2">Không thể tải dữ liệu</h3>
-                    <p className="text-red-600 dark:text-red-300 text-sm mb-1">{error}</p>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs mb-5">Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.</p>
+                    <h3 className="text-red-700 font-bold text-lg mb-2">Unable to Load Data</h3>
+                    <p className="text-red-600 text-sm mb-1">{error}</p>
+                    <p className="text-[#71717A] text-xs mb-5">Please check your network connection or try again later.</p>
                     <button 
                         onClick={fetchMarketIntelligence}
                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 transition-colors"
                     >
                         <RefreshCw size={16} />
-                        Thử lại
+                        Retry
                     </button>
                 </div>
             )}
             
             {/* Content Sections - Only show when data is loaded */}
-            {!isLoading && !error && report && (
+            {isPageReady && !isLoading && !error && report && (
                 <>
                     {/* EXECUTIVE SUMMARY */}
                     {activeSection === 'overview' && (
                         <div className="space-y-6">
-                            <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-lg">Market & Industry: Executive Summary</h3>
+                            <div className="bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-1 h-8 bg-[#E11D48] rounded-full"></div>
+                                        <h3 className="font-bold text-[#18181B] dark:text-white text-lg">Market & Industry: Executive Summary</h3>
+                                    </div>
+                                    <div className="flex items-center gap-1 relative">
+                                        <button
+                                            onClick={() => toggleBookmarkSection('overview')}
+                                            className={`p-1.5 rounded-lg transition-colors ${
+                                                bookmarkedSections.has('overview')
+                                                    ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500'
+                                                    : 'hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA]'
+                                            }`}
+                                            title={bookmarkedSections.has('overview') ? 'Bỏ bookmark' : 'Bookmark phần này'}
+                                        >
+                                            {bookmarkedSections.has('overview') ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
+                                        </button>
+                                        <SectionNote sectionId="overview" />
+                                    </div>
                                 </div>
                                 
-                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                                    {report.executiveSummary.overview}
+                                <p className="text-[#71717A] dark:text-zinc-300 leading-relaxed mb-6">
+                                    {parseSimpleMarkdown(report.executiveSummary.overview)}
                                 </p>
                                 
-                                {/* Key Metrics */}
+                                {/* Key Metrics — with highlight mode & copy buttons */}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                                    <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl">
-                                        <p className="text-xs text-blue-600 font-medium mb-1">Market Size (2024)</p>
-                                        <p className="text-2xl font-black text-gray-900 dark:text-white">{report.marketSize.sam}</p>
+                                    <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-[#FFF1F2] ring-2 ring-[#E11D48]/30 shadow-md scale-[1.02]' : 'bg-gradient-to-br from-[#FFF1F2] to-[#FFF1F2]'}`}>
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-xs text-[#E11D48] font-medium mb-1">Market Size (2024)</p>
+                                            <CopyMetricBtn value={report.marketSize.sam} label="Market Size" />
+                                        </div>
+                                        <p className={`text-2xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.marketSize.sam}</p>
                                     </div>
-                                    <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl">
-                                        <p className="text-xs text-green-600 font-medium mb-1">CAGR</p>
-                                        <p className="text-2xl font-black text-gray-900 dark:text-white">{report.marketSize.cagr}%</p>
+                                    <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-green-50 ring-2 ring-green-500/30 shadow-md scale-[1.02]' : 'bg-gradient-to-br from-green-50 to-green-100'}`}>
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-xs text-green-600 font-medium mb-1">CAGR</p>
+                                            <CopyMetricBtn value={`${report.marketSize.cagr}%`} label="CAGR" />
+                                        </div>
+                                        <p className={`text-2xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.marketSize.cagr}%</p>
                                     </div>
-                                    <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl">
-                                        <p className="text-xs text-purple-600 font-medium mb-1">Total Funding (2024)</p>
-                                        <p className="text-2xl font-black text-gray-900 dark:text-white">{report.funding.totalValue}</p>
+                                    <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-purple-50 ring-2 ring-purple-500/30 shadow-md scale-[1.02]' : 'bg-gradient-to-br from-purple-50 to-[#FFF1F2]'}`}>
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-xs text-[#E11D48] font-medium mb-1">Total Funding (2024)</p>
+                                            <CopyMetricBtn value={report.funding.totalValue} label="Total Funding" />
+                                        </div>
+                                        <p className={`text-2xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.funding.totalValue}</p>
                                     </div>
-                                    <div className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-xl">
-                                        <p className="text-xs text-amber-600 font-medium mb-1">Industry Players</p>
-                                        <p className="text-2xl font-black text-gray-900 dark:text-white">{report.companyCount.toLocaleString()}</p>
+                                    <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-amber-50 ring-2 ring-amber-500/30 shadow-md scale-[1.02]' : 'bg-gradient-to-br from-amber-50 to-amber-100'}`}>
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-xs text-amber-600 font-medium mb-1">Industry Players</p>
+                                            <CopyMetricBtn value={report.companyCount.toLocaleString()} label="Industry Players" />
+                                        </div>
+                                        <p className={`text-2xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.companyCount.toLocaleString()}</p>
                                     </div>
                                 </div>
                                 
                                 {/* Key Insights */}
                                 <div className="mb-6">
-                                    <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-3 flex items-center gap-2">
+                                    <h4 className="font-bold text-[#18181B] text-sm mb-3 flex items-center gap-2">
                                         <Lightbulb size={16} className="text-amber-500" />
                                         Key Insights (Based on Your Data)
                                     </h4>
                                     <div className="space-y-2">
                                         {report.executiveSummary.keyInsights.map((insight, idx) => (
-                                            <div key={idx} className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-300">
+                                            <div key={idx} className="flex items-start gap-3 text-sm text-[#71717A]">
                                                 <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
-                                                <span>{insight}</span>
+                                                <span>{parseSimpleMarkdown(insight)}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -679,17 +1019,17 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                 
                                 {/* Recommendations */}
                                 <div>
-                                    <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-3 flex items-center gap-2">
-                                        <Target size={16} className="text-blue-500" />
+                                    <h4 className="font-bold text-[#18181B] text-sm mb-3 flex items-center gap-2">
+                                        <Target size={16} className="text-[#E11D48]" />
                                         Strategic Recommendations for {userData?.orgName || 'Your Company'}
                                     </h4>
                                     <div className="space-y-3">
                                         {report.executiveSummary.recommendations.map((rec, idx) => (
-                                            <div key={idx} className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                                                <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                            <div key={idx} className="flex gap-4 p-4 bg-[#FAFAFA] rounded-xl">
+                                                <div className="w-6 h-6 rounded-full bg-[#FFF1F2] text-[#E11D48] flex items-center justify-center text-xs font-bold flex-shrink-0">
                                                     {idx + 1}
                                                 </div>
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">{rec}</p>
+                                                <p className="text-sm text-[#71717A]">{parseSimpleMarkdown(rec)}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -701,14 +1041,29 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     {/* MARKET SIZE */}
                     {activeSection === 'market-size' && (
                         <div className="space-y-6">
-                            <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                                        <Target className="text-blue-600" size={20} />
+                            <div className="bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] dark:bg-[#E11D48]/10 flex items-center justify-center">
+                                            <Target className="text-[#E11D48]" size={20} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-[#18181B] dark:text-white">TAM / SAM / SOM Analysis</h3>
+                                            <p className="text-xs text-[#71717A] dark:text-zinc-400">{report.marketSize.methodology}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-gray-900 dark:text-white">TAM / SAM / SOM Analysis</h3>
-                                        <p className="text-xs text-gray-500">{report.marketSize.methodology}</p>
+                                    <div className="flex items-center gap-1 relative">
+                                        <button
+                                            onClick={() => toggleBookmarkSection('market-size')}
+                                            className={`p-1.5 rounded-lg transition-colors ${
+                                                bookmarkedSections.has('market-size')
+                                                    ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500'
+                                                    : 'hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA]'
+                                            }`}
+                                        >
+                                            {bookmarkedSections.has('market-size') ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
+                                        </button>
+                                        <SectionNote sectionId="market-size" />
                                     </div>
                                 </div>
                                 
@@ -716,26 +1071,26 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                     <MarketSizeFunnel tam={report.marketSize.tam} sam={report.marketSize.sam} som={report.marketSize.som} />
                                     
                                     <div className="space-y-4">
-                                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-l-4 border-blue-500">
+                                        <div className="p-4 bg-[#FFF1F2] rounded-xl border-l-4 border-blue-500">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <Globe size={16} className="text-blue-600" />
-                                                <h5 className="font-bold text-gray-900 dark:text-white">TAM - Total Addressable Market</h5>
+                                                <Globe size={16} className="text-[#E11D48]" />
+                                                <h5 className="font-bold text-[#18181B]">TAM - Total Addressable Market</h5>
                                             </div>
-                                            <p className="text-2xl font-black text-blue-600">{report.marketSize.tam}</p>
+                                            <p className="text-2xl font-black text-[#E11D48]">{report.marketSize.tam}</p>
                                         </div>
                                         
-                                        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border-l-4 border-purple-500">
+                                        <div className="p-4 bg-[#FFF1F2] rounded-xl border-l-4 border-purple-500">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <Building2 size={16} className="text-purple-600" />
-                                                <h5 className="font-bold text-gray-900 dark:text-white">SAM - Vietnam Market</h5>
+                                                <Building2 size={16} className="text-[#E11D48]" />
+                                                <h5 className="font-bold text-[#18181B]">SAM - Vietnam Market</h5>
                                             </div>
-                                            <p className="text-2xl font-black text-purple-600">{report.marketSize.sam}</p>
+                                            <p className="text-2xl font-black text-[#E11D48]">{report.marketSize.sam}</p>
                                         </div>
                                         
-                                        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border-l-4 border-green-500">
+                                        <div className="p-4 bg-green-50 rounded-xl border-l-4 border-green-500">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <Target size={16} className="text-green-600" />
-                                                <h5 className="font-bold text-gray-900 dark:text-white">SOM - Obtainable Target</h5>
+                                                <h5 className="font-bold text-[#18181B]">SOM - Obtainable Target</h5>
                                             </div>
                                             <p className="text-2xl font-black text-green-600">{report.marketSize.som}</p>
                                         </div>
@@ -745,52 +1100,61 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                             
                             {/* Revenue Chart */}
                             <div className="grid lg:grid-cols-2 gap-6">
-                                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                                <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                        <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
                                             <BarChart3 className="text-green-600" size={20} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 dark:text-white">Revenue Forecast</h3>
-                                            <p className="text-xs text-gray-500">Historical & projected (USD Billion)</p>
+                                            <h3 className="font-bold text-[#18181B]">Revenue Forecast</h3>
+                                            <p className="text-xs text-[#71717A]">Historical & projected (USD Billion)</p>
                                         </div>
                                     </div>
                                     <RevenueChart data={report.marketSize.revenueHistory} years={report.marketSize.years} />
                                 </div>
                                 
-                                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                                <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                        <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
                                             <TrendingUp className="text-amber-600" size={20} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 dark:text-white">Growth Metrics</h3>
-                                            <p className="text-xs text-gray-500">Key performance indicators</p>
+                                            <h3 className="font-bold text-[#18181B]">Growth Metrics</h3>
+                                            <p className="text-xs text-[#71717A]">Key performance indicators</p>
                                         </div>
                                     </div>
                                     
                                     <div className="space-y-4">
-                                        <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                                        <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-[#FAFAFA] ring-2 ring-green-500/30 shadow-md' : 'bg-[#FAFAFA]'}`}>
                                             <div className="flex justify-between items-center mb-2">
-                                                <span className="text-sm text-gray-600 dark:text-gray-300">CAGR ({report.marketSize.cagrPeriod})</span>
-                                                <span className="text-xl font-black text-green-600">{report.marketSize.cagr}%</span>
+                                                <span className="text-sm text-[#71717A] dark:text-zinc-400">CAGR ({report.marketSize.cagrPeriod})</span>
+                                                <div className="flex items-center gap-1">
+                                                    <span className={`text-xl font-black text-green-600 ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.marketSize.cagr}%</span>
+                                                    <CopyMetricBtn value={`${report.marketSize.cagr}%`} label="CAGR" />
+                                                </div>
                                             </div>
-                                            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                            <div className="h-2 bg-[#E4E4E7] dark:bg-gray-700 rounded-full overflow-hidden">
                                                 <div className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full" style={{ width: `${report.marketSize.cagr * 3}%` }} />
                                             </div>
                                         </div>
                                         
-                                        <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                                        <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-[#FAFAFA] ring-2 ring-[#E11D48]/30 shadow-md' : 'bg-[#FAFAFA]'}`}>
                                             <div className="flex justify-between items-center">
-                                                <span className="text-sm text-gray-600 dark:text-gray-300">Current Size</span>
-                                                <span className="text-xl font-black text-blue-600">${report.marketSize.currentSize.toFixed(1)}B</span>
+                                                <span className="text-sm text-[#71717A] dark:text-zinc-400">Current Size</span>
+                                                <div className="flex items-center gap-1">
+                                                    <span className={`text-xl font-black text-[#E11D48] ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>${report.marketSize.currentSize.toFixed(1)}B</span>
+                                                    <CopyMetricBtn value={`$${report.marketSize.currentSize.toFixed(1)}B`} label="Current Size" />
+                                                </div>
                                             </div>
                                         </div>
                                         
-                                        <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                                        <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-[#FAFAFA] ring-2 ring-purple-500/30 shadow-md' : 'bg-[#FAFAFA]'}`}>
                                             <div className="flex justify-between items-center">
-                                                <span className="text-sm text-gray-600 dark:text-gray-300">Forecast (5Y)</span>
-                                                <span className="text-xl font-black text-purple-600">${report.marketSize.forecastSize.toFixed(1)}B</span>
+                                                <span className="text-sm text-[#71717A] dark:text-zinc-400">Forecast (5Y)</span>
+                                                <div className="flex items-center gap-1">
+                                                    <span className={`text-xl font-black text-[#E11D48] ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>${report.marketSize.forecastSize.toFixed(1)}B</span>
+                                                    <CopyMetricBtn value={`$${report.marketSize.forecastSize.toFixed(1)}B`} label="Forecast 5Y" />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -805,23 +1169,23 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                             <div className="grid lg:grid-cols-3 gap-6">
                                 <DynamicsCard type="Growth Drivers" items={report.marketDynamics.drivers} icon={TrendingUp} color="bg-green-600" />
                                 <DynamicsCard type="Restraints & Challenges" items={report.marketDynamics.restraints} icon={AlertTriangle} color="bg-red-600" />
-                                <DynamicsCard type="Emerging Trends" items={report.marketDynamics.trends} icon={Zap} color="bg-purple-600" />
+                                <DynamicsCard type="Emerging Trends" items={report.marketDynamics.trends} icon={Zap} color="bg-[#E11D48]" />
                             </div>
                             
-                            <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                                <h4 className="font-bold text-gray-900 dark:text-white mb-4">Dynamics Summary</h4>
+                            <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
+                                <h4 className="font-bold text-[#18181B] mb-4">Dynamics Summary</h4>
                                 <div className="grid grid-cols-3 gap-4">
-                                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                                    <div className="text-center p-4 bg-green-50 rounded-xl">
                                         <p className="text-3xl font-black text-green-600">{report.marketDynamics.drivers.length}</p>
-                                        <p className="text-xs text-gray-500">Growth Drivers</p>
+                                        <p className="text-xs text-[#71717A]">Growth Drivers</p>
                                     </div>
-                                    <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                                    <div className="text-center p-4 bg-red-50 rounded-xl">
                                         <p className="text-3xl font-black text-red-600">{report.marketDynamics.restraints.length}</p>
-                                        <p className="text-xs text-gray-500">Restraints</p>
+                                        <p className="text-xs text-[#71717A]">Restraints</p>
                                     </div>
-                                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
-                                        <p className="text-3xl font-black text-purple-600">{report.marketDynamics.trends.length}</p>
-                                        <p className="text-xs text-gray-500">Trends</p>
+                                    <div className="text-center p-4 bg-[#FFF1F2] rounded-xl">
+                                        <p className="text-3xl font-black text-[#E11D48]">{report.marketDynamics.trends.length}</p>
+                                        <p className="text-xs text-[#71717A]">Trends</p>
                                     </div>
                                 </div>
                             </div>
@@ -832,35 +1196,35 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     {activeSection === 'landscape' && (
                         <div className="space-y-6">
                             <div className="grid lg:grid-cols-3 gap-6">
-                                <div className="lg:col-span-2 bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                                <div className="lg:col-span-2 bg-white border border-[#E4E4E7] rounded-2xl p-6">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                                            <PieChart className="text-blue-600" size={20} />
+                                        <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] flex items-center justify-center">
+                                            <PieChart className="text-[#E11D48]" size={20} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 dark:text-white">Market Share Distribution</h3>
-                                            <p className="text-xs text-gray-500">Based on similarity analysis of {report.sources.competitorsAnalyzed} competitors</p>
+                                            <h3 className="font-bold text-[#18181B]">Market Share Distribution</h3>
+                                            <p className="text-xs text-[#71717A]">Based on similarity analysis of {report.sources.competitorsAnalyzed} competitors</p>
                                         </div>
                                     </div>
                                     
                                     <div className="space-y-3">
                                         {report.competitiveLandscape.marketShare.map((item, idx) => {
-                                            const colors = ['bg-blue-600', 'bg-purple-600', 'bg-green-600', 'bg-amber-600', 'bg-red-600', 'bg-gray-400'];
+                                            const colors = ['bg-rose-600', 'bg-orange-600', 'bg-green-600', 'bg-amber-600', 'bg-red-600', 'bg-[#A1A1AA]'];
                                             return (
                                                 <div key={idx} className="space-y-1">
                                                     <div className="flex justify-between text-sm">
                                                         <div className="flex items-center gap-2">
                                                             <div className={`w-3 h-3 rounded-full ${colors[idx % colors.length]}`}></div>
-                                                            <span className="text-gray-700 dark:text-gray-300 font-medium">{item.name}</span>
+                                                            <span className="text-[#18181B] font-medium">{item.name}</span>
                                                         </div>
                                                         <div className="flex items-center gap-3">
                                                             <span className="text-xs text-green-600 flex items-center gap-1">
                                                                 <TrendingUp size={12} />+{item.growth}%
                                                             </span>
-                                                            <span className="font-bold text-gray-900 dark:text-white w-12 text-right">{item.share}%</span>
+                                                            <span className="font-bold text-[#18181B] w-12 text-right">{item.share}%</span>
                                                         </div>
                                                     </div>
-                                                    <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                                    <div className="h-3 bg-[#F4F4F5] rounded-full overflow-hidden">
                                                         <div className={`h-full ${colors[idx % colors.length]} rounded-full`} style={{ width: `${item.share}%` }} />
                                                     </div>
                                                 </div>
@@ -869,37 +1233,37 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                     </div>
                                 </div>
                                 
-                                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                                <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                        <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
                                             <Gauge className="text-amber-600" size={20} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 dark:text-white">Concentration</h3>
-                                            <p className="text-xs text-gray-500">HHI Index analysis</p>
+                                            <h3 className="font-bold text-[#18181B]">Concentration</h3>
+                                            <p className="text-xs text-[#71717A]">HHI Index analysis</p>
                                         </div>
                                     </div>
                                     
                                     <ConcentrationGauge level={report.competitiveLandscape.concentration.level} hhi={report.competitiveLandscape.concentration.hhi} />
                                     
-                                    <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                                    <div className="mt-4 p-3 bg-[#FAFAFA] rounded-xl">
                                         <div className="flex justify-between text-sm mb-2">
-                                            <span className="text-gray-500">CR4 (Top 4)</span>
-                                            <span className="font-bold text-gray-900 dark:text-white">{report.competitiveLandscape.concentration.cr4}%</span>
+                                            <span className="text-[#71717A]">CR4 (Top 4)</span>
+                                            <span className="font-bold text-[#18181B]">{report.competitiveLandscape.concentration.cr4}%</span>
                                         </div>
-                                        <p className="text-xs text-gray-500">{report.competitiveLandscape.concentration.description}</p>
+                                        <p className="text-xs text-[#71717A]">{report.competitiveLandscape.concentration.description}</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                            <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
                                 <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                                        <BarChart3 className="text-purple-600" size={20} />
+                                    <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] flex items-center justify-center">
+                                        <BarChart3 className="text-[#E11D48]" size={20} />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-gray-900 dark:text-white">Competitive Position Matrix</h3>
-                                        <p className="text-xs text-gray-500">BCG-style analysis based on similarity scores</p>
+                                        <h3 className="font-bold text-[#18181B]">Competitive Position Matrix</h3>
+                                        <p className="text-xs text-[#71717A]">BCG-style analysis based on similarity scores</p>
                                     </div>
                                 </div>
                                 <CompetitorMatrix companies={report.competitiveLandscape.marketShare} />
@@ -909,37 +1273,37 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     
                     {/* PORTER'S FIVE FORCES */}
                     {activeSection === 'porters' && (
-                        <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                        <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                                    <Activity className="text-indigo-600" size={20} />
+                                <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] flex items-center justify-center">
+                                    <Activity className="text-[#E11D48]" size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white">Porter's Five Forces Analysis</h3>
-                                    <p className="text-xs text-gray-500">Industry competitive intensity for {report.industry} in {market}</p>
+                                    <h3 className="font-bold text-[#18181B]">Porter's Five Forces Analysis</h3>
+                                    <p className="text-xs text-[#71717A]">Industry competitive intensity for {report.industry} in {market}</p>
                                 </div>
                             </div>
                             
                             <PortersFiveForces forces={report.portersForces} />
                             
-                            <div className="mt-8 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl">
-                                <h4 className="font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                    <Info size={16} className="text-indigo-600" />
+                            <div className="mt-8 p-4 bg-gradient-to-r from-[#FFF1F2] to-[#FFF1F2] rounded-xl">
+                                <h4 className="font-bold text-[#18181B] mb-2 flex items-center gap-2">
+                                    <Info size={16} className="text-[#E11D48]" />
                                     Analysis Summary
                                 </h4>
-                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                <p className="text-sm text-[#71717A]">
                                     Based on analysis of {report.sources.industryPeersFound.toLocaleString()} industry players and {report.sources.competitorsAnalyzed} direct competitors. 
                                     Overall rivalry score: {report.portersForces.rivalry.score}/5 - {report.portersForces.rivalry.description}
                                 </p>
                                 {report.sources.dataSources && report.sources.dataSources.length > 0 && (
-                                    <div className="mt-3 pt-3 border-t border-indigo-200 dark:border-indigo-800">
-                                        <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 mb-1 flex items-center gap-1">
+                                    <div className="mt-3 pt-3 border-t border-[#E4E4E7]">
+                                        <p className="text-xs font-semibold text-[#BE123C] mb-1 flex items-center gap-1">
                                             <Database size={12} />
-                                            Nguồn dữ liệu / Data Sources:
+                                            Data Sources:
                                         </p>
                                         <div className="flex flex-wrap gap-1.5">
                                             {report.sources.dataSources.map((src, idx) => (
-                                                <span key={idx} className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded text-[10px] font-medium">
+                                                <span key={idx} className="px-2 py-0.5 bg-[#FFF1F2] text-[#BE123C] rounded text-[10px] font-medium">
                                                     {src}
                                                 </span>
                                             ))}
@@ -953,24 +1317,24 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     {/* PESTLE */}
                     {activeSection === 'pestle' && (
                         <div className="space-y-6">
-                            <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                            <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
                                 <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                                        <Globe className="text-indigo-600" size={20} />
+                                    <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] flex items-center justify-center">
+                                        <Globe className="text-[#E11D48]" size={20} />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-gray-900 dark:text-white">PESTLE Overview</h3>
-                                        <p className="text-xs text-gray-500">Macro-environmental analysis for {market}</p>
+                                        <h3 className="font-bold text-[#18181B]">PESTLE Overview</h3>
+                                        <p className="text-xs text-[#71717A]">Macro-environmental analysis for {market}</p>
                                     </div>
                                 </div>
                                 
                                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                                     {getPESTLEData(report.industry).map((item, idx) => (
-                                        <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
+                                        <div key={idx} className="p-4 bg-[#FAFAFA] rounded-xl text-center">
                                             <div className={`w-12 h-12 rounded-xl ${item.color} flex items-center justify-center mx-auto mb-3`}>
                                                 <item.icon size={24} className="text-white" />
                                             </div>
-                                            <h4 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h4>
+                                            <h4 className="font-bold text-[#18181B] text-sm">{item.title}</h4>
                                             <span className={`text-xs font-bold mt-2 inline-block ${
                                                 item.impact === 'Positive' ? 'text-green-600' : 'text-amber-600'
                                             }`}>{item.impact}</span>
@@ -991,50 +1355,62 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     {activeSection === 'deals' && (
                         <div className="space-y-6">
                             <div className="grid lg:grid-cols-4 gap-4">
-                                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-center">
+                                <div className={`group bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-green-500/30 shadow-md' : ''}`}>
                                     <DollarSign className="mx-auto text-green-600 mb-2" size={28} />
-                                    <p className="text-3xl font-black text-gray-900 dark:text-white">{report.funding.totalValue}</p>
-                                    <p className="text-xs text-gray-500">Total Funding (2024)</p>
+                                    <div className="flex items-center justify-center gap-1">
+                                        <p className={`text-3xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.funding.totalValue}</p>
+                                        <CopyMetricBtn value={report.funding.totalValue} label="Total Funding" />
+                                    </div>
+                                    <p className="text-xs text-[#71717A] dark:text-zinc-400">Total Funding (2024)</p>
                                 </div>
-                                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-center">
-                                    <Handshake className="mx-auto text-blue-600 mb-2" size={28} />
-                                    <p className="text-3xl font-black text-gray-900 dark:text-white">{report.funding.totalDeals}</p>
-                                    <p className="text-xs text-gray-500">Total Deals</p>
+                                <div className={`group bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-[#E11D48]/30 shadow-md' : ''}`}>
+                                    <Handshake className="mx-auto text-[#E11D48] mb-2" size={28} />
+                                    <div className="flex items-center justify-center gap-1">
+                                        <p className={`text-3xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.funding.totalDeals}</p>
+                                        <CopyMetricBtn value={String(report.funding.totalDeals)} label="Total Deals" />
+                                    </div>
+                                    <p className="text-xs text-[#71717A] dark:text-zinc-400">Total Deals</p>
                                 </div>
-                                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-center">
+                                <div className={`group bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-green-500/30 shadow-md' : ''}`}>
                                     <TrendingUp className="mx-auto text-green-600 mb-2" size={28} />
-                                    <p className="text-3xl font-black text-green-600">+{report.funding.yoyGrowth}%</p>
-                                    <p className="text-xs text-gray-500">YoY Growth</p>
+                                    <div className="flex items-center justify-center gap-1">
+                                        <p className={`text-3xl font-black text-green-600 ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>+{report.funding.yoyGrowth}%</p>
+                                        <CopyMetricBtn value={`+${report.funding.yoyGrowth}%`} label="YoY Growth" />
+                                    </div>
+                                    <p className="text-xs text-[#71717A] dark:text-zinc-400">YoY Growth</p>
                                 </div>
-                                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-center">
-                                    <BarChart2 className="mx-auto text-purple-600 mb-2" size={28} />
-                                    <p className="text-3xl font-black text-gray-900 dark:text-white">{report.funding.avgDealSize}</p>
-                                    <p className="text-xs text-gray-500">Avg Deal Size</p>
+                                <div className={`group bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-amber-500/30 shadow-md' : ''}`}>
+                                    <BarChart2 className="mx-auto text-[#E11D48] mb-2" size={28} />
+                                    <div className="flex items-center justify-center gap-1">
+                                        <p className={`text-3xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.funding.avgDealSize}</p>
+                                        <CopyMetricBtn value={report.funding.avgDealSize} label="Avg Deal Size" />
+                                    </div>
+                                    <p className="text-xs text-[#71717A] dark:text-zinc-400">Avg Deal Size</p>
                                 </div>
                             </div>
                             
                             <div className="grid lg:grid-cols-2 gap-6">
-                                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                                <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                        <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
                                             <Coins className="text-green-600" size={20} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 dark:text-white">Funding by Sector</h3>
-                                            <p className="text-xs text-gray-500">Where capital is flowing</p>
+                                            <h3 className="font-bold text-[#18181B]">Funding by Sector</h3>
+                                            <p className="text-xs text-[#71717A]">Where capital is flowing</p>
                                         </div>
                                     </div>
                                     
                                     <div className="space-y-3">
                                         {report.funding.topSectors.map((sector, idx) => {
-                                            const colors = ['bg-blue-600', 'bg-purple-600', 'bg-orange-600', 'bg-green-600', 'bg-red-600', 'bg-gray-400'];
+                                            const colors = ['bg-rose-600', 'bg-orange-600', 'bg-orange-600', 'bg-green-600', 'bg-red-600', 'bg-[#A1A1AA]'];
                                             return (
                                                 <div key={idx} className="space-y-1">
                                                     <div className="flex justify-between text-sm">
-                                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{sector.name}</span>
-                                                        <span className="font-bold text-gray-900 dark:text-white">{sector.percentage}%</span>
+                                                        <span className="text-[#18181B] font-medium">{sector.name}</span>
+                                                        <span className="font-bold text-[#18181B]">{sector.percentage}%</span>
                                                     </div>
-                                                    <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                                    <div className="h-2 bg-[#F4F4F5] rounded-full overflow-hidden">
                                                         <div className={`h-full ${colors[idx % colors.length]} rounded-full`} style={{ width: `${sector.percentage}%` }} />
                                                     </div>
                                                 </div>
@@ -1043,14 +1419,14 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                     </div>
                                 </div>
                                 
-                                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                                <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                                            <Briefcase className="text-purple-600" size={20} />
+                                        <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] flex items-center justify-center">
+                                            <Briefcase className="text-[#E11D48]" size={20} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 dark:text-white">Recent Notable Deals</h3>
-                                            <p className="text-xs text-gray-500">Based on your competitors</p>
+                                            <h3 className="font-bold text-[#18181B]">Recent Notable Deals</h3>
+                                            <p className="text-xs text-[#71717A]">Based on your competitors</p>
                                         </div>
                                     </div>
                                     
@@ -1063,7 +1439,65 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                             </div>
                         </div>
                     )}
+
+                    {/* Data Sources & Methodology Footer */}
+                    <div className="bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-5 mt-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Database className="w-4 h-4 text-[#A1A1AA]" />
+                                    <span className="text-xs font-semibold text-[#18181B] dark:text-white">Data Sources &amp; Methodology</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {[
+                                        'VICO Company Database (10,000+ companies)',
+                                        'Vietnam GSO (General Statistics Office)',
+                                        'Ministry of Planning & Investment (MPI)',
+                                        'World Bank Vietnam Reports',
+                                        'Statista & IDC Vietnam Market Data',
+                                        'CafeF & VnExpress Financial Data',
+                                    ].map((src, idx) => (
+                                        <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FAFAFA] dark:bg-gray-800 border border-[#E4E4E7] dark:border-gray-700 text-[10px] text-[#71717A] dark:text-zinc-400">
+                                            <CheckCircle className="w-2.5 h-2.5 text-emerald-500" />
+                                            {src}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="text-right shrink-0">
+                                <p className="text-[10px] text-[#A1A1AA] leading-relaxed">
+                                    Last verified: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
+                                </p>
+                                <p className="text-[10px] text-[#A1A1AA]">
+                                    VICO Intelligence &middot; Market Research
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </>
+            )}
+
+            {/* Export Modal */}
+            {showExportModal && report && (
+                <ExportModal
+                    report={report}
+                    companyName={userData?.orgName}
+                    onClose={() => setShowExportModal(false)}
+                />
+            )}
+
+            {/* Highlight Mode indicator */}
+            {highlightMode && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-5 py-2.5 bg-amber-100 dark:bg-amber-900/80 border border-amber-300 dark:border-amber-500/30 rounded-full shadow-lg backdrop-blur-sm">
+                    <Eye size={14} className="text-amber-700 dark:text-amber-400" />
+                    <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">Highlight Mode — Số liệu quan trọng được đánh dấu</span>
+                    <button
+                        onClick={() => setHighlightMode(false)}
+                        className="p-1 rounded-full hover:bg-amber-200 dark:hover:bg-amber-800 text-amber-700 dark:text-amber-400 transition-colors"
+                    >
+                        <X size={12} />
+                    </button>
+                </div>
             )}
         </div>
     );

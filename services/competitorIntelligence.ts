@@ -55,22 +55,22 @@ export interface CompetitorComparison {
 export const getCompetitors = async (companyName: string): Promise<CompetitorProfile[]> => {
     try {
         console.log(`🔍 Finding competitors for: "${companyName}" (using Unified Engine)`);
-        
+
         if (!companyName || !companyName.trim()) {
             console.warn('⚠️ Empty company name, using mock data');
             return generateMockCompetitors('Vingroup');
         }
-        
+
         // 🆕 Use the new unified competitor engine
         const result = await findTopCompetitors(companyName.trim(), 10, 20);
-        
+
         console.log(`📊 Engine stats: ${result.totalCandidates} total companies, ${result.competitors.length} matches in ${result.searchTime}ms`);
-        
+
         if (result.competitors.length === 0) {
             console.warn('⚠️ No competitors found from engine, using mock data');
             return generateMockCompetitors(companyName);
         }
-        
+
         // Convert to CompetitorProfile format
         const competitors: CompetitorProfile[] = result.competitors.map(match => ({
             name: match.company.name,
@@ -83,7 +83,7 @@ export const getCompetitors = async (companyName: string): Promise<CompetitorPro
             matchReasons: match.matchReasons,
             source: match.company.source
         }));
-        
+
         console.log(`✅ Returning ${competitors.length} competitors with similarity scores`);
         return competitors;
 
@@ -99,7 +99,7 @@ export const getCompetitors = async (companyName: string): Promise<CompetitorPro
  */
 function parseEmployeeCount(sizeStr?: string): number | undefined {
     if (!sizeStr) return undefined;
-    
+
     const match = sizeStr.match(/(\d+(?:[.,]\d+)?)/);
     if (match) {
         return parseInt(match[1].replace(/[.,]/g, ''));
@@ -112,7 +112,7 @@ function parseEmployeeCount(sizeStr?: string): number | undefined {
  */
 const generateMockCompetitors = (companyName: string): CompetitorProfile[] => {
     console.log(`📊 Generating mock competitors for: "${companyName}"`);
-    
+
     const competitors: { [key: string]: CompetitorProfile[] } = {
         'Vingroup': [
             { name: 'Samsung Vietnam', industry: 'Technology', location: 'Ho Chi Minh City', fundingStage: 'Multinational', employeeCount: 5000 },
@@ -171,13 +171,13 @@ export const summarizeCompetitorNews = async (
 
         // Use the report generation and extract text
         const report = await CopilotService.generateFullReport(competitorName, 'Technology', [], newsText);
-        
+
         if (report && report.market && report.market.environment) {
             // Extract summary from the report
             const summary = report.market.environment.substring(0, 300) + '...';
             return summary;
         }
-        
+
         return `News summary for ${competitorName}: ${newsText.substring(0, 200)}...`;
 
     } catch (error) {
@@ -198,11 +198,35 @@ export const getCompetitorIntelligence = async (
             summarizeCompetitorNews(competitor.name, await fetchCompetitorNews(competitor)),
         ]);
 
-        // Mô phỏng market position (trong thực tế sẽ từ database)
+        // Deterministic market position estimation based on real signals
+        // (news volume, company size, similarity score)
+        const newsCount = news.length;
+        const employeeCount = competitor.employeeCount || 0;
+
+        // Market share estimate: based on employee count relative to industry
+        // Larger companies tend to have higher market share
+        const marketShareEstimate = employeeCount > 10000 ? 25 + (employeeCount / 5000)
+            : employeeCount > 1000 ? 10 + (employeeCount / 1000)
+                : employeeCount > 100 ? 3 + (employeeCount / 200)
+                    : null; // Cannot estimate without data
+
+        // Growth rate estimate: based on news sentiment and volume
+        const growthEstimate = newsCount > 5 ? 15 + newsCount * 2
+            : newsCount > 0 ? 8 + newsCount * 3
+                : null; // No news = cannot estimate
+
+        // Visibility score: combination of news mentions and similarity to target
+        const visibilityScore = Math.min(100,
+            (newsCount * 12) + (competitor.similarity || 0) * 0.5 + (employeeCount > 1000 ? 20 : 0)
+        );
+
         const marketPosition = {
-            marketShare: Math.random() * 30 + 10,
-            growthRate: Math.random() * 25 + 5,
-            visibility: Math.random() * 100,
+            marketShare: marketShareEstimate ? Math.round(marketShareEstimate * 10) / 10 : undefined,
+            growthRate: growthEstimate ? Math.round(growthEstimate * 10) / 10 : undefined,
+            visibility: Math.round(visibilityScore * 10) / 10,
+            dataNote: marketShareEstimate
+                ? 'Estimated from employee count and news volume'
+                : 'Insufficient data for market share estimation',
         };
 
         return {
@@ -232,7 +256,7 @@ export const generateCompetitorComparison = async (
 ): Promise<CompetitorComparison> => {
     try {
         console.log(`🎯 Starting Competitor Comparison for: "${primaryCompanyName}"`);
-        
+
         if (!primaryCompanyName || primaryCompanyName.trim() === '') {
             console.warn('⚠️ Empty company name provided, using Vingroup');
             return generateCompetitorComparison('Vingroup');
@@ -241,7 +265,7 @@ export const generateCompetitorComparison = async (
         // 1. Lấy danh sách đối thủ
         const competitors = await getCompetitors(primaryCompanyName);
         console.log(`✅ Found ${competitors.length} competitors`);
-        
+
         if (competitors.length === 0) {
             console.warn('⚠️ No competitors found!');
             throw new Error('No competitors found for analysis');
@@ -274,7 +298,7 @@ Format: JSON với các keys: overallAnalysis, strategicInsights[], opportunitie
 `;
 
         const aiAnalysis = await CopilotService.generateFullReport(primaryCompanyName, 'Technology', competitors.map(c => c.name), newsContext);
-        
+
         let parsedAnalysis = {
             overallAnalysis: aiAnalysis?.market?.environment || 'Market analysis in progress',
             strategicInsights: aiAnalysis?.market?.trends || ['Market consolidation accelerating', 'Digital transformation critical', 'Regional expansion opportunities'],
@@ -306,7 +330,7 @@ Format: JSON với các keys: overallAnalysis, strategicInsights[], opportunitie
     } catch (error) {
         console.error('❌ Error generating competitor comparison:', error);
         console.log('📊 Returning default comparison as fallback...');
-        
+
         // Return default comparison if something goes wrong
         return createDefaultComparison(primaryCompanyName, []);
     }

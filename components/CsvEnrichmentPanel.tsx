@@ -63,7 +63,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
 
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
-            alert('Vui lòng nhập từ khóa tìm kiếm');
+            alert('Please enter a search keyword');
             return;
         }
 
@@ -74,7 +74,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
             setSearchResults(data.results || []);
         } catch (error) {
             console.error('Search failed:', error);
-            alert('❌ Tìm kiếm thất bại');
+            alert('❌ Search failed');
         } finally {
             setIsSearching(false);
         }
@@ -99,7 +99,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
             borderRadius: '8px',
             marginBottom: '20px'
         }}>
-            <h2>🚀 CSV Companies Enrichment (10,000+ công ty)</h2>
+            <h2>🚀 CSV Companies Enrichment (10,000+ companies)</h2>
 
             {/* Status Section */}
             <div style={{
@@ -131,7 +131,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
                         marginBottom: '20px'
                     }}
                 >
-                    {isEnriching ? '⏳ Đang xử lý...' : '🔄 Bắt đầu Enrichment'}
+                    {isEnriching ? '⏳ Processing...' : '🔄 Start Enrichment'}
                 </button>
             )}
 
@@ -145,9 +145,9 @@ export const CsvEnrichmentPanel: React.FC = () => {
                         border: '1px solid #ddd',
                         marginBottom: '20px'
                     }}>
-                        <h3>🔍 Tìm kiếm Semantic (Enriched Companies)</h3>
+                        <h3>🔍 Semantic Search (Enriched Companies)</h3>
                         <p style={{ fontSize: '12px', color: '#666' }}>
-                            Nhập mô tả công ty để tìm các công ty tương tự dựa trên embedding tiếng Việt
+                            Enter company description to find similar companies using Vietnamese embeddings
                         </p>
                         <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                             <input
@@ -155,7 +155,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                                placeholder="VD: Công ty phần mềm SaaS, công ty e-commerce..."
+                                placeholder="E.g.: SaaS software company, e-commerce company..."
                                 style={{
                                     flex: 1,
                                     padding: '10px',
@@ -176,7 +176,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
                                     fontWeight: 'bold'
                                 }}
                             >
-                                {isSearching ? 'Đang tìm...' : 'Tìm kiếm'}
+                                {isSearching ? 'Searching...' : 'Search'}
                             </button>
                         </div>
 
@@ -188,7 +188,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
                                 backgroundColor: '#f9f9f9',
                                 borderRadius: '5px'
                             }}>
-                                <h4>📊 Kết quả tìm kiếm ({searchResults.length} công ty)</h4>
+                                <h4>📊 Search results ({searchResults.length} companies)</h4>
                                 {searchResults.map((result, idx) => (
                                     <div
                                         key={idx}
@@ -207,12 +207,12 @@ export const CsvEnrichmentPanel: React.FC = () => {
                                                 <strong>{result.name}</strong>
                                                 <br />
                                                 <span style={{ fontSize: '12px', color: '#666' }}>
-                                                    {result.industry} • {result.competitorCount} đối thủ
+                                                    {result.industry} • {result.competitorCount} competitors
                                                 </span>
                                             </div>
                                             <div style={{ textAlign: 'right' }}>
                                                 <div style={{ color: '#4CAF50', fontWeight: 'bold' }}>
-                                                    {result.similarity} tương đồng
+                                                    {result.similarity} similarity
                                                 </div>
                                             </div>
                                         </div>
@@ -229,12 +229,12 @@ export const CsvEnrichmentPanel: React.FC = () => {
                         borderRadius: '5px',
                         border: '1px solid #90CAF9'
                     }}>
-                        <h4>📌 Điều gì đã được Enriched?</h4>
+                        <h4>📌 What has been Enriched?</h4>
                         <ul style={{ fontSize: '14px' }}>
-                            <li>✅ <strong>Vietnamese Embeddings:</strong> Tất cả 10,000+ công ty được vector hóa bằng dangvantuan/vietnamese-embedding</li>
-                            <li>✅ <strong>Strategic Context:</strong> Mỗi công ty có bối cảnh chiến lược được tạo tự động</li>
-                            <li>✅ <strong>Similar Competitors:</strong> Top 10 đối thủ tương tự cho mỗi công ty dựa trên semantic similarity</li>
-                            <li>✅ <strong>Fast Search:</strong> Tìm kiếm semantic nhanh chóng trên 10,000+ công ty</li>
+                            <li>✅ <strong>Vietnamese Embeddings:</strong> All 10,000+ companies vectorized using dangvantuan/vietnamese-embedding</li>
+                            <li>✅ <strong>Strategic Context:</strong> Each company has auto-generated strategic context</li>
+                            <li>✅ <strong>Similar Competitors:</strong> Top 10 similar competitors for each company based on semantic similarity</li>
+                            <li>✅ <strong>Fast Search:</strong> Fast semantic search across 10,000+ companies</li>
                         </ul>
                     </div>
                 </>

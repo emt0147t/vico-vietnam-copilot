@@ -74,14 +74,14 @@ export const useDashboard = () => {
 // ============================================================================
 
 export const Skeleton = ({ className = '', variant = 'rect' }: { className?: string; variant?: 'rect' | 'circle' | 'text' }) => {
-    const baseClass = 'animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 bg-[length:200%_100%]';
+    const baseClass = 'animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%]';
     const variantClass = variant === 'circle' ? 'rounded-full' : variant === 'text' ? 'rounded h-4' : 'rounded-lg';
     
     return <div className={`${baseClass} ${variantClass} ${className}`} />;
 };
 
 export const CardSkeleton = () => (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 space-y-4">
+    <div className="bg-white rounded-2xl border border-[#E4E4E7] p-6 space-y-4">
         <div className="flex items-center gap-4">
             <Skeleton variant="circle" className="w-12 h-12" />
             <div className="flex-1 space-y-2">
@@ -101,7 +101,7 @@ export const CardSkeleton = () => (
 export const TableSkeleton = ({ rows = 5 }: { rows?: number }) => (
     <div className="space-y-3">
         {Array.from({ length: rows }).map((_, i) => (
-            <div key={i} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+            <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#E4E4E7]">
                 <Skeleton variant="circle" className="w-10 h-10 flex-shrink-0" />
                 <Skeleton className="h-4 flex-1" />
                 <Skeleton className="h-4 w-24" />
@@ -185,35 +185,35 @@ export const CommandCenter = ({ isOpen, onClose, onSearch, recentSearches = [] }
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                         className="fixed top-[20%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-50"
                     >
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-2xl border border-[#E4E4E7] overflow-hidden">
                             {/* Search Input */}
-                            <div className="flex items-center gap-4 p-4 border-b border-gray-100 dark:border-gray-800">
-                                <Search className="w-5 h-5 text-gray-400" />
+                            <div className="flex items-center gap-4 p-4 border-b border-[#E4E4E7]">
+                                <Search className="w-5 h-5 text-[#A1A1AA]" />
                                 <input
                                     autoFocus
                                     type="text"
                                     placeholder="Search companies, news, insights..."
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
-                                    className="flex-1 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 outline-none text-lg"
+                                    className="flex-1 bg-transparent text-[#18181B] placeholder-[#A1A1AA] outline-none text-lg"
                                 />
                                 <div className="flex items-center gap-2">
                                     <span className={`px-2 py-1 rounded text-xs font-bold uppercase tracking-wider transition-colors ${
-                                        searchType === 'company' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' :
-                                        searchType === 'news' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' :
-                                        'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                                        searchType === 'company' ? 'bg-blue-100 text-blue-700' :
+                                        searchType === 'news' ? 'bg-green-100 text-green-700' :
+                                        'bg-[#F4F4F5] text-[#18181B]'
                                     }`}>
                                         {searchType}
                                     </span>
-                                    <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
-                                        <X className="w-4 h-4 text-gray-400" />
+                                    <button onClick={onClose} className="p-1 hover:bg-[#F4F4F5] rounded">
+                                        <X className="w-4 h-4 text-[#A1A1AA]" />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Quick Actions */}
                             <div className="p-2">
-                                <p className="px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Quick Actions</p>
+                                <p className="px-3 py-2 text-xs font-bold text-[#A1A1AA] uppercase tracking-wider">Quick Actions</p>
                                 {suggestions.map((item, index) => (
                                     <button
                                         key={item.type}
@@ -226,23 +226,23 @@ export const CommandCenter = ({ isOpen, onClose, onSearch, recentSearches = [] }
                                         }}
                                         className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
                                             selectedIndex === index
-                                                ? 'bg-gray-100 dark:bg-gray-800'
-                                                : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                                                ? 'bg-[#F4F4F5]'
+                                                : 'hover:bg-[#FAFAFA]'
                                         }`}
                                     >
-                                        <item.icon className="w-5 h-5 text-gray-500" />
-                                        <span className="flex-1 text-left text-gray-900 dark:text-white font-medium">
+                                        <item.icon className="w-5 h-5 text-[#71717A]" />
+                                        <span className="flex-1 text-left text-[#18181B] font-medium">
                                             {item.label}
                                         </span>
-                                        <span className="text-xs text-gray-400 font-mono">{item.shortcut}</span>
+                                        <span className="text-xs text-[#A1A1AA] font-mono">{item.shortcut}</span>
                                     </button>
                                 ))}
                             </div>
 
                             {/* Recent Searches */}
                             {recentSearches.length > 0 && (
-                                <div className="p-2 border-t border-gray-100 dark:border-gray-800">
-                                    <p className="px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Recent</p>
+                                <div className="p-2 border-t border-[#E4E4E7]">
+                                    <p className="px-3 py-2 text-xs font-bold text-[#A1A1AA] uppercase tracking-wider">Recent</p>
                                     {recentSearches.slice(0, 3).map((search, i) => (
                                         <button
                                             key={i}
@@ -251,28 +251,28 @@ export const CommandCenter = ({ isOpen, onClose, onSearch, recentSearches = [] }
                                                 onSearch(search, searchType);
                                                 onClose();
                                             }}
-                                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-[#FAFAFA] transition-colors"
                                         >
-                                            <Clock className="w-4 h-4 text-gray-400" />
-                                            <span className="text-gray-600 dark:text-gray-300">{search}</span>
+                                            <Clock className="w-4 h-4 text-[#A1A1AA]" />
+                                            <span className="text-[#71717A]">{search}</span>
                                         </button>
                                     ))}
                                 </div>
                             )}
 
                             {/* Footer */}
-                            <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                                <div className="flex items-center gap-4 text-xs text-gray-400">
+                            <div className="px-4 py-3 bg-[#FAFAFA] border-t border-[#E4E4E7] flex items-center justify-between">
+                                <div className="flex items-center gap-4 text-xs text-[#A1A1AA]">
                                     <span className="flex items-center gap-1">
-                                        <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px] font-mono">↵</kbd>
+                                        <kbd className="px-1.5 py-0.5 bg-[#E4E4E7] rounded text-[10px] font-mono">↵</kbd>
                                         to search
                                     </span>
                                     <span className="flex items-center gap-1">
-                                        <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px] font-mono">esc</kbd>
+                                        <kbd className="px-1.5 py-0.5 bg-[#E4E4E7] rounded text-[10px] font-mono">esc</kbd>
                                         to close
                                     </span>
                                 </div>
-                                <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <span className="text-xs text-[#A1A1AA] flex items-center gap-1">
                                     <Zap className="w-3 h-3" /> Powered by VICO AI
                                 </span>
                             </div>
@@ -360,15 +360,15 @@ export const DashboardLayout = ({
 
     return (
         <DashboardContext.Provider value={contextValue}>
-            <div className="flex h-screen bg-gray-50 dark:bg-[#0B101B] transition-colors duration-300">
+            <div className="flex h-screen bg-[#FAFAFA] transition-colors duration-300">
                 {/* Sidebar */}
                 <motion.aside
                     animate={{ width: isSidebarCollapsed ? 80 : 280 }}
                     transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    className="bg-white dark:bg-[#0F1623] border-r border-gray-100 dark:border-gray-800 flex flex-col z-30"
+                    className="bg-white border-r border-[#E4E4E7] flex flex-col z-30"
                 >
                     {/* Logo */}
-                    <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800">
+                    <div className="h-16 flex items-center justify-between px-4 border-b border-[#E4E4E7]">
                         <AnimatePresence mode="wait">
                             {!isSidebarCollapsed ? (
                                 <motion.div
@@ -382,8 +382,8 @@ export const DashboardLayout = ({
                                         V
                                     </div>
                                     <div>
-                                        <h1 className="font-black text-gray-900 dark:text-white tracking-tight">VICO</h1>
-                                        <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest">Vietnam Copilot</p>
+                                        <h1 className="font-black text-[#18181B] tracking-tight">VICO</h1>
+                                        <p className="text-[10px] text-[#A1A1AA] font-semibold uppercase tracking-widest">Vietnam Copilot</p>
                                     </div>
                                 </motion.div>
                             ) : (
@@ -401,12 +401,12 @@ export const DashboardLayout = ({
                         
                         <button
                             onClick={() => setIsSidebarCollapsed(prev => !prev)}
-                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                            className="p-1.5 hover:bg-[#F4F4F5] rounded-lg transition-colors"
                         >
                             {isSidebarCollapsed ? (
-                                <ChevronRight className="w-4 h-4 text-gray-400" />
+                                <ChevronRight className="w-4 h-4 text-[#A1A1AA]" />
                             ) : (
-                                <ChevronLeft className="w-4 h-4 text-gray-400" />
+                                <ChevronLeft className="w-4 h-4 text-[#A1A1AA]" />
                             )}
                         </button>
                     </div>
@@ -415,15 +415,15 @@ export const DashboardLayout = ({
                     <div className="px-3 py-4">
                         <button
                             onClick={() => setIsCommandCenterOpen(true)}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 transition-colors ${
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 bg-[#FAFAFA] hover:bg-[#F4F4F5] rounded-xl border border-[#E4E4E7] transition-colors ${
                                 isSidebarCollapsed ? 'justify-center' : ''
                             }`}
                         >
-                            <Search className="w-4 h-4 text-gray-400" />
+                            <Search className="w-4 h-4 text-[#A1A1AA]" />
                             {!isSidebarCollapsed && (
                                 <>
-                                    <span className="flex-1 text-left text-sm text-gray-400">Search...</span>
-                                    <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px] font-mono text-gray-500">⌘K</kbd>
+                                    <span className="flex-1 text-left text-sm text-[#A1A1AA]">Search...</span>
+                                    <kbd className="px-1.5 py-0.5 bg-[#E4E4E7] rounded text-[10px] font-mono text-[#71717A]">⌘K</kbd>
                                 </>
                             )}
                         </button>
@@ -437,18 +437,18 @@ export const DashboardLayout = ({
                                 onClick={() => onViewChange(item.id)}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
                                     activeView === item.id
-                                        ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
+                                        ? 'bg-red-50 text-red-700'
+                                        : 'text-[#71717A] hover:bg-[#FAFAFA] hover:text-[#18181B]'
                                 } ${isSidebarCollapsed ? 'justify-center' : ''}`}
                             >
                                 <item.icon className={`w-5 h-5 flex-shrink-0 ${
-                                    activeView === item.id ? 'text-red-600 dark:text-red-400' : ''
+                                    activeView === item.id ? 'text-red-600' : ''
                                 }`} />
                                 {!isSidebarCollapsed && (
                                     <>
                                         <span className="flex-1 text-left font-medium text-sm">{item.label}</span>
                                         {item.badge && (
-                                            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-full text-[10px] font-bold text-gray-500">
+                                            <span className="px-2 py-0.5 bg-[#F4F4F5] rounded-full text-[10px] font-bold text-[#71717A]">
                                                 {item.badge.toLocaleString()}
                                             </span>
                                         )}
@@ -459,11 +459,11 @@ export const DashboardLayout = ({
                     </nav>
 
                     {/* Footer */}
-                    <div className="p-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
+                    <div className="p-3 border-t border-[#E4E4E7] space-y-2">
                         {/* Theme Toggle */}
                         <button
                             onClick={() => setIsDarkMode(prev => !prev)}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#71717A] hover:bg-[#FAFAFA] transition-colors ${
                                 isSidebarCollapsed ? 'justify-center' : ''
                             }`}
                         >
@@ -472,7 +472,7 @@ export const DashboardLayout = ({
                         </button>
 
                         {/* User Profile */}
-                        <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/50 ${
+                        <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#FAFAFA] ${
                             isSidebarCollapsed ? 'justify-center' : ''
                         }`}>
                             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
@@ -480,8 +480,8 @@ export const DashboardLayout = ({
                             </div>
                             {!isSidebarCollapsed && (
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{userName}</p>
-                                    <p className="text-[10px] text-gray-400 truncate">{orgName}</p>
+                                    <p className="text-sm font-semibold text-[#18181B] truncate">{userName}</p>
+                                    <p className="text-[10px] text-[#A1A1AA] truncate">{orgName}</p>
                                 </div>
                             )}
                         </div>
@@ -490,7 +490,7 @@ export const DashboardLayout = ({
                         {onLogout && (
                             <button
                                 onClick={onLogout}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors ${
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#71717A] hover:bg-red-50 hover:text-red-600 transition-colors ${
                                     isSidebarCollapsed ? 'justify-center' : ''
                                 }`}
                             >
@@ -504,9 +504,9 @@ export const DashboardLayout = ({
                 {/* Main Content */}
                 <main className="flex-1 flex flex-col overflow-hidden">
                     {/* Top Bar */}
-                    <header className="h-16 bg-white dark:bg-[#0F1623] border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-6">
+                    <header className="h-16 bg-white border-b border-[#E4E4E7] flex items-center justify-between px-6">
                         <div className="flex items-center gap-4">
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-white capitalize">
+                            <h2 className="text-lg font-bold text-[#18181B] capitalize">
                                 {navItems.find(n => n.id === activeView)?.label || 'Dashboard'}
                             </h2>
                         </div>
@@ -522,8 +522,8 @@ export const DashboardLayout = ({
                                 onClearAll={clearAll}
                                 onRefresh={refreshNotifs}
                             />
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors">
-                                <Settings className="w-5 h-5 text-gray-500" />
+                            <button className="p-2 hover:bg-[#F4F4F5] rounded-xl transition-colors">
+                                <Settings className="w-5 h-5 text-[#71717A]" />
                             </button>
                         </div>
                     </header>

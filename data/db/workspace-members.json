@@ -1,0 +1,9 @@
+[
+  {
+    "id": "acme_team|1771946278323|owner@example.com",
+    "workspaceId": "acme_team|1771946278323",
+    "email": "owner@example.com",
+    "role": "owner",
+    "addedAt": "2026-02-24T15:17:58.323Z"
+  }
+]

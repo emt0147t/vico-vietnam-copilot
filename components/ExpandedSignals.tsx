@@ -32,7 +32,7 @@ export const ExpandedSignals: React.FC<ExpandedSignalsProps> = ({
     },
     [SignalType.ACQUISITION]: {
       label: "Thâu tóm",
-      color: "bg-indigo-600",
+      color: "bg-[#E11D48]",
       icon: "📊",
       description: "Công ty bị thâu tóm",
     },
@@ -98,7 +98,7 @@ export const ExpandedSignals: React.FC<ExpandedSignalsProps> = ({
     },
     [SignalType.TECHNOLOGY_INNOVATION]: {
       label: "Công nghệ",
-      color: "bg-violet-600",
+      color: "bg-[#F97316]",
       icon: "💡",
       description: "AI, bằng sáng chế, 5G",
     },
@@ -116,7 +116,7 @@ export const ExpandedSignals: React.FC<ExpandedSignalsProps> = ({
     },
     [SignalType.OTHER]: {
       label: "Khác",
-      color: "bg-gray-600",
+      color: "bg-[#A1A1AA]",
       icon: "📌",
       description: "Tín hiệu khác",
     },
@@ -164,8 +164,8 @@ export const ExpandedSignals: React.FC<ExpandedSignalsProps> = ({
             <h4 className={`${config.color.replace("bg-", "text-")} font-bold`}>
               {config.label}
             </h4>
-            <p className="text-xs text-gray-600 mt-1">{config.description}</p>
-            <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
+            <p className="text-xs text-[#71717A] mt-1">{config.description}</p>
+            <div className="mt-3 w-full bg-[#E4E4E7] rounded-full h-2">
               <div
                 className={`${config.color} h-2 rounded-full`}
                 style={{ width: `${confidenceBar}%` }}

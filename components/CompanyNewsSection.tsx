@@ -90,7 +90,7 @@ export const CompanyNewsSection: React.FC<CompanyNewsSectionProps> = ({
     } else if (sentiment === SentimentType.NEGATIVE) {
       return <TrendingDown className="w-4 h-4 text-red-600" />;
     }
-    return <AlertCircle className="w-4 h-4 text-gray-400" />;
+    return <AlertCircle className="w-4 h-4 text-[#A1A1AA]" />;
   };
 
   const getSentimentColor = (sentiment?: SentimentType) => {
@@ -99,7 +99,7 @@ export const CompanyNewsSection: React.FC<CompanyNewsSectionProps> = ({
     } else if (sentiment === SentimentType.NEGATIVE) {
       return "bg-red-50 border-red-200";
     }
-    return "bg-gray-50 border-gray-200";
+    return "bg-[#FAFAFA] border-[#E4E4E7]";
   };
 
   const getSignalBadgeColor = (signal: SignalType) => {
@@ -109,19 +109,19 @@ export const CompanyNewsSection: React.FC<CompanyNewsSectionProps> = ({
       [SignalType.PRODUCT_LAUNCH]: "bg-blue-100 text-blue-800",
       [SignalType.LEGAL_REGULATION]: "bg-red-100 text-red-800",
       [SignalType.PERSONNEL]: "bg-orange-100 text-orange-800",
-      [SignalType.PARTNERSHIP]: "bg-indigo-100 text-indigo-800",
+      [SignalType.PARTNERSHIP]: "bg-[#FFF1F2] text-[#18181B]",
       [SignalType.EARNINGS]: "bg-teal-100 text-teal-800",
       [SignalType.EXPANSION]: "bg-yellow-100 text-yellow-800",
-      [SignalType.OTHER]: "bg-gray-100 text-gray-800",
+      [SignalType.OTHER]: "bg-[#F4F4F5] text-[#18181B]",
     };
-    return colors[signal] || "bg-gray-100 text-gray-800";
+    return colors[signal] || "bg-[#F4F4F5] text-[#18181B]";
   };
 
   return (
-    <div className="w-full bg-white rounded-lg border border-gray-200 p-6">
+    <div className="w-full bg-white rounded-lg border border-[#E4E4E7] p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <h3 className="text-2xl font-bold text-[#18181B] flex items-center gap-2">
           <Newspaper className="w-6 h-6 text-blue-600" />
           Recent News & Market Signals
         </h3>
@@ -136,18 +136,18 @@ export const CompanyNewsSection: React.FC<CompanyNewsSectionProps> = ({
 
       {/* Sentiment Stats */}
       {stats.total > 0 && (
-        <div className="grid grid-cols-3 gap-3 mb-4 bg-gray-50 p-4 rounded-lg">
+        <div className="grid grid-cols-3 gap-3 mb-4 bg-[#FAFAFA] p-4 rounded-lg">
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">{stats.positive}</div>
-            <div className="text-xs text-gray-600">Positive</div>
+            <div className="text-xs text-[#71717A]">Positive</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-600">{stats.neutral}</div>
-            <div className="text-xs text-gray-600">Neutral</div>
+            <div className="text-2xl font-bold text-[#71717A]">{stats.neutral}</div>
+            <div className="text-xs text-[#71717A]">Neutral</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-red-600">{stats.negative}</div>
-            <div className="text-xs text-gray-600">Negative</div>
+            <div className="text-xs text-[#71717A]">Negative</div>
           </div>
         </div>
       )}
@@ -156,7 +156,7 @@ export const CompanyNewsSection: React.FC<CompanyNewsSectionProps> = ({
       {loading && (
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600 text-sm">Loading news...</p>
+          <p className="mt-2 text-[#71717A] text-sm">Loading news...</p>
         </div>
       )}
 
@@ -207,7 +207,7 @@ export const CompanyNewsSection: React.FC<CompanyNewsSectionProps> = ({
 
                   {/* Summary Preview */}
                   {item.summary && (
-                    <div className="text-xs text-gray-700 bg-white bg-opacity-50 p-2 rounded border-l-2 border-blue-300">
+                    <div className="text-xs text-[#18181B] bg-white bg-opacity-50 p-2 rounded border-l-2 border-blue-300">
                       {item.summary.split("\n")[0].substring(0, 100)}...
                     </div>
                   )}
@@ -215,7 +215,7 @@ export const CompanyNewsSection: React.FC<CompanyNewsSectionProps> = ({
               )}
 
               {/* Meta */}
-              <div className="text-xs text-gray-500 mt-2 flex justify-between">
+              <div className="text-xs text-[#71717A] mt-2 flex justify-between">
                 <span>{item.sourceName || "Unknown"}</span>
                 <span>
                   {item.fetchedDate
@@ -230,8 +230,8 @@ export const CompanyNewsSection: React.FC<CompanyNewsSectionProps> = ({
 
       {/* Empty State */}
       {!loading && news.length === 0 && !error && (
-        <div className="text-center py-8 text-gray-600">
-          <Newspaper className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+        <div className="text-center py-8 text-[#71717A]">
+          <Newspaper className="w-12 h-12 text-[#A1A1AA] mx-auto mb-3" />
           <p>No recent news found for {companyName}</p>
         </div>
       )}

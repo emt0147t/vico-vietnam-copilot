@@ -130,7 +130,7 @@ class MarketIndustryController {
         marketIndex,
         economicData,
         industryInfo,
-        industriyStats
+        industryStats
       );
 
       const report: ComprehensiveMarketReport = {
@@ -165,10 +165,10 @@ class MarketIndustryController {
           recentTrends: industryInfo.recentTrends,
           association: industryInfo.industryAssociation
             ? {
-                name: industryInfo.industryAssociation.name,
-                website: industryInfo.industryAssociation.website,
-                email: industryInfo.industryAssociation.contactEmail,
-              }
+              name: industryInfo.industryAssociation.name,
+              website: industryInfo.industryAssociation.website,
+              email: industryInfo.industryAssociation.contactEmail,
+            }
             : null,
         },
 
@@ -176,7 +176,7 @@ class MarketIndustryController {
         financialPulse: {
           topCompaniesIndustry: topCompanies.map((c) => ({
             name: c.name,
-            employees: c.employees,
+            employees: String(c.size || ''),
             sentiment: c.sentiment || 'Neutral',
             growth: c.growth || 0,
           })),
@@ -198,11 +198,11 @@ class MarketIndustryController {
               marketIndex.concentrationRatio.top5EmployeeShare
             ),
           },
-          growthLeaders: topCompanies.map((c, idx) => ({
+          growthLeaders: topCompanies.map((c) => ({
             name: c.name,
             growth: c.growth || 0,
             sentiment: c.sentiment || 'Neutral',
-            employees: c.employees,
+            employees: String(c.size || ''),
           })),
           hiringSignals: {
             trend: marketIndex.hiringTrend.trend,
@@ -278,7 +278,7 @@ class MarketIndustryController {
     marketIndex: any,
     economicData: any,
     industryInfo: any,
-    industriyStats: any
+    industryStats: any
   ) {
     const insights: string[] = [];
     const opportunities: string[] = [];
@@ -311,7 +311,7 @@ class MarketIndustryController {
       `Market concentration: ${marketIndex.concentrationRatio.marketConcentration} (Top 5 control ${marketIndex.concentrationRatio.top5EmployeeShare.toFixed(1)}%)`
     );
     insights.push(
-      `Industry sentiment: ${marketIndex.industryHealth.sentimentScore.toFixed(1)}/100 (${industriyStats.totalCompanies > 0 ? 'Positive signal' : 'Data limited'})`
+      `Industry sentiment: ${marketIndex.industryHealth.sentimentScore.toFixed(1)}/100 (${industryStats.totalCompanies > 0 ? 'Positive signal' : 'Data limited'})`
     );
 
     // Generate opportunities

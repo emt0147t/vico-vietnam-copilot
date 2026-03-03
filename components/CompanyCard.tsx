@@ -11,12 +11,12 @@
  * - Responsive design
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Building2, TrendingUp, TrendingDown, Minus,
-    Newspaper, Calendar, MapPin, Users, ExternalLink,
-    ChevronRight, Sparkles, AlertCircle, RefreshCw
+    Newspaper, Calendar, MapPin, Users,
+    ChevronRight, Sparkles, AlertCircle, RefreshCw, Shield
 } from 'lucide-react';
 import { Skeleton } from './DashboardLayout';
 
@@ -38,13 +38,17 @@ export interface CompanyCardData {
     products?: string;
     customers?: string;
     intro?: string;
-    
+
     // Denormalized fields from Prisma schema
     latestNewsSentiment?: 'Positive' | 'Neutral' | 'Negative' | null;
     newsCount?: number;
     headlineSnapshot?: string[];
     latestNewsAt?: Date | string;
     marketShare?: number;
+
+    // Data quality tier (from companyFilter)
+    dataTier?: 'premium' | 'standard' | 'basic';
+    dataScore?: number;
 }
 
 interface CompanyCardProps {
@@ -68,7 +72,7 @@ interface ErrorStateProps {
 export const CompanyCardSkeleton = ({ variant = 'default' }: { variant?: 'default' | 'compact' | 'expanded' }) => {
     if (variant === 'compact') {
         return (
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4 flex items-center gap-4">
+            <div className="bg-white rounded-xl border border-[#E4E4E7] p-4 flex items-center gap-4">
                 <Skeleton variant="circle" className="w-10 h-10 flex-shrink-0" />
                 <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-3/4" />
@@ -80,7 +84,7 @@ export const CompanyCardSkeleton = ({ variant = 'default' }: { variant?: 'defaul
     }
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 space-y-4">
+        <div className="bg-white rounded-2xl border border-[#E4E4E7] p-6 space-y-4">
             <div className="flex items-start gap-4">
                 <Skeleton variant="circle" className="w-14 h-14 flex-shrink-0" />
                 <div className="flex-1 space-y-2">
@@ -115,9 +119,9 @@ export const CompanyCardSkeleton = ({ variant = 'default' }: { variant?: 'defaul
 // ============================================================================
 
 export const ErrorState = ({ message = 'Failed to load data', onRetry }: ErrorStateProps) => (
-    <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 p-6 flex flex-col items-center justify-center text-center space-y-3">
+    <div className="bg-red-50 rounded-2xl border border-red-200 p-6 flex flex-col items-center justify-center text-center space-y-3">
         <AlertCircle className="w-8 h-8 text-red-500" />
-        <p className="text-red-700 dark:text-red-400 font-medium">{message}</p>
+        <p className="text-red-700 font-medium">{message}</p>
         {onRetry && (
             <button
                 onClick={onRetry}
@@ -137,20 +141,20 @@ export const ErrorState = ({ message = 'Failed to load data', onRetry }: ErrorSt
 const SentimentBadge = ({ sentiment }: { sentiment?: 'Positive' | 'Neutral' | 'Negative' | null }) => {
     const config = {
         Positive: {
-            bg: 'bg-emerald-100 dark:bg-emerald-900/30',
-            text: 'text-emerald-700 dark:text-emerald-400',
+            bg: 'bg-emerald-100',
+            text: 'text-emerald-700',
             icon: TrendingUp,
             label: 'Bullish'
         },
         Negative: {
-            bg: 'bg-red-100 dark:bg-red-900/30',
-            text: 'text-red-700 dark:text-red-400',
+            bg: 'bg-red-100',
+            text: 'text-red-700',
             icon: TrendingDown,
             label: 'Bearish'
         },
         Neutral: {
-            bg: 'bg-gray-100 dark:bg-gray-800',
-            text: 'text-gray-600 dark:text-gray-400',
+            bg: 'bg-[#F4F4F5]',
+            text: 'text-[#71717A]',
             icon: Minus,
             label: 'Neutral'
         }
@@ -163,6 +167,60 @@ const SentimentBadge = ({ sentiment }: { sentiment?: 'Positive' | 'Neutral' | 'N
         <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${current.bg} ${current.text}`}>
             <Icon className="w-3 h-3" />
             {current.label}
+        </div>
+    );
+};
+
+// ============================================================================
+// DATA TIER BADGE COMPONENT
+// ============================================================================
+
+const DataTierBadge = ({ tier, score }: { tier?: 'premium' | 'standard' | 'basic'; score?: number }) => {
+    if (!tier) return null;
+
+    const config = {
+        premium: {
+            bg: 'bg-amber-100',
+            text: 'text-amber-700',
+            border: 'border-amber-200',
+            label: '⭐ Premium',
+            ringColor: '#f59e0b',
+        },
+        standard: {
+            bg: 'bg-blue-100',
+            text: 'text-blue-700',
+            border: 'border-blue-200',
+            label: 'Standard',
+            ringColor: '#3b82f6',
+        },
+        basic: {
+            bg: 'bg-[#F4F4F5]',
+            text: 'text-[#71717A]',
+            border: 'border-[#E4E4E7]',
+            label: '⚠️ Limited',
+            ringColor: '#6b7280',
+        },
+    };
+
+    const current = config[tier];
+
+    return (
+        <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${current.bg} ${current.text} ${current.border}`}>
+            {score !== undefined && (
+                <svg width="16" height="16" viewBox="0 0 16 16" className="flex-shrink-0" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="2" opacity={0.15} />
+                    <circle
+                        cx="8" cy="8" r="6" fill="none"
+                        stroke={current.ringColor} strokeWidth="2" strokeLinecap="round"
+                        strokeDasharray={`${2 * Math.PI * 6}`}
+                        strokeDashoffset={`${2 * Math.PI * 6 * (1 - (score / 100))}`}
+                        style={{ transition: 'stroke-dashoffset 800ms ease-out' }}
+                    />
+                </svg>
+            )}
+            <Shield className="w-2.5 h-2.5" />
+            {current.label}
+            {score !== undefined && <span className="opacity-60">{score}</span>}
         </div>
     );
 };
@@ -187,7 +245,7 @@ export const CompanyCard = ({
     }
 
     // Format date helper
-    const formatDate = (date?: Date | string) => {
+    const _formatDate = (date?: Date | string) => {
         if (!date) return null;
         const d = typeof date === 'string' ? new Date(date) : date;
         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -199,19 +257,19 @@ export const CompanyCard = ({
             <motion.div
                 whileHover={{ scale: 1.01 }}
                 onClick={() => onClick?.(company)}
-                className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4 flex items-center gap-4 cursor-pointer hover:border-red-200 dark:hover:border-red-900 hover:shadow-md transition-all"
+                className="bg-white rounded-xl border border-[#E4E4E7] p-4 flex items-center gap-4 cursor-pointer hover:border-red-200 hover:shadow-md transition-all"
             >
                 <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0">
                     {company.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 dark:text-white truncate">{company.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                    <h3 className="font-semibold text-[#18181B] truncate">{company.name}</h3>
+                    <p className="text-sm text-[#71717A] truncate">
                         {company.industry} {company.ticker && `· ${company.ticker}`}
                     </p>
                 </div>
                 <SentimentBadge sentiment={company.latestNewsSentiment} />
-                <ChevronRight className="w-4 h-4 text-gray-400" />
+                <ChevronRight className="w-4 h-4 text-[#A1A1AA]" />
             </motion.div>
         );
     }
@@ -223,7 +281,7 @@ export const CompanyCard = ({
             onHoverStart={() => setIsHovered(true)}
             onHoverEnd={() => setIsHovered(false)}
             onClick={() => onClick?.(company)}
-            className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden cursor-pointer hover:border-red-200 dark:hover:border-red-900 hover:shadow-xl transition-all duration-300"
+            className="bg-white rounded-2xl border border-[#E4E4E7] overflow-hidden cursor-pointer hover:border-red-200 hover:shadow-xl transition-all duration-300"
         >
             {/* Header */}
             <div className="p-6 pb-4">
@@ -232,31 +290,32 @@ export const CompanyCard = ({
                     <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg flex-shrink-0">
                         {company.name.charAt(0).toUpperCase()}
                     </div>
-                    
+
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate">{company.name}</h3>
+                            <h3 className="font-bold text-lg text-[#18181B] truncate">{company.name}</h3>
                             {company.ticker && (
-                                <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold rounded">
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-bold rounded">
                                     {company.ticker}
                                 </span>
                             )}
                         </div>
                         {company.englishName && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{company.englishName}</p>
+                            <p className="text-sm text-[#71717A] truncate">{company.englishName}</p>
                         )}
-                        
+
                         {/* Tags */}
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                             {company.industry && (
-                                <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-medium rounded-lg">
+                                <span className="px-2 py-1 bg-[#F4F4F5] text-[#71717A] text-xs font-medium rounded-lg">
                                     {company.industry}
                                 </span>
                             )}
+                            <DataTierBadge tier={company.dataTier} score={company.dataScore} />
                             <SentimentBadge sentiment={company.latestNewsSentiment} />
                             {company.newsCount !== undefined && company.newsCount > 0 && (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-lg">
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-lg">
                                     <Newspaper className="w-3 h-3" />
                                     {company.newsCount} articles
                                 </span>
@@ -269,7 +328,7 @@ export const CompanyCard = ({
             {/* Description */}
             {company.intro && (
                 <div className="px-6 pb-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                    <p className="text-sm text-[#71717A] line-clamp-2">
                         {company.intro}
                     </p>
                 </div>
@@ -278,13 +337,13 @@ export const CompanyCard = ({
             {/* Headlines Preview */}
             {showNews && company.headlineSnapshot && company.headlineSnapshot.length > 0 && (
                 <div className="px-6 pb-4">
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl space-y-2">
-                        <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <div className="p-3 bg-[#FAFAFA] rounded-xl space-y-2">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-[#71717A] uppercase tracking-wider">
                             <Sparkles className="w-3 h-3" />
                             Latest Headlines
                         </div>
                         {company.headlineSnapshot.slice(0, 2).map((headline, i) => (
-                            <p key={i} className="text-sm text-gray-700 dark:text-gray-300 line-clamp-1">
+                            <p key={i} className="text-sm text-[#18181B] line-clamp-1">
                                 • {headline}
                             </p>
                         ))}
@@ -296,32 +355,32 @@ export const CompanyCard = ({
             {variant === 'expanded' && (
                 <div className="px-6 pb-4 grid grid-cols-3 gap-3">
                     {company.yearFounded && (
-                        <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
-                            <Calendar className="w-4 h-4 text-gray-400 mx-auto mb-1" />
-                            <p className="text-xs text-gray-500">Founded</p>
-                            <p className="font-bold text-gray-900 dark:text-white">{company.yearFounded}</p>
+                        <div className="p-3 bg-[#FAFAFA] rounded-xl text-center">
+                            <Calendar className="w-4 h-4 text-[#A1A1AA] mx-auto mb-1" />
+                            <p className="text-xs text-[#71717A]">Founded</p>
+                            <p className="font-bold text-[#18181B]">{company.yearFounded}</p>
                         </div>
                     )}
                     {company.employeeSize && (
-                        <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
-                            <Users className="w-4 h-4 text-gray-400 mx-auto mb-1" />
-                            <p className="text-xs text-gray-500">Employees</p>
-                            <p className="font-bold text-gray-900 dark:text-white">{company.employeeSize}</p>
+                        <div className="p-3 bg-[#FAFAFA] rounded-xl text-center">
+                            <Users className="w-4 h-4 text-[#A1A1AA] mx-auto mb-1" />
+                            <p className="text-xs text-[#71717A]">Employees</p>
+                            <p className="font-bold text-[#18181B]">{company.employeeSize}</p>
                         </div>
                     )}
                     {company.revenue && (
-                        <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
-                            <TrendingUp className="w-4 h-4 text-gray-400 mx-auto mb-1" />
-                            <p className="text-xs text-gray-500">Revenue</p>
-                            <p className="font-bold text-gray-900 dark:text-white">{company.revenue}</p>
+                        <div className="p-3 bg-[#FAFAFA] rounded-xl text-center">
+                            <TrendingUp className="w-4 h-4 text-[#A1A1AA] mx-auto mb-1" />
+                            <p className="text-xs text-[#71717A]">Revenue</p>
+                            <p className="font-bold text-[#18181B]">{company.revenue}</p>
                         </div>
                     )}
                 </div>
             )}
 
             {/* Footer */}
-            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/30 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+            <div className="px-6 py-4 bg-[#FAFAFA] border-t border-[#E4E4E7] flex items-center justify-between">
+                <div className="flex items-center gap-3 text-sm text-[#71717A]">
                     {company.address && (
                         <span className="flex items-center gap-1 truncate max-w-[200px]">
                             <MapPin className="w-4 h-4 flex-shrink-0" />
@@ -329,7 +388,7 @@ export const CompanyCard = ({
                         </span>
                     )}
                 </div>
-                
+
                 {showActions && (
                     <AnimatePresence>
                         {isHovered && (
@@ -337,7 +396,7 @@ export const CompanyCard = ({
                                 initial={{ opacity: 0, x: 10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 10 }}
-                                className="flex items-center gap-1 text-red-600 dark:text-red-400 font-semibold text-sm"
+                                className="flex items-center gap-1 text-red-600 font-semibold text-sm"
                             >
                                 View Details
                                 <ChevronRight className="w-4 h-4" />
@@ -383,11 +442,10 @@ export const CompanyGrid = ({
     // Loading state
     if (isLoading) {
         return (
-            <div className={`grid gap-4 ${
-                columns === 1 ? 'grid-cols-1' :
+            <div className={`grid gap-4 ${columns === 1 ? 'grid-cols-1' :
                 columns === 2 ? 'grid-cols-1 md:grid-cols-2' :
-                'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-            }`}>
+                    'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                }`}>
                 {Array.from({ length: 6 }).map((_, i) => (
                     <div key={i}>
                         <CompanyCardSkeleton variant={variant} />
@@ -400,20 +458,19 @@ export const CompanyGrid = ({
     // Empty state
     if (companies.length === 0) {
         return (
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 p-12 flex flex-col items-center justify-center text-center">
-                <Building2 className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 font-medium">{emptyMessage}</p>
+            <div className="bg-[#FAFAFA] rounded-2xl border border-[#E4E4E7] p-12 flex flex-col items-center justify-center text-center">
+                <Building2 className="w-12 h-12 text-[#A1A1AA] mb-4" />
+                <p className="text-[#71717A] font-medium">{emptyMessage}</p>
             </div>
         );
     }
 
     // Grid
     return (
-        <div className={`grid gap-4 ${
-            columns === 1 ? 'grid-cols-1' :
+        <div className={`grid gap-4 ${columns === 1 ? 'grid-cols-1' :
             columns === 2 ? 'grid-cols-1 md:grid-cols-2' :
-            'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-        }`}>
+                'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+            }`}>
             {companies.map((company) => (
                 <div key={company.id}>
                     <CompanyCard

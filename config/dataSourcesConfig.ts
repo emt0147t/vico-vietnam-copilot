@@ -133,54 +133,69 @@ export const DATA_SOURCES_CONFIG = {
 // ================================================================
 export const API_CREDENTIALS = {
     newsApi: {
-        key: process.env.NEWSAPI_KEY,
+        key: process.env['NEWSAPI_KEY'],
         endpoint: 'https://newsapi.org/v2',
         rateLimit: { requests: 100, period: 24 * 60 * 60 * 1000 },
         docs: 'https://newsapi.org'
     },
     gnews: {
-        key: process.env.GNEWS_KEY,
+        key: process.env['GNEWS_KEY'],
         endpoint: 'https://gnews.io/api/v4',
         rateLimit: { requests: 100, period: 24 * 60 * 60 * 1000 },
         docs: 'https://gnews.io'
     },
     crunchbase: {
-        key: process.env.CRUNCHBASE_API_KEY,
+        key: process.env['CRUNCHBASE_API_KEY'],
         endpoint: 'https://api.crunchbase.com/api/v4',
         rateLimit: { requests: 1000, period: 24 * 60 * 60 * 1000 },
         docs: 'https://www.crunchbase.com/'
     },
     builtwith: {
-        key: process.env.BUILTWITH_API_KEY,
+        key: process.env['BUILTWITH_API_KEY'],
         endpoint: 'https://api.builtwith.com/v20',
         rateLimit: { requests: 1000, period: 24 * 60 * 60 * 1000 },
         docs: 'https://builtwith.com/api'
     },
     apolloIo: {
-        key: process.env.APOLLO_IO_KEY,
+        key: process.env['APOLLO_IO_KEY'],
         endpoint: 'https://api.apollo.io/v1',
         rateLimit: { requests: 10000, period: 24 * 60 * 60 * 1000 },
         docs: 'https://www.apollo.io/api'
     },
     rocketreach: {
-        key: process.env.ROCKETREACH_KEY,
+        key: process.env['ROCKETREACH_KEY'],
         endpoint: 'https://api.rocketreach.co/rest/v2',
         rateLimit: { requests: 5000, period: 24 * 60 * 60 * 1000 },
         docs: 'https://app.rocketreach.com/api'
     },
     alphaVantage: {
-        key: process.env.ALPHA_VANTAGE_KEY,
+        key: process.env['ALPHA_VANTAGE_KEY'],
         endpoint: 'https://www.alphavantage.co/query',
         rateLimit: { requests: 500, period: 24 * 60 * 60 * 1000 },
         docs: 'https://www.alphavantage.co/'
     },
     iexcloud: {
-        key: process.env.IEX_CLOUD_KEY,
+        key: process.env['IEX_CLOUD_KEY'],
         endpoint: 'https://cloud.iexapis.com/stable',
         rateLimit: { requests: 100, period: 60 * 1000 },
         docs: 'https://iexcloud.io/'
     }
 };
+
+// Return only credentials that have an API key configured in the environment.
+export function getEnabledApiCredentials() {
+    const enabled: Record<string, any> = {};
+    for (const k of Object.keys(API_CREDENTIALS)) {
+        // treat empty string or undefined as disabled
+        const cred = (API_CREDENTIALS as any)[k];
+        if (cred && cred.key) {
+            enabled[k] = cred;
+        }
+    }
+    return enabled;
+}
+
+export const ENABLED_API_CREDENTIALS = getEnabledApiCredentials();
 
 // ================================================================
 // FALLBACK STRATEGIES

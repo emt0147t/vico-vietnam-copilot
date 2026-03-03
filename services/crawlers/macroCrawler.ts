@@ -2,11 +2,11 @@ import axios from 'axios';
 
 export const fetchMacroEconomics = async () => {
   try {
-    console.log("🌍 Đang lấy dữ liệu Vĩ mô từ World Bank...");
+    console.log("🌍 Fetching macroeconomic data from World Bank...");
 
-    // URL API World Bank cho Việt Nam (Mã: VNM)
+    // World Bank API URL for Vietnam (Code: VNM)
     // GDP Growth: NY.GDP.MKTP.KD.ZG
-    // Lạm phát (CPI): FP.CPI.TOTL.ZG
+    // Inflation (CPI): FP.CPI.TOTL.ZG
     // FDI: BX.KLT.DINV.CD.WD
     const indicators = [
       'NY.GDP.MKTP.KD.ZG', 
@@ -17,15 +17,15 @@ export const fetchMacroEconomics = async () => {
     const results = [];
 
     for (const indicator of indicators) {
-      // Gọi API lấy dữ liệu 5 năm gần nhất
+      // Call API to get data for the last 5 years
       const url = `https://api.worldbank.org/v2/country/VNM/indicator/${indicator}?format=json&per_page=5&date=2020:2025`;
       const response = await axios.get(url);
       
-      // World Bank trả về mảng: [Metadata, Data[]]
+      // World Bank returns array: [Metadata, Data[]]
       const data = response.data[1]; 
       
       if (data && data.length > 0) {
-        // Lấy năm gần nhất có số liệu
+        // Get the most recent year with data
         const latest = data.find((d: any) => d.value !== null);
         results.push({
           indicator: latest.indicator.value,
@@ -36,11 +36,11 @@ export const fetchMacroEconomics = async () => {
       }
     }
 
-    console.log("✅ Kết quả Vĩ mô:", results);
-    return results; // Sau này sẽ lưu vào DB
+    console.log("✅ Macro results:", results);
+    return results; // Will be saved to DB later
 
   } catch (error) {
-    console.error("❌ Lỗi lấy Macro data:", error);
+    console.error("❌ Error fetching Macro data:", error);
     return [];
   }
 };

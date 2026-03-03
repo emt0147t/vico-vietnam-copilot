@@ -82,7 +82,7 @@ const TableSkeleton = ({
 }) => (
     <div className="space-y-2">
         {/* Header */}
-        <div className={`flex gap-4 ${compact ? 'py-2' : 'py-3'} px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg`}>
+        <div className={`flex gap-4 ${compact ? 'py-2' : 'py-3'} px-4 bg-[#FAFAFA] rounded-lg`}>
             {Array.from({ length: columns }).map((_, i) => (
                 <span key={i}>
                     <Skeleton className="h-4 flex-1" />
@@ -91,7 +91,7 @@ const TableSkeleton = ({
         </div>
         {/* Rows */}
         {Array.from({ length: rows }).map((_, i) => (
-            <div key={i} className={`flex gap-4 ${compact ? 'py-2' : 'py-3'} px-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800`}>
+            <div key={i} className={`flex gap-4 ${compact ? 'py-2' : 'py-3'} px-4 bg-white rounded-lg border border-[#E4E4E7]`}>
                 {Array.from({ length: columns }).map((_, j) => (
                     <span key={j}>
                         <Skeleton className="h-4 flex-1" />
@@ -218,9 +218,9 @@ export function DataTable<T extends { id: string | number }>({
     // Error state
     if (error) {
         return (
-            <div className="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 p-8 text-center">
+            <div className="bg-red-50 rounded-xl border border-red-200 p-8 text-center">
                 <X className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <p className="text-red-700 dark:text-red-400 font-medium mb-4">{error}</p>
+                <p className="text-red-700 font-medium mb-4">{error}</p>
                 {onRetry && (
                     <button
                         onClick={onRetry}
@@ -254,9 +254,9 @@ export function DataTable<T extends { id: string | number }>({
     // Empty state
     if (data.length === 0) {
         return (
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
-                <Filter className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 font-medium">{emptyMessage}</p>
+            <div className="bg-[#FAFAFA] rounded-xl border border-[#E4E4E7] p-12 text-center">
+                <Filter className="w-12 h-12 text-[#A1A1AA] mx-auto mb-4" />
+                <p className="text-[#71717A] font-medium">{emptyMessage}</p>
             </div>
         );
     }
@@ -270,7 +270,7 @@ export function DataTable<T extends { id: string | number }>({
                 {/* Search */}
                 {searchable && (
                     <div className="relative w-full sm:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A1A1AA]" />
                         <input
                             type="text"
                             placeholder={searchPlaceholder}
@@ -279,7 +279,7 @@ export function DataTable<T extends { id: string | number }>({
                                 setSearchQuery(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            className="w-full sm:w-64 pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 transition-all"
+                            className="w-full sm:w-64 pl-10 pr-4 py-2.5 bg-white border border-[#E4E4E7] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
                         />
                     </div>
                 )}
@@ -290,16 +290,16 @@ export function DataTable<T extends { id: string | number }>({
                     {onRefresh && (
                         <button
                             onClick={onRefresh}
-                            className="p-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            className="p-2.5 bg-white border border-[#E4E4E7] rounded-xl hover:bg-[#FAFAFA] transition-colors"
                             title="Refresh"
                         >
-                            <RefreshCw className="w-4 h-4 text-gray-500" />
+                            <RefreshCw className="w-4 h-4 text-[#71717A]" />
                         </button>
                     )}
                     {onExport && (
                         <button
                             onClick={onExport}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E4E4E7] rounded-xl hover:bg-[#FAFAFA] transition-colors text-sm font-medium text-[#18181B]"
                         >
                             <Download className="w-4 h-4" />
                             Export
@@ -310,17 +310,17 @@ export function DataTable<T extends { id: string | number }>({
 
             {/* Results count */}
             {searchQuery && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-[#71717A]">
                     {sortedData.length} results for "{searchQuery}"
                 </p>
             )}
 
             {/* Table */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="bg-white rounded-xl border border-[#E4E4E7] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         {/* Header */}
-                        <thead className={`bg-gray-50 dark:bg-gray-800/50 ${stickyHeader ? 'sticky top-0 z-10' : ''}`}>
+                        <thead className={`bg-[#FAFAFA] ${stickyHeader ? 'sticky top-0 z-10' : ''}`}>
                             <tr>
                                 {/* Checkbox column */}
                                 {selectable && (
@@ -330,7 +330,7 @@ export function DataTable<T extends { id: string | number }>({
                                             className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                                                 selectedIds.length === paginatedData.length && paginatedData.length > 0
                                                     ? 'bg-red-600 border-red-600'
-                                                    : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
+                                                    : 'border-[#E4E4E7] hover:border-red-400'
                                             }`}
                                         >
                                             {selectedIds.length === paginatedData.length && paginatedData.length > 0 && (
@@ -343,8 +343,8 @@ export function DataTable<T extends { id: string | number }>({
                                 {columns.map((column) => (
                                     <th
                                         key={column.id}
-                                        className={`${cellPadding} text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ${
-                                            column.sortable !== false ? 'cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-300' : ''
+                                        className={`${cellPadding} text-left text-xs font-bold text-[#71717A] uppercase tracking-wider ${
+                                            column.sortable !== false ? 'cursor-pointer select-none hover:text-[#18181B]' : ''
                                         }`}
                                         style={{ width: column.width }}
                                         onClick={() => column.sortable !== false && handleSort(column.id)}
@@ -370,7 +370,7 @@ export function DataTable<T extends { id: string | number }>({
                         </thead>
 
                         {/* Body */}
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                        <tbody className="divide-y divide-[#E4E4E7]">
                             {paginatedData.map((row, rowIndex) => (
                                 <motion.tr
                                     key={row.id}
@@ -380,9 +380,9 @@ export function DataTable<T extends { id: string | number }>({
                                     onClick={() => onRowClick?.(row)}
                                     className={`
                                         ${onRowClick ? 'cursor-pointer' : ''}
-                                        ${hoverable ? 'hover:bg-gray-50 dark:hover:bg-gray-800/50' : ''}
-                                        ${striped && rowIndex % 2 === 1 ? 'bg-gray-50/50 dark:bg-gray-800/20' : ''}
-                                        ${selectedIds.includes(row.id) ? 'bg-red-50 dark:bg-red-900/10' : ''}
+                                        ${hoverable ? 'hover:bg-[#FAFAFA]' : ''}
+                                        ${striped && rowIndex % 2 === 1 ? 'bg-[#FAFAFA]/50' : ''}
+                                        ${selectedIds.includes(row.id) ? 'bg-red-50' : ''}
                                         transition-colors
                                     `}
                                 >
@@ -394,7 +394,7 @@ export function DataTable<T extends { id: string | number }>({
                                                 className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                                                     selectedIds.includes(row.id)
                                                         ? 'bg-red-600 border-red-600'
-                                                        : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
+                                                        : 'border-[#E4E4E7] hover:border-red-400'
                                                 }`}
                                             >
                                                 {selectedIds.includes(row.id) && (
@@ -409,7 +409,7 @@ export function DataTable<T extends { id: string | number }>({
                                         return (
                                             <td
                                                 key={column.id}
-                                                className={`${cellPadding} text-sm text-gray-900 dark:text-white ${
+                                                className={`${cellPadding} text-sm text-[#18181B] ${
                                                     column.align === 'center' ? 'text-center' :
                                                     column.align === 'right' ? 'text-right' : ''
                                                 }`}
@@ -426,9 +426,9 @@ export function DataTable<T extends { id: string | number }>({
 
                 {/* Pagination */}
                 {pagination && totalPages > 1 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/30">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 border-t border-[#E4E4E7] bg-[#FAFAFA]">
                         {/* Page size */}
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-[#71717A]">
                             <span>Show</span>
                             <select
                                 value={pageSize}
@@ -436,7 +436,7 @@ export function DataTable<T extends { id: string | number }>({
                                     setPageSize(Number(e.target.value));
                                     setCurrentPage(1);
                                 }}
-                                className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                className="px-2 py-1 bg-white border border-[#E4E4E7] rounded-lg text-[#18181B] focus:outline-none focus:ring-2 focus:ring-red-500"
                             >
                                 {pageSizeOptions.map(size => (
                                     <option key={size} value={size}>{size}</option>
@@ -450,16 +450,16 @@ export function DataTable<T extends { id: string | number }>({
                             <button
                                 onClick={() => handlePageChange(1)}
                                 disabled={currentPage === 1}
-                                className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="p-2 rounded-lg hover:bg-[#E4E4E7] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronsLeft className="w-4 h-4 text-gray-500" />
+                                <ChevronsLeft className="w-4 h-4 text-[#71717A]" />
                             </button>
                             <button
                                 onClick={() => handlePageChange(currentPage - 1)}
                                 disabled={currentPage === 1}
-                                className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="p-2 rounded-lg hover:bg-[#E4E4E7] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronLeft className="w-4 h-4 text-gray-500" />
+                                <ChevronLeft className="w-4 h-4 text-[#71717A]" />
                             </button>
 
                             {/* Page numbers */}
@@ -483,7 +483,7 @@ export function DataTable<T extends { id: string | number }>({
                                             className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                                                 currentPage === page
                                                     ? 'bg-red-600 text-white'
-                                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                                    : 'text-[#71717A] hover:bg-[#E4E4E7]'
                                             }`}
                                         >
                                             {page}
@@ -495,16 +495,16 @@ export function DataTable<T extends { id: string | number }>({
                             <button
                                 onClick={() => handlePageChange(currentPage + 1)}
                                 disabled={currentPage === totalPages}
-                                className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="p-2 rounded-lg hover:bg-[#E4E4E7] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronRight className="w-4 h-4 text-gray-500" />
+                                <ChevronRight className="w-4 h-4 text-[#71717A]" />
                             </button>
                             <button
                                 onClick={() => handlePageChange(totalPages)}
                                 disabled={currentPage === totalPages}
-                                className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="p-2 rounded-lg hover:bg-[#E4E4E7] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronsRight className="w-4 h-4 text-gray-500" />
+                                <ChevronsRight className="w-4 h-4 text-[#71717A]" />
                             </button>
                         </div>
                     </div>
@@ -518,12 +518,12 @@ export function DataTable<T extends { id: string | number }>({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
-                        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-4 z-50"
+                        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#FAFAFA] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-4 z-50"
                     >
                         <span className="font-medium">{selectedIds.length} selected</span>
                         <button
                             onClick={() => onSelectionChange?.([])}
-                            className="px-3 py-1.5 bg-white/10 dark:bg-gray-900/10 hover:bg-white/20 dark:hover:bg-gray-900/20 rounded-lg text-sm transition-colors"
+                            className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
                         >
                             Clear
                         </button>

@@ -5,6 +5,7 @@
  * - Sentiment Analysis
  * - AI Summarization via Gemini
  * - Entity Linking (Company Mentions)
+ * - Structured Event Extraction
  */
 
 import {
@@ -252,9 +253,9 @@ Impact: high/medium/low`,
           bullets.length > 0
             ? bullets
             : [
-                "Không thể tóm tắt",
-                "",
-              ],
+              "Không thể tóm tắt",
+              "",
+            ],
         keyTakeaways: bullets.slice(0, 2),
         impactLevel,
       };
@@ -389,6 +390,17 @@ Impact: high/medium/low`,
       );
       if (mentions.length > 0) {
         enriched.mentionedCompanies = mentions;
+      }
+
+      // Extract structured business events (keyword-based, fast)
+      try {
+        const { detectEventTypes } = await import('./eventExtractionService');
+        const detectedEvents = detectEventTypes(newsItem.title, newsItem.content);
+        if (detectedEvents.length > 0) {
+          (enriched as any).extractedEventTypes = detectedEvents;
+        }
+      } catch {
+        // Event extraction is optional — don't fail enrichment
       }
     } catch (error) {
       console.error("Error enriching news:", error);

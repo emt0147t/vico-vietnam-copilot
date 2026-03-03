@@ -38,6 +38,12 @@ export interface CompetitorIntelligenceInput {
         size?: string;
         source?: string;
         website?: string;
+        // Rich fields from company database (Phase 15+)
+        year?: number;
+        revenue?: string;
+        headcount?: number;
+        total_funding?: string;
+        employee_range?: string;
     }>;
 }
 
@@ -378,6 +384,7 @@ Be specific to ${competitor.name}'s actual business. Use Vietnamese for SWOT and
                 config: {
                     temperature: 0.3,
                     maxOutputTokens: 2000,
+                    tools: [{ googleSearch: {} }],
                 }
             });
 
@@ -442,7 +449,7 @@ Return ONLY valid JSON:
 }
 
 Use Vietnamese. Be specific and actionable.`,
-                config: { temperature: 0.4, maxOutputTokens: 1000 }
+                config: { temperature: 0.4, maxOutputTokens: 1000, tools: [{ googleSearch: {} }] }
             });
 
             const text = response.text || '';
@@ -541,8 +548,14 @@ function buildProfile(
     const hasAI = !!aiAnalysis;
     const ai = aiAnalysis;
 
-    const headcount = ai?.firmographics?.estimatedHeadcount || parseSizeToNumber(competitor.size);
-    const foundedYear = ai?.firmographics?.foundedYear || 0;
+    const headcount = ai?.firmographics?.estimatedHeadcount
+        || (competitor as any).headcount
+        || parseSizeToNumber(competitor.size);
+    const foundedYear = ai?.firmographics?.foundedYear
+        || (competitor as any).year
+        || 0;
+    const dbRevenue = (competitor as any).revenue;
+    const dbFunding = (competitor as any).total_funding;
 
     const profile: CompetitorProfile = {
         id: `comp-${index}`,
@@ -551,25 +564,25 @@ function buildProfile(
         industry: competitor.industry || industry,
         similarity,
         source: competitor.source || 'csv',
-        dataSource: hasAI ? 'ai_analysis' : 'estimated',
+        dataSource: hasAI ? 'ai_analysis' : (dbRevenue ? 'database' : 'estimated'),
 
         firmographics: {
-            revenue: ai?.firmographics?.estimatedRevenue || 'Chưa có dữ liệu',
+            revenue: ai?.firmographics?.estimatedRevenue || dbRevenue || 'Undisclosed',
             revenueGrowth: ai?.firmographics?.revenueGrowth || 0,
             headcount,
             headcountGrowth: ai?.firmographics?.headcountGrowth || 0,
             headcountHistory: buildHeadcountHistory(headcount, ai?.firmographics?.headcountGrowth || 0),
             funding: {
-                total: ai?.firmographics?.fundingInfo || 'Chưa có dữ liệu',
-                lastRound: ai?.firmographics?.lastRound || 'unknown',
-                lastRoundDate: ai?.firmographics?.lastRoundDate || 'unknown',
+                total: ai?.firmographics?.fundingInfo || dbFunding || 'Undisclosed',
+                lastRound: ai?.firmographics?.lastRound || 'N/A',
+                lastRoundDate: ai?.firmographics?.lastRoundDate || 'N/A',
                 investors: ai?.firmographics?.investors || [],
             },
             hq: competitor.address || (ai?.firmographics?.offices?.[0] || 'Vietnam'),
             offices: ai?.firmographics?.offices || [competitor.address || 'Vietnam'].filter(Boolean),
             foundedYear: foundedYear || 0,
             website: competitor.website || '',
-            confidence: hasAI ? 'ai_estimated' : 'industry_average',
+            confidence: hasAI ? 'ai_estimated' : (dbRevenue ? 'verified' : 'industry_average'),
         },
 
         techStack: ai?.techStack ? {
@@ -602,7 +615,7 @@ function buildProfile(
         gtmStrategy: {
             targetSegment: parseSegment(ai?.gtm?.targetSegment) || 'Both',
             salesModel: parseSalesModel(ai?.gtm?.salesModel) || 'Hybrid',
-            pricingModel: ai?.gtm?.pricingModel || 'Chưa có dữ liệu',
+            pricingModel: ai?.gtm?.pricingModel || 'Undisclosed',
             keyChannels: ai?.gtm?.keyChannels || [],
         },
 
@@ -633,7 +646,7 @@ function buildProfile(
         },
 
         digitalFootprint: {
-            monthlyTraffic: ai?.digitalPresence?.estimatedTraffic || 'Chưa có dữ liệu',
+            monthlyTraffic: ai?.digitalPresence?.estimatedTraffic || 'N/A',
             trafficGrowth: 0,
             trafficSources: [],
             topKeywords: [],

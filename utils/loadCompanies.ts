@@ -1,9 +1,9 @@
 
 /* 
 [VICO ARCHITECTURE FIX] 
-File này trước đây chứa logic kết nối trực tiếp đến MongoDB.
-Vì MongoDB driver không chạy được trên trình duyệt (thiếu net, tls, dns),
-chúng ta chuyển sang sử dụng API call thông qua fetch().
+This file previously contained direct MongoDB connection logic.
+Since MongoDB driver cannot run in the browser (missing net, tls, dns),
+we switched to using API calls via fetch().
 */
 
 /* [VICO OLD CODE]
@@ -15,8 +15,8 @@ export async function loadCompanies() {
 */
 
 /**
- * Hàm dự phòng để tránh lỗi import ở các file khác.
- * Thực tế việc lấy dữ liệu hiện tại được xử lý trong RagService.ts bằng fetch().
+ * Fallback function to prevent import errors in other files.
+ * In practice, data fetching is currently handled in RagService.ts via fetch().
  */
 export async function loadCompanies() {
     console.warn("⚠️ VICO NOTICE: Direct DB access from frontend is disabled for security and stability.");

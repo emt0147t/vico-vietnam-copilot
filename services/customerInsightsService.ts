@@ -305,7 +305,7 @@ ${industryInfo}
 
 Target Market: ${targetMarket}
 
-Return ONLY valid JSON with this EXACT structure (use Vietnamese for all text content):
+Return ONLY valid JSON with this EXACT structure (use English for all text content):
 {
   "idealCustomerProfile": {
     "firmographics": {
@@ -330,15 +330,15 @@ Return ONLY valid JSON with this EXACT structure (use Vietnamese for all text co
   },
   "userPersonas": [
     {
-      "name": "Vietnamese name with alliterative role prefix",
+      "name": "name with alliterative role prefix",
       "title": "job title",
       "avatar": "emoji",
       "age": "age range",
-      "background": "background in Vietnamese",
+      "background": "professional background",
       "goals": ["goal1", "goal2", "goal3"],
       "frustrations": ["frustration1", "frustration2", "frustration3"],
       "preferredChannels": ["channel1", "channel2", "channel3"],
-      "quote": "characteristic quote in Vietnamese",
+      "quote": "characteristic quote",
       "dayInLife": ["activity1", "activity2", "activity3"],
       "techStack": ["tool1", "tool2", "tool3"]
     }
@@ -346,7 +346,7 @@ Return ONLY valid JSON with this EXACT structure (use Vietnamese for all text co
   "painPoints": [
     {
       "category": "category",
-      "pain": "specific pain point relevant to ${companyName}'s customers in Vietnamese",
+      "pain": "specific pain point relevant to ${companyName}'s customers",
       "severity": "Critical" or "High" or "Medium" or "Low",
       "frequency": "how often",
       "currentSolution": "what they do now",
@@ -354,7 +354,7 @@ Return ONLY valid JSON with this EXACT structure (use Vietnamese for all text co
     }
   ],
   "desiredOutcomes": [
-    {"outcome": "outcome in Vietnamese", "metric": "measurable metric", "timeframe": "timeframe"}
+    {"outcome": "specific outcome", "metric": "measurable metric", "timeframe": "timeframe"}
   ],
   "triggerEvents": [
     {
@@ -362,40 +362,40 @@ Return ONLY valid JSON with this EXACT structure (use Vietnamese for all text co
       "urgency": "Immediate" or "Short-term" or "Long-term",
       "likelihood": 70,
       "signals": ["signal1", "signal2"],
-      "approach": "sales approach in Vietnamese"
+      "approach": "sales approach"
     }
   ],
   "buyingProcess": [
     {
-      "stage": "stage name in Vietnamese",
-      "description": "description in Vietnamese",
+      "stage": "stage name",
+      "description": "stage description",
       "duration": "duration",
       "activities": ["activity1", "activity2"],
       "contentNeeded": ["content1", "content2"],
       "objections": ["objection1"],
-      "successCriteria": "criteria in Vietnamese"
+      "successCriteria": "success criteria"
     }
   ],
   "purchaseBarriers": [
     {
-      "barrier": "barrier in Vietnamese",
+      "barrier": "barrier description",
       "category": "Price" or "Trust" or "Complexity" or "Timing" or "Politics" or "Competition",
       "severity": "High" or "Medium" or "Low",
-      "overcomingStrategy": "strategy in Vietnamese",
+      "overcomingStrategy": "overcoming strategy",
       "proofPoints": ["proof1", "proof2"]
     }
   ],
   "buyingCommittee": {
     "avgSize": 4,
-    "typicalCycle": "X ngày",
+    "typicalCycle": "X days",
     "budgetHolder": "job title"
   },
   "commonObjections": [
     {
-      "objection": "objection in Vietnamese",
+      "objection": "objection statement",
       "frequency": 75,
       "category": "Price or Usability or Competition or Timing or Implementation",
-      "response": "detailed response in Vietnamese",
+      "response": "detailed response",
       "proofPoints": ["proof1", "proof2"]
     }
   ],
@@ -419,7 +419,7 @@ Return ONLY valid JSON with this EXACT structure (use Vietnamese for all text co
   ],
   "npsScore": 45,
   "executiveSummary": {
-    "overview": "2-3 sentence overview in Vietnamese about ${companyName}'s customer landscape",
+    "overview": "2-3 sentence overview about ${companyName}'s customer landscape",
     "keyInsights": ["insight1", "insight2", "insight3", "insight4", "insight5"],
     "recommendations": ["recommendation1", "recommendation2", "recommendation3"]
   }
@@ -434,7 +434,7 @@ IMPORTANT RULES:
 - Sentiment: reflect typical ${industry} B2B landscape based on your knowledge (not real survey data — note this)
 - NPS: industry benchmarks for ${industry} in Vietnam (30-60 range)
 - Feature requests: realistic for ${companyName}'s product type, votes 50-250
-- All text content in Vietnamese
+- All text content in English
 - Be specific to ${companyName} — do NOT use generic templates
 - 3-4 decision makers, 2-3 key influencers`;
 
@@ -447,6 +447,7 @@ IMPORTANT RULES:
                 config: {
                     temperature: 0.4,
                     maxOutputTokens: 4000,
+                    tools: [{ googleSearch: {} }],
                 }
             });
 
@@ -494,18 +495,18 @@ function buildFallbackICP(industry: string, ctx: IndustryContext): IdealCustomer
             companySize: ['SME (50-200)', 'Mid-Market (200-1000)'],
             industries: industryTargets[industry] || ['SME', 'Enterprise', 'Startup'],
             regions: ctx.commonLocations.length > 0 ? ctx.commonLocations.slice(0, 3) : ['Ho Chi Minh City', 'Hanoi', 'Da Nang'],
-            annualRevenue: 'Chưa có dữ liệu cụ thể',
+            annualRevenue: 'No specific data available',
             employeeCount: ctx.avgSize !== 'Unknown' ? ctx.avgSize : '50-500',
             techMaturity: 'Mainstream'
         },
         decisionMakers: [
-            { title: 'CEO / Founder', role: 'Economic Buyer', concerns: ['ROI', 'Chi phí tổng thể', 'Rủi ro'], successMetrics: ['Tăng trưởng doanh thu', 'Giảm chi phí'] },
-            { title: 'CTO / IT Director', role: 'Technical Buyer', concerns: ['Tích hợp hệ thống', 'Bảo mật', 'Khả năng mở rộng'], successMetrics: ['Uptime', 'Hiệu suất hệ thống'] },
-            { title: 'Operations Manager', role: 'User Buyer', concerns: ['Dễ sử dụng', 'Quy trình hàng ngày'], successMetrics: ['Tiết kiệm thời gian', 'Tỷ lệ adoption'] },
+            { title: 'CEO / Founder', role: 'Economic Buyer', concerns: ['ROI', 'Total cost', 'Risk'], successMetrics: ['Revenue growth', 'Cost reduction'] },
+            { title: 'CTO / IT Director', role: 'Technical Buyer', concerns: ['System integration', 'Security', 'Scalability'], successMetrics: ['Uptime', 'System performance'] },
+            { title: 'Operations Manager', role: 'User Buyer', concerns: ['Ease of use', 'Daily workflows'], successMetrics: ['Time savings', 'Adoption rate'] },
         ],
         keyInfluencers: [
-            { title: 'End Users', influence: 'High', focus: 'Trải nghiệm sử dụng hàng ngày' },
-            { title: 'IT Team', influence: 'Medium', focus: 'Tích hợp và bảo trì' },
+            { title: 'End Users', influence: 'High', focus: 'Daily user experience' },
+            { title: 'IT Team', influence: 'Medium', focus: 'Integration and maintenance' },
         ]
     };
 }
@@ -513,28 +514,28 @@ function buildFallbackICP(industry: string, ctx: IndustryContext): IdealCustomer
 function buildFallbackPersonas(industry: string, companyName: string): UserPersona[] {
     return [
         {
-            name: 'Giám đốc Giang',
+            name: 'Director Giang',
             title: 'CEO / Founder',
             avatar: '👔',
             age: '35-50',
-            background: `Lãnh đạo doanh nghiệp ${industry}, quan tâm đến tăng trưởng và hiệu quả`,
-            goals: ['Mở rộng thị trường', 'Tối ưu chi phí vận hành', 'Tăng trưởng doanh thu'],
-            frustrations: ['Thiếu dữ liệu để ra quyết định', 'Quy trình thủ công', 'Khó tìm talent'],
-            preferredChannels: ['LinkedIn', 'Hội thảo ngành', 'Peer referral'],
-            quote: '"Tôi cần giải pháp có thể đo lường được ROI rõ ràng."',
-            dayInLife: ['Họp chiến lược', 'Review KPI', 'Gặp đối tác', 'Đánh giá vendor'],
+            background: `Business leader in ${industry}, focused on growth and efficiency`,
+            goals: ['Market expansion', 'Optimize operational costs', 'Revenue growth'],
+            frustrations: ['Lack of data for decision-making', 'Manual processes', 'Difficulty finding talent'],
+            preferredChannels: ['LinkedIn', 'Industry seminars', 'Peer referral'],
+            quote: '"I need a solution that delivers clearly measurable ROI."',
+            dayInLife: ['Strategy meetings', 'Review KPI', 'Partner meetings', 'Vendor evaluation'],
             techStack: ['Email', 'Slack', 'Google Workspace', 'ERP']
         },
         {
-            name: 'Kỹ thuật Khoa',
+            name: 'Engineer Khoa',
             title: 'CTO / Technical Lead',
             avatar: '👨‍💻',
             age: '30-40',
-            background: `Chuyên gia kỹ thuật trong ngành ${industry}, tập trung vào hệ thống và công nghệ`,
-            goals: ['Xây dựng hệ thống ổn định', 'Giảm technical debt', 'Áp dụng công nghệ mới'],
-            frustrations: ['Legacy systems', 'Documentation kém', 'Vendor lock-in'],
+            background: `Technical expert in ${industry}, focused on systems and technology`,
+            goals: ['Build stable systems', 'Reduce technical debt', 'Adopt new technologies'],
+            frustrations: ['Legacy systems', 'Poor documentation', 'Vendor lock-in'],
             preferredChannels: ['GitHub', 'Tech blogs', 'Stack Overflow', 'Meetups'],
-            quote: '"Production-ready, không phải demo."',
+            quote: '"Production-ready, not just a demo."',
             dayInLife: ['Code review', 'Architecture planning', 'Team standup', 'Research'],
             techStack: ['AWS/GCP', 'Docker', 'CI/CD', 'Monitoring tools']
         },
@@ -543,9 +544,9 @@ function buildFallbackPersonas(industry: string, companyName: string): UserPerso
             title: 'Operations / Product Manager',
             avatar: '👩‍💼',
             age: '28-38',
-            background: `Quản lý vận hành trong ngành ${industry}, data-driven`,
-            goals: ['Tăng hiệu suất team', 'Cải thiện trải nghiệm khách hàng', 'Giảm thời gian xử lý'],
-            frustrations: ['Data silos', 'Quy trình thủ công', 'Thiếu automation'],
+            background: `Operations manager in ${industry}, data-driven`,
+            goals: ['Increase team productivity', 'Improve customer experience', 'Reduce processing time'],
+            frustrations: ['Data silos', 'Manual processes', 'Lack of automation'],
             preferredChannels: ['LinkedIn', 'Product Hunt', 'Industry events'],
             quote: '"Show me the data."',
             dayInLife: ['Sprint planning', 'KPI tracking', 'Process optimization', 'Stakeholder meetings'],
@@ -557,36 +558,36 @@ function buildFallbackPersonas(industry: string, companyName: string): UserPerso
 function buildFallbackPainPoints(industry: string, companyName: string): PainPoint[] {
     return [
         {
-            category: 'Hiệu suất',
-            pain: `Khách hàng tiềm năng của ${companyName} mất nhiều thời gian cho quy trình thủ công`,
+            category: 'Productivity',
+            pain: `Potential customers of ${companyName} spend too much time on manual processes`,
             severity: 'High',
-            frequency: 'Hàng ngày',
-            currentSolution: 'Xử lý thủ công hoặc Excel',
-            costOfInaction: 'Chi phí nhân công cao, sai sót nhiều'
+            frequency: 'Daily',
+            currentSolution: 'Manual processing or Excel',
+            costOfInaction: 'High labor costs, frequent errors'
         },
         {
-            category: 'Dữ liệu',
-            pain: 'Không có nguồn dữ liệu thống nhất (single source of truth)',
+            category: 'Data',
+            pain: 'No unified data source (single source of truth)',
             severity: 'High',
-            frequency: 'Hàng tuần',
-            currentSolution: 'Tổng hợp thủ công từ nhiều nguồn',
-            costOfInaction: 'Ra quyết định sai, lãng phí nguồn lực'
+            frequency: 'Weekly',
+            currentSolution: 'Manual aggregation from multiple sources',
+            costOfInaction: 'Poor decisions, wasted resources'
         },
         {
-            category: 'Tăng trưởng',
-            pain: 'Khó scale khi lượng khách hàng/giao dịch tăng',
+            category: 'Growth',
+            pain: 'Difficulty scaling as customers/transactions increase',
             severity: 'Critical',
-            frequency: 'Khi tăng trưởng nhanh',
-            currentSolution: 'Thuê thêm nhân sự',
-            costOfInaction: 'Mất cơ hội, revenue bị giới hạn'
+            frequency: 'During rapid growth',
+            currentSolution: 'Hiring more staff',
+            costOfInaction: 'Lost opportunities, revenue capped'
         },
         {
-            category: 'Cạnh tranh',
-            pain: 'Đối thủ đang chuyển đổi số nhanh hơn',
+            category: 'Competition',
+            pain: 'Competitors are digitizing faster',
             severity: 'Medium',
-            frequency: 'Liên tục',
-            currentSolution: 'Theo dõi thủ công',
-            costOfInaction: 'Mất thị phần'
+            frequency: 'Continuous',
+            currentSolution: 'Manual monitoring',
+            costOfInaction: 'Losing market share'
         }
     ];
 }
@@ -617,80 +618,80 @@ function buildFallbackReport(
 
         painPoints,
         desiredOutcomes: [
-            { outcome: 'Giảm chi phí vận hành', metric: 'Cần đo lường cụ thể', timeframe: '6 tháng' },
-            { outcome: 'Tăng hiệu suất nhân viên', metric: 'Cần đo lường cụ thể', timeframe: '3 tháng' },
-            { outcome: 'Cải thiện trải nghiệm khách hàng', metric: 'Cần đo lường cụ thể', timeframe: '12 tháng' },
+            { outcome: 'Reduce operational costs', metric: 'Needs specific measurement', timeframe: '6 months' },
+            { outcome: 'Increase employee productivity', metric: 'Needs specific measurement', timeframe: '3 months' },
+            { outcome: 'Improve customer experience', metric: 'Needs specific measurement', timeframe: '12 months' },
         ],
         triggerEvents: [
-            { event: 'Tăng trưởng nhanh', urgency: 'Immediate', likelihood: 75, signals: ['Tuyển dụng nhiều', 'Revenue tăng'], approach: 'Outbound trực tiếp' },
-            { event: 'Chuyển đổi số', urgency: 'Short-term', likelihood: 65, signals: ['Tuyển IT lead mới', 'Budget IT tăng'], approach: 'Content marketing' },
-            { event: 'Thay đổi lãnh đạo', urgency: 'Short-term', likelihood: 55, signals: ['CEO/CTO mới', 'Restructuring'], approach: 'Executive outreach' },
+            { event: 'Rapid growth', urgency: 'Immediate', likelihood: 75, signals: ['Hiring surge', 'Revenue increase'], approach: 'Direct outbound' },
+            { event: 'Digital transformation', urgency: 'Short-term', likelihood: 65, signals: ['New IT lead hired', 'IT budget increased'], approach: 'Content marketing' },
+            { event: 'Leadership change', urgency: 'Short-term', likelihood: 55, signals: ['New CEO/CTO', 'Restructuring'], approach: 'Executive outreach' },
         ],
 
         buyingProcess: [
             {
-                stage: '1. Nhận thức vấn đề',
-                description: 'Khách hàng nhận ra cần giải pháp mới',
-                duration: '2-4 tuần',
-                activities: ['Đọc báo cáo ngành', 'Thảo luận nội bộ'],
+                stage: '1. Problem awareness',
+                description: 'Customer realizes they need a new solution',
+                duration: '2-4 weeks',
+                activities: ['Reading industry reports', 'Internal discussions'],
                 contentNeeded: ['Blog posts', 'Industry reports'],
-                objections: ['Chưa phải ưu tiên'],
-                successCriteria: 'Đồng ý đây là vấn đề cần giải quyết'
+                objections: ['Not a priority yet'],
+                successCriteria: 'Agreement that this is a problem worth solving'
             },
             {
-                stage: '2. Tìm kiếm giải pháp',
-                description: 'So sánh các lựa chọn có sẵn',
-                duration: '2-6 tuần',
-                activities: ['Google search', 'Demo request', 'Hỏi peer'],
-                contentNeeded: ['So sánh sản phẩm', 'Demo', 'Free trial'],
-                objections: ['Quá nhiều lựa chọn'],
+                stage: '2. Solution search',
+                description: 'Comparing available options',
+                duration: '2-6 weeks',
+                activities: ['Google search', 'Demo request', 'Asking peers'],
+                contentNeeded: ['Product comparison', 'Demo', 'Free trial'],
+                objections: ['Too many options'],
                 successCriteria: 'Shortlist 2-3 vendors'
             },
             {
-                stage: '3. Đánh giá chi tiết',
-                description: 'POC và đánh giá kỹ thuật',
-                duration: '2-4 tuần',
+                stage: '3. Detailed evaluation',
+                description: 'POC and technical assessment',
+                duration: '2-4 weeks',
                 activities: ['POC', 'Reference calls', 'Negotiation'],
                 contentNeeded: ['Technical docs', 'Customer references'],
-                objections: ['Tính năng thiếu', 'Giá cao'],
-                successCriteria: 'Chọn preferred vendor'
+                objections: ['Missing features', 'High price'],
+                successCriteria: 'Select preferred vendor'
             },
             {
-                stage: '4. Quyết định mua',
-                description: 'Phê duyệt và ký hợp đồng',
-                duration: '1-4 tuần',
+                stage: '4. Purchase decision',
+                description: 'Approval and contract signing',
+                duration: '1-4 weeks',
                 activities: ['Final negotiation', 'Legal review', 'Budget approval'],
                 contentNeeded: ['Proposal', 'Contract', 'SLA'],
-                objections: ['Budget freeze', 'Cần thêm approval'],
-                successCriteria: 'Ký hợp đồng'
+                objections: ['Budget freeze', 'Need more approvals'],
+                successCriteria: 'Contract signed'
             },
             {
-                stage: '5. Triển khai & Adoption',
-                description: 'Onboarding và bắt đầu sử dụng',
-                duration: '4-12 tuần',
+                stage: '5. Implementation & Adoption',
+                description: 'Onboarding and starting usage',
+                duration: '4-12 weeks',
                 activities: ['Implementation', 'Training', 'Go-live'],
                 contentNeeded: ['Onboarding guide', 'Training videos'],
-                objections: ['Phức tạp', 'Nhân viên không muốn đổi'],
+                objections: ['Too complex', 'Staff resistant to change'],
                 successCriteria: 'Active usage'
             }
         ],
         purchaseBarriers: [
-            { barrier: 'Ngân sách hạn chế', category: 'Price', severity: 'High', overcomingStrategy: 'Flexible payment, ROI calculator, pilot program', proofPoints: ['ROI case study', 'Payment plan options'] },
-            { barrier: 'Sợ triển khai phức tạp', category: 'Complexity', severity: 'High', overcomingStrategy: 'Pre-built templates, dedicated CSM', proofPoints: ['2-week implementation avg', 'Customer success stories'] },
-            { barrier: 'Đang dùng giải pháp khác', category: 'Competition', severity: 'Medium', overcomingStrategy: 'Free migration, parallel running', proofPoints: ['Migration guide', 'Zero-downtime guarantee'] },
-            { barrier: 'Chính trị nội bộ', category: 'Politics', severity: 'Medium', overcomingStrategy: 'Stakeholder-specific materials', proofPoints: ['Role-based value props', 'Champion toolkit'] },
+            { barrier: 'Limited budget', category: 'Price', severity: 'High', overcomingStrategy: 'Flexible payment, ROI calculator, pilot program', proofPoints: ['ROI case study', 'Payment plan options'] },
+            { barrier: 'Fear of complex implementation', category: 'Complexity', severity: 'High', overcomingStrategy: 'Pre-built templates, dedicated CSM', proofPoints: ['2-week implementation avg', 'Customer success stories'] },
+            { barrier: 'Already using another solution', category: 'Competition', severity: 'Medium', overcomingStrategy: 'Free migration, parallel running', proofPoints: ['Migration guide', 'Zero-downtime guarantee'] },
+            { barrier: 'Internal politics', category: 'Politics', severity: 'Medium', overcomingStrategy: 'Stakeholder-specific materials', proofPoints: ['Role-based value props', 'Champion toolkit'] },
         ],
         buyingCommittee: {
             avgSize: 4,
-            typicalCycle: '60 ngày',
+            typicalCycle: '60 days',
             budgetHolder: 'CEO / CFO'
         },
 
         commonObjections: [
-            { objection: 'Giá bên em đắt hơn bên kia', frequency: 80, category: 'Price', response: 'Total Cost of Ownership thấp hơn khi tính đầy đủ', proofPoints: ['TCO comparison', 'ROI calculator'] },
-            { objection: 'Chúng tôi đang dùng giải pháp khác', frequency: 65, category: 'Competition', response: 'Hỗ trợ migration miễn phí, không downtime', proofPoints: ['Migration guide', 'Switch case studies'] },
-            { objection: 'Cần hỏi ý kiến thêm người khác', frequency: 60, category: 'Decision Process', response: 'Chuẩn bị tài liệu cho từng stakeholder', proofPoints: ['Stakeholder decks', 'Executive summary'] },
-            { objection: 'Bây giờ chưa phải thời điểm', frequency: 55, category: 'Timing', response: 'Flexible payment, cost of delay analysis', proofPoints: ['Cost of delay calculator', 'Quick start program'] },
+            { objection: 'Your price is higher than the competition', frequency: 80, category: 'Price', response: 'Total Cost of Ownership is lower when fully calculated', proofPoints: ['TCO comparison', 'ROI calculator'] },
+            { objection: 'We are already using another solution', frequency: 65, category: 'Competition', response: 'Free migration support with zero downtime', proofPoints: ['Migration guide', 'Switch case studies'] },
+            { objection: 'Need to consult additional stakeholders', frequency: 60, category: 'Decision Process', response: 'Prepare materials for each stakeholder', proofPoints: ['Stakeholder decks', 'Executive summary'] },
+            { objection: 'Now is not the right time', frequency: 55, category: 'Timing', response: 'Flexible payment, cost of delay analysis', proofPoints: ['Cost of delay calculator', 'Quick start program'] },
         ],
         sentimentAnalysis: {
             overall: 0,
@@ -698,28 +699,28 @@ function buildFallbackReport(
             neutral: 0,
             negative: 0,
             trend: 'Stable',
-            topPositiveThemes: ['Chưa có dữ liệu sentiment thực tế'],
-            topNegativeThemes: ['Chưa có dữ liệu sentiment thực tế']
+            topPositiveThemes: ['No real sentiment data available'],
+            topNegativeThemes: ['No real sentiment data available']
         },
         featureRequests: [],
         npsScore: 0,
 
         executiveSummary: {
-            overview: `Phân tích customer insights cho ${companyName} trong ngành ${industry} tại ${targetMarket}. ` +
+            overview: `Customer insights analysis for ${companyName} in the ${industry} industry in ${targetMarket}. ` +
                 (ctx.totalCompanies > 0
-                    ? `Database VICO có ${ctx.totalCompanies} công ty ${industry}. `
+                    ? `VICO database has ${ctx.totalCompanies} ${industry} companies. `
                     : '') +
-                `Lưu ý: AI không khả dụng nên dữ liệu dựa trên industry benchmarks, không phải phân tích cụ thể.`,
+                `Note: AI unavailable so data is based on industry benchmarks, not specific analysis.`,
             keyInsights: [
                 `ICP: ${icp.firmographics.industries.slice(0, 3).join(', ')}`,
-                `Pain point chính: ${painPoints[0]?.pain || 'Hiệu suất vận hành'}`,
+                `Key pain point: ${painPoints[0]?.pain || 'Operational efficiency'}`,
                 `Decision maker: ${icp.decisionMakers[0]?.title || 'CEO'}`,
-                `Dữ liệu sentiment/NPS: chưa có — cần khảo sát thực tế`,
+                `Sentiment/NPS data: not available — requires real survey data`,
             ],
             recommendations: [
-                `Tập trung vào trigger event "Tăng trưởng nhanh" để tiếp cận khách hàng`,
-                `Xây dựng content giải quyết pain point "${painPoints[0]?.pain || 'hiệu suất'}"`,
-                `Thu thập feedback thực tế để có NPS và sentiment chính xác`,
+                `Focus on trigger event "Rapid growth" to reach customers`,
+                `Build content addressing pain point "${painPoints[0]?.pain || 'efficiency'}"`,
+                `Collect real feedback for accurate NPS and sentiment data`,
             ]
         }
     };
@@ -810,7 +811,7 @@ export async function generateCustomerInsights(params: {
                 category: pb.category as any || 'Complexity',
                 severity: pb.severity as any || 'Medium'
             })),
-            buyingCommittee: aiInsights.buyingCommittee || { avgSize: 4, typicalCycle: '60 ngày', budgetHolder: 'CEO' },
+            buyingCommittee: aiInsights.buyingCommittee || { avgSize: 4, typicalCycle: '60 days', budgetHolder: 'CEO' },
 
             commonObjections: aiInsights.commonObjections || [],
             sentimentAnalysis: {
@@ -830,7 +831,7 @@ export async function generateCustomerInsights(params: {
             npsScore: aiInsights.npsScore || 0,
 
             executiveSummary: aiInsights.executiveSummary || {
-                overview: `Phân tích AI cho ${companyName}`,
+                overview: `AI analysis for ${companyName}`,
                 keyInsights: [],
                 recommendations: []
             }

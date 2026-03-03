@@ -1,1172 +1,1134 @@
-/**
- * 🎯 Competitor Analysis Page - Enterprise Edition
- * 
- * 5 Tầng Thông Tin Chiến Lược:
- * 1. Hồ Sơ & Sức Khỏe (Firmographics, Tech Stack)
- * 2. Định Vị & Chiến Lược (Market Map, SWOT, GTM)
- * 3. Sales Battlecards (Why Win/Lose, Feature Matrix)
- * 4. Tín Hiệu Sớm (Hiring, Website, News)
- * 5. Digital Footprint (Traffic, Keywords, Social)
+﻿/**
+ * Competitor Analysis Page  Multi-Select Comparison (Phase 20)
+ *
+ * Users select 2+ Hero Companies and get a detailed side-by-side comparison.
+ * Zero API calls. Pure CSS/Tailwind charts. Executive Crimson design system.
+ *
+ * Sections: Multi-Select, Hero Cards, Market Map, Head-to-Head Table,
+ *           Market Share, Growth vs CSAT, Products, Tech Stack, Vulnerabilities
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import {
-    ChevronDown, ChevronUp, ChevronLeft, ChevronRight, TrendingUp, TrendingDown,
-    Building2, Users, Globe, DollarSign, Target, Zap, AlertTriangle, 
-    CheckCircle, XCircle, Info, Download, Edit3, ExternalLink, Search, Filter,
-    BarChart3, Loader2, Star, Award, Briefcase, MapPin, Calendar, RefreshCw,
-    Database, Cpu, Server, Code, Shield, Eye, Share2, MessageSquare, Linkedin,
-    Facebook, Twitter, FileText, TrendingDown as TrendDown, Activity, Layers,
-    Swords, ThumbsUp, ThumbsDown, Crosshair, Flag, AlertCircle, Minus, PieChart
+    Users, Building2, DollarSign, Target,
+    CheckCircle, BarChart3, Star,
+    Award, TrendingUp, Shield, Flag, Sparkles,
+    Rocket, Crown, Zap, Globe, Calendar, Package,
+    Briefcase, CircleDot, Database,
+    Download, X, FileText, FileJson, Highlighter,
+    StickyNote, Copy, Check, Printer,
+    Bookmark, BookmarkCheck, Eye
 } from 'lucide-react';
-import { exportCompetitorReport } from '../utils/exportReport';
-import { sessionCacheGet, sessionCacheSet } from '../utils/sessionCache';
+import { COMPANIES, type CompanyProfile } from '../data/companies';
+import {
+    exportCompetitorReportHTML,
+    exportCompetitorReportJSON,
+    exportCompetitorReportTXT,
+    type CompetitorExportData,
+} from '../utils/exportCompetitorReportHTML';
+
+// ==================== HELPER COMPONENTS ====================
+
+/** Compact copy-to-clipboard button that appears on hover */
+const CopyMetricBtn: React.FC<{ value: string }> = ({ value }) => {
+    const [copied, setCopied] = useState(false);
+    return (
+        <button
+            className="inline-flex items-center justify-center w-5 h-5 rounded ml-1 opacity-0 group-hover:opacity-100 transition-opacity bg-[#FAFAFA] hover:bg-[#E4E4E7] border border-transparent hover:border-[#E4E4E7]"
+            title="Copy"
+            onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 1200); }}
+        >
+            {copied ? <Check size={10} className="text-emerald-500" /> : <Copy size={10} className="text-[#A1A1AA]" />}
+        </button>
+    );
+};
+
+/** Section-level sticky note persisted in localStorage */
+const SectionNote: React.FC<{ sectionId: string }> = ({ sectionId }) => {
+    const storageKey = `vico_competitor_note_${sectionId}`;
+    const [open, setOpen] = useState(false);
+    const [text, setText] = useState(() => localStorage.getItem(storageKey) || '');
+    const save = () => { localStorage.setItem(storageKey, text); };
+    const clear = () => { setText(''); localStorage.removeItem(storageKey); };
+
+    if (!open) return (
+        <button onClick={() => setOpen(true)} title="Ghi chú" className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-[#71717A] hover:text-[#E11D48] hover:bg-[#FFF1F2] transition-colors border border-transparent hover:border-[#FFE4E6]">
+            <StickyNote size={12} />
+            {text ? <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> : null}
+        </button>
+    );
+
+    return (
+        <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3 animate-fade-in">
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1"><StickyNote size={10} /> Ghi chú</span>
+                <div className="flex gap-1">
+                    <button onClick={save} className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-800 hover:bg-amber-300">Lưu</button>
+                    <button onClick={clear} className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-600 hover:bg-amber-200">Xoá</button>
+                    <button onClick={() => setOpen(false)} className="px-1.5 py-0.5 rounded text-[10px] text-amber-500 hover:bg-amber-100"><X size={10} /></button>
+                </div>
+            </div>
+            <textarea
+                value={text}
+                onChange={e => setText(e.target.value)}
+                placeholder="Nhập ghi chú cho mục này..."
+                className="w-full h-20 text-xs bg-white border border-amber-200 rounded-lg p-2 resize-none focus:outline-none focus:ring-1 focus:ring-amber-300"
+            />
+        </div>
+    );
+};
+
+/** Export Modal — format picker with HTML / TXT / JSON */
+const ExportModal: React.FC<{
+    show: boolean;
+    onClose: () => void;
+    onExport: (format: 'html' | 'txt' | 'json') => void;
+}> = ({ show, onClose, onExport }) => {
+    const [loading, setLoading] = useState(false);
+    const [done, setDone] = useState(false);
+
+    if (!show) return null;
+
+    const handleExport = (fmt: 'html' | 'txt' | 'json') => {
+        setLoading(true);
+        setTimeout(() => {
+            onExport(fmt);
+            setLoading(false);
+            setDone(true);
+            setTimeout(() => { setDone(false); onClose(); }, 1200);
+        }, 600);
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+            <div className="bg-white rounded-2xl shadow-2xl border border-[#E4E4E7] w-full max-w-md p-6 animate-slide-up" onClick={e => e.stopPropagation()}>
+                {done ? (
+                    <div className="text-center py-8">
+                        <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                            <Check className="text-emerald-600" size={32} />
+                        </div>
+                        <p className="text-lg font-bold text-[#18181B]">Xuất báo cáo thành công!</p>
+                        <p className="text-sm text-[#71717A] mt-1">File đã được tải xuống.</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="flex items-center justify-between mb-5">
+                            <div>
+                                <h3 className="text-lg font-bold text-[#18181B]">Xuất Báo Cáo Đối Thủ</h3>
+                                <p className="text-xs text-[#71717A]">Chọn định dạng để tải xuống</p>
+                            </div>
+                            <button onClick={onClose} className="p-2 rounded-xl hover:bg-[#FAFAFA]"><X size={18} className="text-[#A1A1AA]" /></button>
+                        </div>
+
+                        {loading ? (
+                            <div className="flex flex-col items-center py-10">
+                                <div className="w-10 h-10 border-4 border-[#E11D48] border-t-transparent rounded-full animate-spin mb-4" />
+                                <p className="text-sm text-[#71717A]">Đang tạo báo cáo...</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                <button onClick={() => handleExport('html')} className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-[#E11D48] bg-[#FFF1F2] hover:bg-[#FFE4E6] transition-colors text-left group">
+                                    <div className="w-10 h-10 rounded-xl bg-[#E11D48] flex items-center justify-center"><Eye className="text-white" size={18} /></div>
+                                    <div className="flex-1">
+                                        <div className="text-sm font-bold text-[#18181B]">HTML Premium Report</div>
+                                        <div className="text-[10px] text-[#71717A]">Báo cáo đẹp, in được, có biểu đồ & bảng</div>
+                                    </div>
+                                    <span className="px-2 py-0.5 rounded-full bg-[#E11D48] text-white text-[9px] font-bold">RECOMMENDED</span>
+                                </button>
+                                <button onClick={() => handleExport('txt')} className="w-full flex items-center gap-4 p-4 rounded-xl border border-[#E4E4E7] bg-white hover:bg-[#FAFAFA] transition-colors text-left">
+                                    <div className="w-10 h-10 rounded-xl bg-[#FAFAFA] border border-[#E4E4E7] flex items-center justify-center"><FileText className="text-[#71717A]" size={18} /></div>
+                                    <div className="flex-1">
+                                        <div className="text-sm font-bold text-[#18181B]">Plain Text (.txt)</div>
+                                        <div className="text-[10px] text-[#71717A]">Dạng văn bản đơn giản</div>
+                                    </div>
+                                </button>
+                                <button onClick={() => handleExport('json')} className="w-full flex items-center gap-4 p-4 rounded-xl border border-[#E4E4E7] bg-white hover:bg-[#FAFAFA] transition-colors text-left">
+                                    <div className="w-10 h-10 rounded-xl bg-[#FAFAFA] border border-[#E4E4E7] flex items-center justify-center"><FileJson className="text-[#71717A]" size={18} /></div>
+                                    <div className="flex-1">
+                                        <div className="text-sm font-bold text-[#18181B]">JSON Data</div>
+                                        <div className="text-[10px] text-[#71717A]">Dữ liệu có cấu trúc, dùng cho tích hợp</div>
+                                    </div>
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// ==================== TYPES ====================
 
 interface CompetitorAnalysisPageProps {
-    userData: any;
+    userData?: any;
     competitors?: any[];
 }
 
-// Types matching the backend service
-interface CompetitorProfile {
-    id: string;
-    name: string;
-    logo: string;
-    industry: string;
-    similarity: number;
-    source: string;
-    firmographics: {
-        revenue: string;
-        revenueGrowth: number;
-        headcount: number;
-        headcountGrowth: number;
-        headcountHistory: number[];
-        funding: { total: string; lastRound: string; lastRoundDate: string; investors: string[] };
-        hq: string;
-        offices: string[];
-        foundedYear: number;
-        website: string;
-    };
-    techStack: { cloud: string[]; frontend: string[]; backend: string[]; database: string[]; analytics: string[]; other: string[] };
-    positioning: { x: number; y: number; quadrant: 'Leader' | 'Challenger' | 'Niche' | 'Visionary'; marketShare: number };
-    swot: { strengths: string[]; weaknesses: string[]; opportunities: string[]; threats: string[] };
-    gtmStrategy: { targetSegment: string; salesModel: string; pricingModel: string; keyChannels: string[] };
-    battlecard: { whyWeWin: string[]; whyWeLose: string[]; killPoints: string[]; landmines: string[]; objectionHandlers: Array<{ objection: string; response: string }> };
-    featureComparison: Array<{ feature: string; category: string; us: boolean | 'partial'; them: boolean | 'partial'; notes: string }>;
-    signals: {
-        hiringTrends: Array<{ role: string; count: number; change: number; signal: string }>;
-        websiteChanges: Array<{ type: string; date: string; description: string; impact: 'High' | 'Medium' | 'Low' }>;
-        newsSentiment: { positive: number; neutral: number; negative: number; trend: string; recentHeadlines: string[] };
-    };
-    digitalFootprint: {
-        monthlyTraffic: string;
-        trafficGrowth: number;
-        trafficSources: Array<{ source: string; percentage: number }>;
-        topKeywords: Array<{ keyword: string; position: number; volume: number }>;
-        socialMetrics: { linkedin: { followers: number; engagement: number }; facebook: { followers: number; engagement: number }; twitter: { followers: number; engagement: number } };
-        contentStrategy: string[];
-    };
-}
+type QuadrantType = 'Leader' | 'Challenger' | 'Visionary' | 'Niche Player';
 
-interface CompetitorIntelligenceReport {
-    generatedAt: string;
-    userCompany: string;
-    industry: string;
-    totalCompetitors: number;
-    competitors: CompetitorProfile[];
-    marketPositioningMap: { quadrants: { leaders: string[]; challengers: string[]; niche: string[]; visionaries: string[] }; avgPrice: number; avgFeatures: number };
-    industryOverview: { totalPlayers: number; avgRevenue: string; avgHeadcount: number; topTechStacks: Array<{ tech: string; adoption: number }> };
-    executiveSummary: { overview: string; keyFindings: string[]; recommendations: string[] };
-}
+// ==================== DATA HELPERS ====================
 
-// ==================== LOADING SKELETON ====================
-const ANALYSIS_PHASES = [
-    { label: "Đang thu thập dữ liệu công ty...", icon: "🔍", duration: "~5s" },
-    { label: "Phân tích firmographics đối thủ...", icon: "🏢", duration: "~8s" },
-    { label: "So sánh positioning & thị phần...", icon: "📊", duration: "~10s" },
-    { label: "Tạo battlecard chiến lược...", icon: "⚔️", duration: "~12s" },
-    { label: "Quét tín hiệu digital footprint...", icon: "🌐", duration: "~15s" },
+const HERO_COMPANIES = COMPANIES.filter(
+    (c): c is CompanyProfile & {
+        quadrant_position: QuadrantType;
+        market_share_percentage: number;
+        yoy_growth: string;
+        csat_score: number;
+    } =>
+        c.dataTier === 'premium' &&
+        !!c.quadrant_position &&
+        typeof c.market_share_percentage === 'number'
+);
+
+const QUADRANT_CONFIG: Record<QuadrantType, { color: string; bg: string; border: string; textColor: string }> = {
+    Leader:        { color: 'bg-emerald-500', bg: 'bg-emerald-50',  border: 'border-emerald-200', textColor: 'text-emerald-700' },
+    Challenger:    { color: 'bg-blue-500',    bg: 'bg-blue-50',     border: 'border-blue-200',    textColor: 'text-blue-700' },
+    Visionary:     { color: 'bg-amber-500',   bg: 'bg-amber-50',    border: 'border-amber-200',   textColor: 'text-amber-700' },
+    'Niche Player':{ color: 'bg-purple-500',  bg: 'bg-purple-50',   border: 'border-purple-200',  textColor: 'text-purple-700' },
+};
+
+const COMPANY_COLORS = [
+    { bg: 'bg-[#E11D48]', text: 'text-white', ring: 'ring-[#E11D48]/30', accent: '#E11D48', bgLight: 'bg-[#FFF1F2]', textDark: 'text-[#E11D48]' },
+    { bg: 'bg-blue-600',  text: 'text-white', ring: 'ring-blue-600/30',  accent: '#2563EB', bgLight: 'bg-blue-50',   textDark: 'text-blue-600' },
+    { bg: 'bg-emerald-600', text: 'text-white', ring: 'ring-emerald-600/30', accent: '#059669', bgLight: 'bg-emerald-50', textDark: 'text-emerald-600' },
+    { bg: 'bg-amber-500',  text: 'text-white', ring: 'ring-amber-500/30', accent: '#D97706', bgLight: 'bg-amber-50', textDark: 'text-amber-600' },
+    { bg: 'bg-purple-600', text: 'text-white', ring: 'ring-purple-600/30', accent: '#7C3AED', bgLight: 'bg-purple-50', textDark: 'text-purple-600' },
 ];
 
-const LoadingSkeleton = () => {
-    const [phase, setPhase] = React.useState(0);
-    React.useEffect(() => {
-        const interval = setInterval(() => {
-            setPhase(p => (p < ANALYSIS_PHASES.length - 1 ? p + 1 : p));
-        }, 4000);
-        return () => clearInterval(interval);
-    }, []);
+function parseGrowth(g: string): number {
+    return parseFloat(g.replace(/[^0-9.\-]/g, '')) || 0;
+}
 
-    return (
-        <div className="space-y-6">
-            {/* AI Analysis Progress */}
-            <div className="bg-white dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/50 rounded-2xl p-6 shadow-sm">
-                <div className="flex items-center gap-4 mb-5">
-                    <div className="relative">
-                        <div className="w-12 h-12 border-3 border-blue-200 dark:border-blue-500/30 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
-                        <span className="absolute inset-0 flex items-center justify-center text-lg">🤖</span>
-                    </div>
-                    <div>
-                        <h3 className="text-gray-900 dark:text-white font-bold text-lg">AI đang phân tích đối thủ cạnh tranh</h3>
-                        <p className="text-gray-500 text-sm">Gemini 2.0 Flash đang tổng hợp dữ liệu từ nhiều nguồn...</p>
-                    </div>
-                </div>
+function shortName(name: string): string {
+    return name.split('(')[0]?.trim().split(' ')[0] ?? name;
+}
 
-                {/* Phase Steps */}
-                <div className="space-y-2.5">
-                    {ANALYSIS_PHASES.map((p, i) => (
-                        <div key={i} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-500 ${
-                            i < phase ? 'bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/30' :
-                            i === phase ? 'bg-blue-50 dark:bg-blue-900/15 border border-blue-200 dark:border-blue-700/40' :
-                            'bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/20 opacity-50'
-                        }`}>
-                            <span className="text-lg w-7 text-center">{i < phase ? '✅' : i === phase ? p.icon : '⏳'}</span>
-                            <span className={`text-sm font-medium flex-1 ${
-                                i < phase ? 'text-green-700 dark:text-green-400' :
-                                i === phase ? 'text-blue-700 dark:text-blue-300' :
-                                'text-gray-400 dark:text-gray-500'
-                            }`}>{p.label}</span>
-                            {i === phase && (
-                                <span className="flex gap-1">
-                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                                </span>
+
+
+// ==================== COMPARISON HERO CARDS ====================
+
+const ComparisonHeroCards: React.FC<{ companies: typeof HERO_COMPANIES; highlightMode?: boolean }> = ({ companies, highlightMode }) => (
+    <div className={`grid gap-4 ${companies.length === 2 ? 'grid-cols-1 md:grid-cols-2' : companies.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-' + Math.min(companies.length, 4)}`}>
+        {companies.map((c, idx) => {
+            const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+            const qc = QUADRANT_CONFIG[c.quadrant_position];
+            return (
+                <div key={c.name} className="bg-white border border-[#E4E4E7] rounded-2xl overflow-hidden">
+                    {/* Color accent bar */}
+                    <div className={`h-1.5 ${cc.bg}`} />
+                    <div className="p-5">
+                        {/* Header */}
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 rounded-xl bg-white border-2 border-[#E4E4E7] shadow flex items-center justify-center overflow-hidden">
+                                {c.logoUrl ? (
+                                    <img src={c.logoUrl} alt={c.name} className="w-8 h-8 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling && ((e.target as HTMLImageElement).nextElementSibling as HTMLElement).classList.remove('hidden'); }} />
+                                ) : null}
+                                <span className={`text-lg font-black ${cc.textDark} ${c.logoUrl ? 'hidden' : ''}`}>{c.name.substring(0, 2).toUpperCase()}</span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <h3 className="text-base font-bold text-[#18181B] truncate">{c.name.split('(')[0]?.trim()}</h3>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${qc.bg} ${qc.textColor} border ${qc.border}`}>{c.quadrant_position}</span>
+                                    <span className="text-[10px] text-[#A1A1AA]">{c.sub_industry}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-xs text-[#71717A] line-clamp-2 mb-4">{c.description || c.intro}</p>
+
+                        {/* Metrics Grid */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className={`group bg-[#FAFAFA] rounded-xl p-3 text-center ${highlightMode ? 'ring-1 ring-amber-300 bg-amber-50/40' : ''}`}>
+                                <div className="text-[10px] text-[#A1A1AA] flex items-center justify-center gap-1"><DollarSign size={10} />Revenue</div>
+                                <div className="text-lg font-black text-[#18181B] mt-0.5">{c.revenue || 'N/A'}<CopyMetricBtn value={c.revenue || 'N/A'} /></div>
+                            </div>
+                            <div className={`group bg-[#FAFAFA] rounded-xl p-3 text-center ${highlightMode ? 'ring-1 ring-amber-300 bg-amber-50/40' : ''}`}>
+                                <div className="text-[10px] text-[#A1A1AA] flex items-center justify-center gap-1"><Users size={10} />Headcount</div>
+                                <div className="text-lg font-black text-[#18181B] mt-0.5">{c.headcount ? c.headcount.toLocaleString() : 'N/A'}<CopyMetricBtn value={c.headcount ? c.headcount.toLocaleString() : 'N/A'} /></div>
+                            </div>
+                            <div className={`group bg-[#FAFAFA] rounded-xl p-3 text-center ${highlightMode ? 'ring-1 ring-amber-300 bg-amber-50/40' : ''}`}>
+                                <div className="text-[10px] text-[#A1A1AA] flex items-center justify-center gap-1"><TrendingUp size={10} />Growth</div>
+                                <div className="text-lg font-black text-emerald-600 mt-0.5">{c.yoy_growth}<CopyMetricBtn value={c.yoy_growth} /></div>
+                            </div>
+                            <div className={`group bg-[#FAFAFA] rounded-xl p-3 text-center ${highlightMode ? 'ring-1 ring-amber-300 bg-amber-50/40' : ''}`}>
+                                <div className="text-[10px] text-[#A1A1AA] flex items-center justify-center gap-1"><Star size={10} />CSAT</div>
+                                <div className="text-lg font-black text-[#E11D48] mt-0.5">{c.csat_score}/100<CopyMetricBtn value={`${c.csat_score}/100`} /></div>
+                            </div>
+                        </div>
+
+                        {/* Extra details */}
+                        <div className="mt-3 space-y-1.5">
+                            <div className={`group flex items-center gap-2 text-xs text-[#71717A] ${highlightMode ? 'bg-amber-50/60 rounded-lg px-2 py-1' : ''}`}>
+                                <BarChart3 size={12} className={cc.textDark} />
+                                <span>Market Share: <strong className="text-[#18181B]">{c.market_share_percentage}%</strong><CopyMetricBtn value={`${c.market_share_percentage}%`} /></span>
+                            </div>
+                            {c.total_funding && (
+                                <div className="group flex items-center gap-2 text-xs text-[#71717A]">
+                                    <DollarSign size={12} className={cc.textDark} />
+                                    <span className="truncate">Funding: <strong className="text-[#18181B]">{c.total_funding}</strong><CopyMetricBtn value={c.total_funding} /></span>
+                                </div>
                             )}
+                            <div className="flex items-center gap-2 text-xs text-[#71717A]">
+                                <Calendar size={12} className={cc.textDark} />
+                                <span>Founded: <strong className="text-[#18181B]">{c.year}</strong></span>
+                            </div>
                         </div>
-                    ))}
+                    </div>
                 </div>
+            );
+        })}
+    </div>
+);
 
-                {/* Progress bar */}
-                <div className="mt-5">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1.5">
-                        <span>Tiến trình phân tích</span>
-                        <span>{Math.min(Math.round(((phase + 1) / ANALYSIS_PHASES.length) * 100), 100)}%</span>
-                    </div>
-                    <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
-                            style={{ width: `${((phase + 1) / ANALYSIS_PHASES.length) * 100}%` }}
-                        />
-                    </div>
-                </div>
-            </div>
+// ==================== MARKET MAP (2x2 QUADRANT) ====================
 
-            {/* Skeleton preview of what's coming */}
-            <div className="animate-pulse grid grid-cols-2 md:grid-cols-4 gap-4">
-                {['Competitors', 'Market Share', 'Threat Level', 'Similarity'].map((label, i) => (
-                    <div key={i} className="bg-white dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/30 rounded-xl p-4">
-                        <div className="text-xs text-gray-400 mb-2">{label}</div>
-                        <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-// ==================== TIER 1: FIRMOGRAPHICS ====================
-const FirmographicsCard: React.FC<{ competitor: CompetitorProfile }> = ({ competitor }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
-    const f = competitor.firmographics;
-    
-    return (
-        <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
-            <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50" onClick={() => setIsExpanded(!isExpanded)}>
-                <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center font-bold text-white text-lg ${
-                        competitor.source === 'ts' ? 'bg-gradient-to-br from-blue-500 to-purple-600' : 'bg-gradient-to-br from-gray-500 to-gray-700'
-                    }`}>
-                        {competitor.logo}
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-gray-900 dark:text-white">{competitor.name}</h4>
-                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded uppercase ${
-                                competitor.positioning.quadrant === 'Leader' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                competitor.positioning.quadrant === 'Challenger' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                                competitor.positioning.quadrant === 'Niche' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
-                                'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                            }`}>
-                                {competitor.positioning.quadrant}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                            <span className="flex items-center gap-1"><Briefcase size={12} />{competitor.industry}</span>
-                            <span className="flex items-center gap-1"><MapPin size={12} />{f.hq.split(',')[0]}</span>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex items-center gap-4">
-                    <div className="text-right">
-                        <div className="text-2xl font-black text-gray-900 dark:text-white">{competitor.similarity}%</div>
-                        <div className="text-xs text-gray-500">Similarity</div>
-                    </div>
-                    {isExpanded ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
-                </div>
-            </div>
-            
-            {isExpanded && (
-                <div className="px-5 pb-5 space-y-6 border-t border-gray-100 dark:border-gray-800 pt-5">
-                    {/* Key Metrics */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl">
-                            <div className="flex items-center gap-2 mb-2">
-                                <DollarSign size={16} className="text-green-600" />
-                                <span className="text-xs text-gray-500">Revenue (Est.)</span>
-                            </div>
-                            <div className="text-xl font-black text-gray-900 dark:text-white">{f.revenue}</div>
-                            <div className="flex items-center gap-1 text-xs text-green-600 mt-1">
-                                <TrendingUp size={12} />+{f.revenueGrowth}% YoY
-                            </div>
-                        </div>
-                        
-                        <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Users size={16} className="text-blue-600" />
-                                <span className="text-xs text-gray-500">Headcount</span>
-                            </div>
-                            <div className="text-xl font-black text-gray-900 dark:text-white">{f.headcount}</div>
-                            <div className="flex items-center gap-1 text-xs text-blue-600 mt-1">
-                                <TrendingUp size={12} />+{f.headcountGrowth}% (6mo)
-                            </div>
-                        </div>
-                        
-                        <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Briefcase size={16} className="text-purple-600" />
-                                <span className="text-xs text-gray-500">Total Funding</span>
-                            </div>
-                            <div className="text-xl font-black text-gray-900 dark:text-white">{f.funding.total}</div>
-                            <div className="text-xs text-purple-600 mt-1">{f.funding.lastRound}</div>
-                        </div>
-                        
-                        <div className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-xl">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Calendar size={16} className="text-amber-600" />
-                                <span className="text-xs text-gray-500">Founded</span>
-                            </div>
-                            <div className="text-xl font-black text-gray-900 dark:text-white">{f.foundedYear}</div>
-                            <div className="text-xs text-amber-600 mt-1">{2026 - f.foundedYear} years old</div>
-                        </div>
-                    </div>
-                    
-                    {/* Headcount Trend */}
-                    <div>
-                        <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Headcount Trend (Last 6 Months)</h5>
-                        <div className="flex items-end gap-2 h-20">
-                            {f.headcountHistory.map((count, idx) => {
-                                const maxCount = Math.max(...f.headcountHistory);
-                                const height = (count / maxCount) * 100;
-                                const isLatest = idx === f.headcountHistory.length - 1;
-                                return (
-                                    <div key={idx} className="flex-1 flex flex-col items-center gap-1">
-                                        <span className="text-[10px] text-gray-500">{count}</span>
-                                        <div 
-                                            className={`w-full rounded-t ${isLatest ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-                                            style={{ height: `${height}%`, minHeight: '4px' }}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                    
-                    {/* Investors & Offices */}
-                    <div className="grid lg:grid-cols-2 gap-4">
-                        <div>
-                            <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Key Investors</h5>
-                            <div className="flex flex-wrap gap-2">
-                                {f.funding.investors.map((inv, idx) => (
-                                    <span key={idx} className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">{inv}</span>
-                                ))}
-                            </div>
-                        </div>
-                        <div>
-                            <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Office Locations</h5>
-                            <div className="flex flex-wrap gap-2">
-                                {f.offices.map((office, idx) => (
-                                    <span key={idx} className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-700 dark:text-blue-300 flex items-center gap-1">
-                                        <MapPin size={12} />{office}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Tech Stack */}
-                    <div>
-                        <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <Cpu size={14} />Tech Stack
-                        </h5>
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                            {Object.entries(competitor.techStack).map(([category, techs]) => {
-                                const techArray = techs as string[];
-                                return techArray.length > 0 && (
-                                    <div key={category} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                                        <div className="text-[10px] font-bold text-gray-400 uppercase mb-2">{category}</div>
-                                        <div className="flex flex-wrap gap-1">
-                                            {techArray.map((tech, idx) => (
-                                                <span key={idx} className="px-2 py-0.5 bg-white dark:bg-gray-700 rounded text-xs text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">{tech}</span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
-
-// ==================== TIER 2: MARKET POSITIONING MAP ====================
-const MarketPositioningMap: React.FC<{ competitors: CompetitorProfile[]; userCompany: string }> = ({ competitors, userCompany }) => {
-    const quadrantColors = {
-        Leader: 'bg-green-500',
-        Challenger: 'bg-blue-500',
-        Niche: 'bg-purple-500',
-        Visionary: 'bg-amber-500'
+const MarketMapQuadrant: React.FC<{ companies: typeof HERO_COMPANIES; selectedNames: string[] }> = ({ companies, selectedNames }) => {
+    const quadrantPositions: Record<QuadrantType, { gridArea: string; label: string }> = {
+        'Niche Player': { gridArea: '1 / 1 / 2 / 2', label: 'NICHE PLAYERS' },
+        Leader:         { gridArea: '1 / 2 / 2 / 3', label: 'LEADERS' },
+        Visionary:      { gridArea: '2 / 1 / 3 / 2', label: 'VISIONARIES' },
+        Challenger:     { gridArea: '2 / 2 / 3 / 3', label: 'CHALLENGERS' },
     };
-    
+
+    const grouped = companies.reduce((acc, c) => {
+        const q = c.quadrant_position;
+        if (!acc[q]) acc[q] = [];
+        acc[q].push(c);
+        return acc;
+    }, {} as Record<QuadrantType, typeof companies>);
+
     return (
-        <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                    <Target className="text-indigo-600" size={20} />
+        <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] flex items-center justify-center">
+                    <Target className="text-[#E11D48]" size={20} />
                 </div>
                 <div>
-                    <h3 className="font-bold text-gray-900 dark:text-white">Market Positioning Map</h3>
-                    <p className="text-xs text-gray-500">Gartner-style Magic Quadrant</p>
+                    <h3 className="font-bold text-[#18181B]">Market Positioning Map</h3>
+                    <p className="text-xs text-[#71717A]">Gartner-style Magic Quadrant  {companies.length} Vietnamese Tech Companies</p>
                 </div>
             </div>
-            
-            <div className="relative h-[400px] bg-gray-50 dark:bg-gray-800/30 rounded-2xl overflow-hidden">
-                {/* Axis Labels */}
-                <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-gray-500 font-medium whitespace-nowrap">
-                    Ability to Execute →
-                </div>
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500 font-medium">
-                    Completeness of Vision →
-                </div>
-                
-                {/* Quadrants */}
-                <div className="absolute inset-8 grid grid-cols-2 grid-rows-2 gap-1">
-                    <div className="bg-purple-50 dark:bg-purple-900/10 rounded-tl-xl flex items-start justify-start p-3">
-                        <span className="text-xs font-bold text-purple-600">NICHE PLAYERS</span>
-                    </div>
-                    <div className="bg-green-50 dark:bg-green-900/10 rounded-tr-xl flex items-start justify-end p-3">
-                        <span className="text-xs font-bold text-green-600">LEADERS</span>
-                    </div>
-                    <div className="bg-amber-50 dark:bg-amber-900/10 rounded-bl-xl flex items-end justify-start p-3">
-                        <span className="text-xs font-bold text-amber-600">VISIONARIES</span>
-                    </div>
-                    <div className="bg-blue-50 dark:bg-blue-900/10 rounded-br-xl flex items-end justify-end p-3">
-                        <span className="text-xs font-bold text-blue-600">CHALLENGERS</span>
-                    </div>
-                </div>
-                
-                {/* Center Lines */}
-                <div className="absolute left-8 right-8 top-1/2 border-t-2 border-dashed border-gray-300 dark:border-gray-600" />
-                <div className="absolute top-8 bottom-8 left-1/2 border-l-2 border-dashed border-gray-300 dark:border-gray-600" />
-                
-                {/* Data Points */}
-                <div className="absolute inset-12">
-                    {/* User Company */}
-                    <div
-                        className="absolute w-12 h-12 rounded-full bg-red-600 ring-4 ring-red-200 dark:ring-red-900/50 flex items-center justify-center shadow-lg transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-110 transition-transform z-20"
-                        style={{ left: '65%', bottom: '55%' }}
-                        title={userCompany}
-                    >
-                        <span className="text-white font-bold text-xs">{userCompany?.substring(0, 2).toUpperCase() || 'YOU'}</span>
-                    </div>
-                    
-                    {/* Competitors */}
-                    {competitors.map((comp, idx) => (
-                        <div
-                            key={idx}
-                            className={`absolute w-10 h-10 rounded-full ${quadrantColors[comp.positioning.quadrant]} flex items-center justify-center shadow-lg transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-125 transition-transform z-10 group`}
-                            style={{ 
-                                left: `${Math.min(95, Math.max(5, comp.positioning.x))}%`, 
-                                bottom: `${Math.min(95, Math.max(5, comp.positioning.y))}%` 
-                            }}
-                        >
-                            <span className="text-white font-bold text-[10px]">{comp.logo}</span>
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity text-xs whitespace-nowrap z-50">
-                                <div className="font-bold">{comp.name}</div>
-                                <div className="text-gray-400">{comp.positioning.quadrant} • {comp.similarity}%</div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            
-            {/* Legend */}
-            <div className="flex flex-wrap gap-4 mt-4 justify-center">
-                {Object.entries(quadrantColors).map(([quadrant, color]) => (
-                    <div key={quadrant} className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${color}`} />
-                        <span className="text-xs text-gray-600 dark:text-gray-400">{quadrant}</span>
-                    </div>
-                ))}
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-600 ring-2 ring-red-200" />
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Your Company</span>
-                </div>
-            </div>
-        </div>
-    );
-};
 
-// ==================== TIER 2: SWOT ANALYSIS ====================
-const SWOTAnalysis: React.FC<{ competitor: CompetitorProfile }> = ({ competitor }) => {
-    const swot = competitor.swot;
-    
-    const quadrants = [
-        { key: 'strengths', title: 'Strengths', items: swot.strengths, color: 'bg-green-500', bgColor: 'bg-green-50 dark:bg-green-900/20', textColor: 'text-green-700 dark:text-green-400', icon: ThumbsUp },
-        { key: 'weaknesses', title: 'Weaknesses', items: swot.weaknesses, color: 'bg-red-500', bgColor: 'bg-red-50 dark:bg-red-900/20', textColor: 'text-red-700 dark:text-red-400', icon: ThumbsDown },
-        { key: 'opportunities', title: 'Opportunities', items: swot.opportunities, color: 'bg-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-900/20', textColor: 'text-blue-700 dark:text-blue-400', icon: Target },
-        { key: 'threats', title: 'Threats', items: swot.threats, color: 'bg-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-900/20', textColor: 'text-amber-700 dark:text-amber-400', icon: AlertTriangle }
-    ];
-    
-    return (
-        <div className="grid grid-cols-2 gap-4">
-            {quadrants.map(q => (
-                <div key={q.key} className={`${q.bgColor} rounded-xl p-4`}>
-                    <div className="flex items-center gap-2 mb-3">
-                        <div className={`w-8 h-8 rounded-lg ${q.color} flex items-center justify-center`}>
-                            <q.icon size={16} className="text-white" />
-                        </div>
-                        <h5 className={`font-bold ${q.textColor}`}>{q.title}</h5>
-                    </div>
-                    <ul className="space-y-2">
-                        {q.items.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                <CheckCircle size={14} className={`mt-0.5 flex-shrink-0 ${q.textColor}`} />
-                                <span>{item}</span>
-                            </li>
-                        ))}
-                    </ul>
+            <div className="relative">
+                <div className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider text-center mb-1">
+                    Completeness of Vision &rarr;
                 </div>
-            ))}
-        </div>
-    );
-};
-
-// ==================== TIER 3: BATTLECARD ====================
-const BattlecardSection: React.FC<{ competitor: CompetitorProfile; userCompany: string }> = ({ competitor, userCompany }) => {
-    const [activeTab, setActiveTab] = useState('overview');
-    const bc = competitor.battlecard;
-    
-    const tabs = [
-        { id: 'overview', label: 'Overview', icon: Layers },
-        { id: 'win', label: 'Why We Win', icon: ThumbsUp },
-        { id: 'lose', label: 'Why We Lose', icon: ThumbsDown },
-        { id: 'kill', label: 'Kill Points', icon: Crosshair },
-        { id: 'landmines', label: 'Landmines', icon: Flag },
-        { id: 'features', label: 'Feature Matrix', icon: CheckCircle }
-    ];
-    
-    return (
-        <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
-            <div className="p-5 border-b border-gray-100 dark:border-gray-800">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                        <Swords className="text-red-600" size={20} />
+                <div className="flex gap-0">
+                    <div className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider -rotate-90 origin-center shrink-0 w-5 flex items-center justify-center" style={{writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>
+                        Ability to Execute &rarr;
                     </div>
-                    <div>
-                        <h3 className="font-bold text-gray-900 dark:text-white">Sales Battlecard: {competitor.name}</h3>
-                        <p className="text-xs text-gray-500">Chiến lược cạnh tranh trực tiếp</p>
-                    </div>
-                </div>
-                
-                <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
-                                activeTab === tab.id
-                                    ? 'bg-red-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                            }`}
-                        >
-                            <tab.icon size={14} />
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
-            
-            <div className="p-5">
-                {activeTab === 'overview' && (
-                    <div className="grid lg:grid-cols-2 gap-6">
-                        <div>
-                            <h5 className="text-sm font-bold text-green-600 mb-3 flex items-center gap-2">
-                                <ThumbsUp size={16} />Why We Win ({userCompany})
-                            </h5>
-                            <ul className="space-y-2">
-                                {bc.whyWeWin.slice(0, 3).map((item, idx) => (
-                                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                        <CheckCircle size={14} className="text-green-500 mt-0.5" />
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                        <div>
-                            <h5 className="text-sm font-bold text-red-600 mb-3 flex items-center gap-2">
-                                <ThumbsDown size={16} />Why We Lose
-                            </h5>
-                            <ul className="space-y-2">
-                                {bc.whyWeLose.slice(0, 3).map((item, idx) => (
-                                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                        <XCircle size={14} className="text-red-500 mt-0.5" />
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                )}
-                
-                {activeTab === 'win' && (
-                    <div className="space-y-3">
-                        {bc.whyWeWin.map((item, idx) => (
-                            <div key={idx} className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-start gap-3">
-                                <CheckCircle className="text-green-500 flex-shrink-0" size={20} />
-                                <span className="text-gray-700 dark:text-gray-300">{item}</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                
-                {activeTab === 'lose' && (
-                    <div className="space-y-3">
-                        {bc.whyWeLose.map((item, idx) => (
-                            <div key={idx} className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-start gap-3">
-                                <XCircle className="text-red-500 flex-shrink-0" size={20} />
-                                <span className="text-gray-700 dark:text-gray-300">{item}</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                
-                {activeTab === 'kill' && (
-                    <div className="space-y-3">
-                        <p className="text-sm text-gray-500 mb-4">Câu hỏi/thông tin khiến đối thủ "cứng họng" khi deal</p>
-                        {bc.killPoints.map((item, idx) => (
-                            <div key={idx} className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl flex items-start gap-3 border-l-4 border-amber-500">
-                                <Crosshair className="text-amber-600 flex-shrink-0" size={20} />
-                                <span className="text-gray-700 dark:text-gray-300">{item}</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                
-                {activeTab === 'landmines' && (
-                    <div className="space-y-3">
-                        <p className="text-sm text-gray-500 mb-4">Những điều đối thủ hay nói xấu về bạn và cách phản bác</p>
-                        {bc.landmines.map((item, idx) => (
-                            <div key={idx} className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
-                                <div className="flex items-start gap-3">
-                                    <Flag className="text-purple-600 flex-shrink-0" size={20} />
-                                    <span className="text-gray-700 dark:text-gray-300">{item}</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                
-                {activeTab === 'features' && (
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-gray-50 dark:bg-gray-800/50">
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Feature</th>
-                                    <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase">{userCompany || 'Us'}</th>
-                                    <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase">{competitor.name}</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                                {competitor.featureComparison.map((f, idx) => (
-                                    <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                        <td className="px-4 py-3">
-                                            <div className="font-medium text-gray-900 dark:text-white text-sm">{f.feature}</div>
-                                            <div className="text-xs text-gray-500">{f.category}</div>
-                                        </td>
-                                        <td className="px-4 py-3 text-center">
-                                            {f.us === true ? <CheckCircle className="inline text-green-500" size={20} /> :
-                                             f.us === 'partial' ? <Minus className="inline text-amber-500" size={20} /> :
-                                             <XCircle className="inline text-gray-300" size={20} />}
-                                        </td>
-                                        <td className="px-4 py-3 text-center">
-                                            {f.them === true ? <CheckCircle className="inline text-green-500" size={20} /> :
-                                             f.them === 'partial' ? <Minus className="inline text-amber-500" size={20} /> :
-                                             <XCircle className="inline text-gray-300" size={20} />}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
-
-// ==================== TIER 4: EARLY WARNING SIGNALS ====================
-const EarlyWarningSignals: React.FC<{ competitor: CompetitorProfile }> = ({ competitor }) => {
-    const signals = competitor.signals;
-    
-    return (
-        <div className="space-y-6">
-            {/* Hiring Trends */}
-            <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                        <Users className="text-blue-600" size={20} />
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-gray-900 dark:text-white">Hiring Trends</h4>
-                        <p className="text-xs text-gray-500">Xu hướng tuyển dụng - Dự báo hướng đi của đối thủ</p>
-                    </div>
-                </div>
-                
-                <div className="space-y-3">
-                    {signals.hiringTrends.map((trend, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                                    <span className="text-lg font-bold text-blue-600">{trend.count}</span>
-                                </div>
-                                <div>
-                                    <div className="font-medium text-gray-900 dark:text-white">{trend.role}</div>
-                                    <div className="flex items-center gap-2 text-xs">
-                                        <span className={`flex items-center gap-1 ${trend.change > 30 ? 'text-red-600' : 'text-green-600'}`}>
-                                            <TrendingUp size={12} />+{trend.change}%
-                                        </span>
-                                        <span className="text-gray-500">vs last quarter</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
-                                trend.signal.includes('🚨') ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                                'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                            }`}>
-                                {trend.signal}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            
-            {/* Website Changes */}
-            <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                        <Globe className="text-purple-600" size={20} />
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-gray-900 dark:text-white">Website Changes</h4>
-                        <p className="text-xs text-gray-500">Thay đổi trên website đối thủ</p>
-                    </div>
-                </div>
-                
-                <div className="space-y-3">
-                    {signals.websiteChanges.map((change, idx) => (
-                        <div key={idx} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                            <div className={`px-2 py-1 rounded text-xs font-bold ${
-                                change.impact === 'High' ? 'bg-red-100 text-red-700 dark:bg-red-900/30' :
-                                change.impact === 'Medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' :
-                                'bg-gray-100 text-gray-600 dark:bg-gray-700'
-                            }`}>
-                                {change.type}
-                            </div>
-                            <div className="flex-1">
-                                <div className="font-medium text-gray-900 dark:text-white text-sm">{change.description}</div>
-                                <div className="text-xs text-gray-500 mt-1">{change.date}</div>
-                            </div>
-                            <span className={`text-xs font-bold ${
-                                change.impact === 'High' ? 'text-red-600' : change.impact === 'Medium' ? 'text-amber-600' : 'text-gray-500'
-                            }`}>
-                                {change.impact} Impact
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            
-            {/* News Sentiment */}
-            <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                        <FileText className="text-amber-600" size={20} />
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-gray-900 dark:text-white">News & PR Sentiment</h4>
-                        <p className="text-xs text-gray-500">Phân tích cảm xúc tin tức</p>
-                    </div>
-                </div>
-                
-                <div className="grid lg:grid-cols-2 gap-6">
-                    <div>
-                        <div className="space-y-4">
-                            <div>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="text-green-600">Positive</span>
-                                    <span className="font-bold">{signals.newsSentiment.positive}%</span>
-                                </div>
-                                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                    <div className="h-full bg-green-500 rounded-full" style={{ width: `${signals.newsSentiment.positive}%` }} />
-                                </div>
-                            </div>
-                            <div>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="text-gray-500">Neutral</span>
-                                    <span className="font-bold">{signals.newsSentiment.neutral}%</span>
-                                </div>
-                                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                    <div className="h-full bg-gray-400 rounded-full" style={{ width: `${signals.newsSentiment.neutral}%` }} />
-                                </div>
-                            </div>
-                            <div>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="text-red-600">Negative</span>
-                                    <span className="font-bold">{signals.newsSentiment.negative}%</span>
-                                </div>
-                                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                    <div className="h-full bg-red-500 rounded-full" style={{ width: `${signals.newsSentiment.negative}%` }} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h5 className="text-xs font-bold text-gray-500 uppercase mb-3">Recent Headlines</h5>
-                        <div className="space-y-2">
-                            {signals.newsSentiment.recentHeadlines.map((headline, idx) => (
-                                <div key={idx} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-sm text-gray-700 dark:text-gray-300">
-                                    {headline}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// ==================== TIER 5: DIGITAL FOOTPRINT ====================
-const DigitalFootprint: React.FC<{ competitor: CompetitorProfile }> = ({ competitor }) => {
-    const df = competitor.digitalFootprint;
-    
-    return (
-        <div className="space-y-6">
-            {/* Traffic Overview */}
-            <div className="grid lg:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-center">
-                    <Globe className="mx-auto text-blue-600 mb-2" size={28} />
-                    <p className="text-3xl font-black text-gray-900 dark:text-white">{df.monthlyTraffic}</p>
-                    <p className="text-xs text-gray-500">Monthly Traffic</p>
-                    <p className="text-xs text-green-600 mt-1">+{df.trafficGrowth}% MoM</p>
-                </div>
-                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-center">
-                    <Linkedin className="mx-auto text-blue-700 mb-2" size={28} />
-                    <p className="text-3xl font-black text-gray-900 dark:text-white">{(df.socialMetrics.linkedin.followers / 1000).toFixed(0)}K</p>
-                    <p className="text-xs text-gray-500">LinkedIn Followers</p>
-                    <p className="text-xs text-blue-600 mt-1">{df.socialMetrics.linkedin.engagement}% Engagement</p>
-                </div>
-                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-center">
-                    <Facebook className="mx-auto text-blue-600 mb-2" size={28} />
-                    <p className="text-3xl font-black text-gray-900 dark:text-white">{(df.socialMetrics.facebook.followers / 1000).toFixed(0)}K</p>
-                    <p className="text-xs text-gray-500">Facebook Followers</p>
-                    <p className="text-xs text-blue-600 mt-1">{df.socialMetrics.facebook.engagement}% Engagement</p>
-                </div>
-                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-center">
-                    <Twitter className="mx-auto text-sky-500 mb-2" size={28} />
-                    <p className="text-3xl font-black text-gray-900 dark:text-white">{(df.socialMetrics.twitter.followers / 1000).toFixed(0)}K</p>
-                    <p className="text-xs text-gray-500">Twitter Followers</p>
-                    <p className="text-xs text-sky-600 mt-1">{df.socialMetrics.twitter.engagement}% Engagement</p>
-                </div>
-            </div>
-            
-            {/* Traffic Sources & Keywords */}
-            <div className="grid lg:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                    <h4 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <PieChart size={18} className="text-purple-600" />
-                        Traffic Sources
-                    </h4>
-                    <div className="space-y-3">
-                        {df.trafficSources.map((source, idx) => {
-                            const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-amber-500', 'bg-red-500'];
+                    <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-1 min-h-[340px]">
+                        {(Object.entries(quadrantPositions) as [QuadrantType, typeof quadrantPositions[QuadrantType]][]).map(([quadrant, config]) => {
+                            const qc = QUADRANT_CONFIG[quadrant];
+                            const items = grouped[quadrant] || [];
                             return (
-                                <div key={idx} className="space-y-1">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600 dark:text-gray-300">{source.source}</span>
-                                        <span className="font-bold text-gray-900 dark:text-white">{source.percentage}%</span>
-                                    </div>
-                                    <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                        <div className={`h-full ${colors[idx % colors.length]} rounded-full`} style={{ width: `${source.percentage}%` }} />
+                                <div key={quadrant} className={`${qc.bg} rounded-xl p-3 flex flex-col`} style={{ gridArea: config.gridArea }}>
+                                    <span className={`text-[10px] font-bold uppercase tracking-wider ${qc.textColor} mb-2`}>{config.label}</span>
+                                    <div className="flex flex-wrap gap-2 flex-1 content-start">
+                                        {items.map(c => {
+                                            const isSelected = selectedNames.includes(c.name);
+                                            const selIdx = selectedNames.indexOf(c.name);
+                                            const cc = selIdx >= 0 ? COMPANY_COLORS[selIdx % COMPANY_COLORS.length]! : null;
+                                            return (
+                                                <div
+                                                    key={c.name}
+                                                    className={`group relative flex items-center gap-2 px-3 py-2 rounded-xl border transition-all cursor-default ${
+                                                        isSelected
+                                                            ? `${cc?.bg} ${cc?.text} border-transparent ring-2 ${cc?.ring} shadow-lg`
+                                                            : 'bg-white/60 border-[#E4E4E7] text-[#71717A]'
+                                                    }`}
+                                                >
+                                                    <span className={`text-xs font-semibold truncate max-w-[100px]`}>
+                                                        {shortName(c.name)}
+                                                    </span>
+                                                    {isSelected && <Crown size={12} className="opacity-80 shrink-0" />}
+                                                    <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 bg-zinc-900 text-white px-3 py-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity text-xs whitespace-nowrap pointer-events-none">
+                                                        <div className="font-bold">{c.name}</div>
+                                                        <div className="text-zinc-400">{c.market_share_percentage}% share &middot; {c.yoy_growth} growth</div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
                 </div>
-                
-                <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                    <h4 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <Search size={18} className="text-green-600" />
-                        Top Keywords
-                    </h4>
-                    <div className="space-y-3">
-                        {df.topKeywords.map((kw, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                                <div>
-                                    <div className="font-medium text-gray-900 dark:text-white">{kw.keyword}</div>
-                                    <div className="text-xs text-gray-500">{kw.volume.toLocaleString()} searches/mo</div>
-                                </div>
-                                <div className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                                    kw.position <= 3 ? 'bg-green-100 text-green-700 dark:bg-green-900/30' :
-                                    kw.position <= 10 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' :
-                                    'bg-gray-100 text-gray-600 dark:bg-gray-700'
-                                }`}>
-                                    #{kw.position}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             </div>
-            
-            {/* Content Strategy */}
-            <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                <h4 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <FileText size={18} className="text-amber-600" />
-                    Content Strategy
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                    {df.contentStrategy.map((strategy, idx) => (
-                        <span key={idx} className="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-xl text-sm font-medium">
-                            {strategy}
-                        </span>
-                    ))}
-                </div>
+
+            <div className="flex flex-wrap gap-4 mt-4 justify-center">
+                {(Object.entries(QUADRANT_CONFIG) as [QuadrantType, typeof QUADRANT_CONFIG[QuadrantType]][]).map(([q, cfg]) => (
+                    <div key={q} className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full ${cfg.color}`} />
+                        <span className="text-xs text-[#71717A]">{q}</span>
+                    </div>
+                ))}
+                {selectedNames.map((name, idx) => {
+                    const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+                    return (
+                        <div key={name} className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${cc.bg} ring-2 ${cc.ring}`} />
+                            <span className="text-xs text-[#71717A]">{shortName(name)}</span>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
 };
 
-// ==================== MAIN COMPONENT ====================
-export const CompetitorAnalysisPage: React.FC<CompetitorAnalysisPageProps> = ({ userData, competitors = [] }) => {
-    const [activeSection, setActiveSection] = useState('overview');
-    const [selectedCompetitor, setSelectedCompetitor] = useState<number>(0);
-    const [report, setReport] = useState<CompetitorIntelligenceReport | null>(() => sessionCacheGet<CompetitorIntelligenceReport>('competitor_report'));
-    const [isLoading, setIsLoading] = useState(!sessionCacheGet('competitor_report'));
-    const [error, setError] = useState<string | null>(null);
-    
-    // Use refs to avoid closure stale values
-    const userDataRef = React.useRef(userData);
-    const competitorsRef = React.useRef(competitors);
-    const isMountedRef = React.useRef(false);
-    
-    // Update refs when props change
-    userDataRef.current = userData;
-    competitorsRef.current = competitors;
-    
-    // Stable fetch function that reads from refs
-    const fetchCompetitorIntelligence = useCallback(async (forceRefresh = false) => {
-        // Skip if already fetched and not forcing refresh
-        if (isMountedRef.current && !forceRefresh) return;
-        
-        setIsLoading(true);
-        setError(null);
-        
-        try {
-            const currentUserData = userDataRef.current;
-            const currentCompetitors = competitorsRef.current;
-            
-            // Use provided competitors or fetch from API
-            const selectedComps = currentCompetitors.length > 0 
-                ? currentCompetitors.filter(c => c.selected !== false)
-                : currentUserData?.competitors?.filter((c: any) => c.selected) || [];
-            
-            const response = await fetch('/api/competitor-intelligence', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userCompany: {
-                        name: currentUserData?.orgName || 'Your Company',
-                        industry: currentUserData?.industry || 'Technology',
-                        description: currentUserData?.companyDescription || '',
-                        products: currentUserData?.productsServices || '',
-                        location: currentUserData?.hqCountry || 'Vietnam',
-                        size: currentUserData?.orgSize || '11-50'
-                    },
-                    selectedCompetitors: selectedComps
-                })
-            });
-            
-            if (!response.ok) throw new Error(`API Error: ${response.status}`);
-            
-            const data = await response.json();
-            setReport(data);
-            sessionCacheSet('competitor_report', data);
-            isMountedRef.current = true;
-        } catch (err) {
-            console.error('Competitor Intelligence fetch error:', err);
-            setError(err instanceof Error ? err.message : 'Failed to load competitor intelligence');
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-    
-    // Only fetch on initial mount (skip if cached)
-    useEffect(() => {
-        if (!report) fetchCompetitorIntelligence();
-    }, [fetchCompetitorIntelligence, report]);
-    
-    const sections = useMemo(() => [
-        { id: 'overview', label: 'Executive Summary' },
-        { id: 'firmographics', label: '1. Hồ Sơ & Sức Khỏe' },
-        { id: 'positioning', label: '2. Định Vị & Chiến Lược' },
-        { id: 'battlecards', label: '3. Sales Battlecards' },
-        { id: 'signals', label: '4. Tín Hiệu Sớm' },
-        { id: 'digital', label: '5. Digital Footprint' }
-    ], []);
-    
-    const currentCompetitor = report?.competitors[selectedCompetitor];
-    
+// ==================== HEAD-TO-HEAD COMPARISON TABLE ====================
+
+const HeadToHeadTable: React.FC<{ companies: typeof HERO_COMPANIES; highlightMode?: boolean }> = ({ companies, highlightMode: _highlightMode }) => {
     return (
-        <div className="space-y-8 animate-fade-in">
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                    <Award className="text-purple-600" size={20} />
+                </div>
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                        Competitor Analysis
-                    </h1>
-                    <p className="text-gray-500 text-sm mt-1">
-                        Enterprise Intelligence cho {userData?.orgName || 'công ty của bạn'}
-                        {report && <span className="ml-2 text-green-600">• {report.totalCompetitors} competitors analyzed</span>}
-                    </p>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                    <button onClick={() => fetchCompetitorIntelligence(true)} disabled={isLoading}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium disabled:opacity-50">
-                        <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-                        Refresh
-                    </button>
-                    <button
-                        onClick={() => report && exportCompetitorReport(report)}
-                        disabled={!report}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        <Download size={16} />
-                        Xuất báo cáo
-                    </button>
+                    <h3 className="font-bold text-[#18181B]">Head-to-Head Comparison</h3>
+                    <p className="text-xs text-[#71717A]">{companies.map(c => shortName(c.name)).join(' vs ')}</p>
                 </div>
             </div>
-            
-            {/* Section Navigation */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-                <span className="text-sm text-gray-500 mr-2 flex-shrink-0">≡ 5 Tầng Phân Tích</span>
-                {sections.map(section => (
-                    <button
-                        key={section.id}
-                        onClick={() => setActiveSection(section.id)}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
-                            activeSection === section.id
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                        }`}
-                    >
-                        {section.label}
-                    </button>
-                ))}
+
+            <div className="overflow-x-auto -mx-1">
+                <table className="w-full min-w-[600px]">
+                    <thead>
+                        <tr className="bg-[#FAFAFA]">
+                            <th className="px-4 py-3 text-left text-xs font-bold text-[#71717A] uppercase w-36">Metric</th>
+                            {companies.map((c, idx) => {
+                                const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+                                return (
+                                    <th key={c.name} className="px-4 py-3 text-center">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <div className="w-6 h-6 rounded-lg bg-white border border-[#E4E4E7] flex items-center justify-center overflow-hidden">
+                                                {c.logoUrl ? <img src={c.logoUrl} alt="" className="w-4 h-4 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : <span className="text-[8px] font-bold">{c.name.substring(0,2)}</span>}
+                                            </div>
+                                            <span className={`text-xs font-bold ${cc.textDark}`}>{shortName(c.name)}</span>
+                                        </div>
+                                    </th>
+                                );
+                            })}
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E4E4E7]">
+                        <MetricRow label="Revenue" icon={<DollarSign size={14} />} companies={companies} render={c => c.revenue || 'N/A'} />
+                        <MetricRow label="Headcount" icon={<Users size={14} />} companies={companies} render={c => c.headcount ? c.headcount.toLocaleString() : 'N/A'} />
+                        <MetricRow label="Founded" icon={<Calendar size={14} />} companies={companies} render={c => String(c.year)} />
+                        <MetricRow label="Total Funding" icon={<DollarSign size={14} />} companies={companies} render={c => c.total_funding || 'N/A'} />
+                        <MetricRow label="YoY Growth" icon={<TrendingUp size={14} />} companies={companies} render={c => c.yoy_growth} highlight="growth" />
+                        <MetricRow label="CSAT Score" icon={<Star size={14} />} companies={companies} render={c => `${c.csat_score}/100`} highlight="csat" />
+                        <MetricRow label="Market Share" icon={<BarChart3 size={14} />} companies={companies} render={c => `${c.market_share_percentage}%`} highlight="share" />
+                        <MetricRow label="Quadrant" icon={<Target size={14} />} companies={companies} render={c => c.quadrant_position} renderBadge />
+                        <MetricRow label="Industry" icon={<Building2 size={14} />} companies={companies} render={c => c.sub_industry || c.industry || 'Technology'} />
+                        <MetricRow label="Website" icon={<Globe size={14} />} companies={companies} render={c => c.website || 'N/A'} />
+                    </tbody>
+                </table>
             </div>
-            
-            {/* Loading */}
-            {isLoading && <LoadingSkeleton />}
-            
-            {/* Error */}
-            {error && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6 text-center">
-                    <AlertTriangle className="mx-auto text-red-500 mb-3" size={32} />
-                    <p className="text-red-600 font-medium">{error}</p>
-                    <button onClick={fetchCompetitorIntelligence} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700">
-                        Retry
-                    </button>
+        </div>
+    );
+};
+
+const MetricRow: React.FC<{
+    label: string;
+    icon: React.ReactNode;
+    companies: typeof HERO_COMPANIES;
+    render: (c: typeof HERO_COMPANIES[0]) => string;
+    highlight?: 'growth' | 'csat' | 'share';
+    renderBadge?: boolean;
+}> = ({ label, icon, companies, render, highlight, renderBadge }) => {
+    // Determine the "winner" for highlighting
+    let bestIdx = -1;
+    if (highlight === 'growth') {
+        let best = -Infinity;
+        companies.forEach((c, i) => { const v = parseGrowth(c.yoy_growth); if (v > best) { best = v; bestIdx = i; } });
+    } else if (highlight === 'csat') {
+        let best = -Infinity;
+        companies.forEach((c, i) => { if (c.csat_score > best) { best = c.csat_score; bestIdx = i; } });
+    } else if (highlight === 'share') {
+        let best = -Infinity;
+        companies.forEach((c, i) => { if (c.market_share_percentage > best) { best = c.market_share_percentage; bestIdx = i; } });
+    }
+
+    return (
+        <tr className="hover:bg-[#FAFAFA]">
+            <td className="px-4 py-3 text-xs font-semibold text-[#71717A] flex items-center gap-2">{icon} {label}</td>
+            {companies.map((c, idx) => {
+                const val = render(c);
+                const isBest = bestIdx === idx;
+                const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+                return (
+                    <td key={c.name} className="px-4 py-3 text-center group">
+                        {renderBadge ? (
+                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${QUADRANT_CONFIG[c.quadrant_position]?.bg} ${QUADRANT_CONFIG[c.quadrant_position]?.textColor}`}>
+                                {val}
+                            </span>
+                        ) : (
+                            <span className={`text-sm font-bold ${isBest ? cc.textDark + ' underline decoration-2 decoration-dotted underline-offset-4' : 'text-[#18181B]'}`}>
+                                {isBest && <Crown size={10} className="inline -mt-0.5 mr-1" />}
+                                {val}
+                                <CopyMetricBtn value={val} />
+                            </span>
+                        )}
+                    </td>
+                );
+            })}
+        </tr>
+    );
+};
+
+// ==================== MARKET SHARE BARS ====================
+
+const MarketShareComparison: React.FC<{ companies: typeof HERO_COMPANIES; highlightMode?: boolean }> = ({ companies, highlightMode }) => {
+    const maxShare = Math.max(...companies.map(c => c.market_share_percentage));
+    const sorted = useMemo(() => [...companies].sort((a, b) => b.market_share_percentage - a.market_share_percentage), [companies]);
+
+    return (
+        <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <BarChart3 className="text-blue-600" size={20} />
                 </div>
-            )}
-            
-            {/* Content */}
-            {!isLoading && !error && report && (
-                <>
-                    {/* Competitor Selector */}
-                    {report.competitors.length > 1 && activeSection !== 'overview' && activeSection !== 'positioning' && (
-                        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                            <span className="text-sm text-gray-500 mr-2 flex-shrink-0">Chọn đối thủ:</span>
-                            {report.competitors.map((comp, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setSelectedCompetitor(idx)}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
-                                        selectedCompetitor === idx
-                                            ? 'bg-red-600 text-white'
-                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                    }`}
-                                >
-                                    <span className="w-6 h-6 rounded-full bg-gray-500 text-white text-xs flex items-center justify-center">{comp.logo}</span>
-                                    {comp.name}
-                                    <span className="text-xs opacity-70">{comp.similarity}%</span>
-                                </button>
-                            ))}
+                <div>
+                    <h3 className="font-bold text-[#18181B]">Market Share Comparison</h3>
+                    <p className="text-xs text-[#71717A]">Selected companies only  estimated share in Vietnamese tech sector</p>
+                </div>
+            </div>
+            <div className="space-y-3">
+                {sorted.map((c) => {
+                    const origIdx = companies.indexOf(c);
+                    const cc = COMPANY_COLORS[origIdx % COMPANY_COLORS.length]!;
+                    const pct = maxShare > 0 ? (c.market_share_percentage / maxShare) * 100 : 0;
+                    return (
+                        <div key={c.name} className={`group flex items-center gap-3 p-3 rounded-xl ${cc.bgLight} ${highlightMode ? 'ring-1 ring-amber-300' : ''}`}>
+                            <div className="w-8 h-8 rounded-lg bg-white border border-[#E4E4E7] flex items-center justify-center overflow-hidden shrink-0">
+                                {c.logoUrl ? <img src={c.logoUrl} alt="" className="w-5 h-5 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : <span className="text-[10px] font-bold">{c.name.substring(0,2)}</span>}
+                            </div>
+                            <div className="w-24 shrink-0">
+                                <p className={`text-xs font-semibold ${cc.textDark}`}>{c.name.split('(')[0]?.trim() ?? c.name}</p>
+                            </div>
+                            <div className="flex-1 h-7 bg-white border border-[#E4E4E7] rounded-lg overflow-hidden">
+                                <div className={`h-full ${cc.bg} rounded-lg transition-all duration-700 ease-out flex items-center justify-end pr-2`} style={{ width: `${pct}%` }}>
+                                    {pct > 25 && <span className="text-[10px] font-bold text-white">{c.market_share_percentage}%</span>}
+                                </div>
+                            </div>
+                            {pct <= 25 && <span className={`text-xs font-bold ${cc.textDark} w-10 text-right shrink-0`}>{c.market_share_percentage}%</span>}
+                            <CopyMetricBtn value={`${c.market_share_percentage}%`} />
                         </div>
-                    )}
-                    
-                    {/* EXECUTIVE SUMMARY */}
-                    {activeSection === 'overview' && (
-                        <div className="space-y-6">
-                            <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-lg">Executive Summary</h3>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+// ==================== GROWTH vs CSAT COMPARISON ====================
+
+const GrowthCsatComparison: React.FC<{ companies: typeof HERO_COMPANIES; highlightMode?: boolean }> = ({ companies, highlightMode }) => {
+    const maxGrowth = Math.max(...companies.map(c => parseGrowth(c.yoy_growth)));
+    const maxCsat = 100;
+
+    return (
+        <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                    <TrendingUp className="text-emerald-600" size={20} />
+                </div>
+                <div>
+                    <h3 className="font-bold text-[#18181B]">Growth vs. Customer Satisfaction</h3>
+                    <p className="text-xs text-[#71717A]">Year-over-year growth and CSAT score for selected companies</p>
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                {companies.map((c, idx) => {
+                    const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+                    const growth = parseGrowth(c.yoy_growth);
+                    const growthPct = maxGrowth > 0 ? (growth / maxGrowth) * 100 : 0;
+                    const csatPct = (c.csat_score / maxCsat) * 100;
+
+                    return (
+                        <div key={c.name} className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded bg-white border border-[#E4E4E7] flex items-center justify-center overflow-hidden">
+                                    {c.logoUrl ? <img src={c.logoUrl} alt="" className="w-4 h-4 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : <span className="text-[8px] font-bold">{c.name.substring(0,2)}</span>}
                                 </div>
-                                
-                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">{report.executiveSummary.overview}</p>
-                                
-                                <div className="grid lg:grid-cols-4 gap-4 mb-6">
-                                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
-                                        <p className="text-3xl font-black text-blue-600">{report.totalCompetitors}</p>
-                                        <p className="text-xs text-gray-500">Competitors Analyzed</p>
+                                <span className={`text-sm font-bold ${cc.textDark}`}>{c.name.split('(')[0]?.trim()}</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                {/* Growth */}
+                                <div className={`group flex items-center gap-2 ${highlightMode ? 'bg-amber-50/50 rounded-lg px-1' : ''}`}>
+                                    <span className="text-[10px] text-[#A1A1AA] w-12 shrink-0">Growth</span>
+                                    <div className="flex-1 h-5 bg-[#FAFAFA] border border-[#E4E4E7] rounded overflow-hidden">
+                                        <div className={`h-full rounded transition-all duration-700`} style={{ width: `${growthPct}%`, backgroundColor: cc.accent }} />
                                     </div>
-                                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl text-center">
-                                        <p className="text-3xl font-black text-green-600">{report.marketPositioningMap.quadrants.leaders.length}</p>
-                                        <p className="text-xs text-gray-500">Market Leaders</p>
-                                    </div>
-                                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-center">
-                                        <p className="text-3xl font-black text-purple-600">{report.industryOverview.totalPlayers.toLocaleString()}</p>
-                                        <p className="text-xs text-gray-500">Industry Players</p>
-                                    </div>
-                                    <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl text-center">
-                                        <p className="text-3xl font-black text-amber-600">{report.industryOverview.avgRevenue}</p>
-                                        <p className="text-xs text-gray-500">Avg Revenue</p>
-                                    </div>
+                                    <span className="text-xs font-bold text-emerald-600 w-12 text-right">{c.yoy_growth}</span>
+                                    <CopyMetricBtn value={c.yoy_growth} />
                                 </div>
-                                
-                                <div className="grid lg:grid-cols-2 gap-6">
-                                    <div>
-                                        <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                            <AlertCircle size={16} className="text-blue-500" />Key Findings
-                                        </h4>
-                                        <ul className="space-y-2">
-                                            {report.executiveSummary.keyFindings.map((finding, idx) => (
-                                                <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                                    <CheckCircle size={14} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                                                    {finding}
-                                                </li>
-                                            ))}
-                                        </ul>
+
+                                {/* CSAT */}
+                                <div className={`group flex items-center gap-2 ${highlightMode ? 'bg-amber-50/50 rounded-lg px-1' : ''}`}>
+                                    <span className="text-[10px] text-[#A1A1AA] w-12 shrink-0">CSAT</span>
+                                    <div className="flex-1 h-5 bg-[#FAFAFA] border border-[#E4E4E7] rounded overflow-hidden">
+                                        <div className="h-full rounded transition-all duration-700 bg-blue-500" style={{ width: `${csatPct}%` }} />
                                     </div>
-                                    <div>
-                                        <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                            <Target size={16} className="text-green-500" />Recommendations
-                                        </h4>
-                                        <ul className="space-y-2">
-                                            {report.executiveSummary.recommendations.map((rec, idx) => (
-                                                <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                                    <Zap size={14} className="text-green-500 mt-0.5 flex-shrink-0" />
-                                                    {rec}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                    <span className="text-xs font-bold text-blue-600 w-12 text-right">{c.csat_score}/100</span>
+                                    <CopyMetricBtn value={`${c.csat_score}/100`} />
                                 </div>
                             </div>
                         </div>
-                    )}
-                    
-                    {/* TIER 1: FIRMOGRAPHICS */}
-                    {activeSection === 'firmographics' && currentCompetitor && (
-                        <FirmographicsCard competitor={currentCompetitor} />
-                    )}
-                    
-                    {/* TIER 2: POSITIONING & STRATEGY */}
-                    {activeSection === 'positioning' && (
-                        <div className="space-y-6">
-                            <MarketPositioningMap competitors={report.competitors} userCompany={report.userCompany} />
-                            
-                            {currentCompetitor && (
-                                <>
-                                    <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                                <Activity className="text-green-600" size={20} />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-gray-900 dark:text-white">SWOT Analysis: {currentCompetitor.name}</h3>
-                                                <p className="text-xs text-gray-500">Điểm mạnh, yếu, cơ hội, thách thức</p>
-                                            </div>
-                                        </div>
-                                        <SWOTAnalysis competitor={currentCompetitor} />
-                                    </div>
-                                    
-                                    <div className="bg-white dark:bg-[#0F1623] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                                                <Target className="text-purple-600" size={20} />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-gray-900 dark:text-white">GTM Strategy</h3>
-                                                <p className="text-xs text-gray-500">Chiến lược Go-to-Market của {currentCompetitor.name}</p>
-                                            </div>
-                                        </div>
-                                        <div className="grid lg:grid-cols-4 gap-4">
-                                            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                                                <div className="text-xs text-gray-500 mb-1">Target Segment</div>
-                                                <div className="font-bold text-gray-900 dark:text-white">{currentCompetitor.gtmStrategy.targetSegment}</div>
-                                            </div>
-                                            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                                                <div className="text-xs text-gray-500 mb-1">Sales Model</div>
-                                                <div className="font-bold text-gray-900 dark:text-white">{currentCompetitor.gtmStrategy.salesModel}</div>
-                                            </div>
-                                            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                                                <div className="text-xs text-gray-500 mb-1">Pricing</div>
-                                                <div className="font-bold text-gray-900 dark:text-white text-sm">{currentCompetitor.gtmStrategy.pricingModel}</div>
-                                            </div>
-                                            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                                                <div className="text-xs text-gray-500 mb-1">Key Channels</div>
-                                                <div className="text-sm text-gray-700 dark:text-gray-300">{currentCompetitor.gtmStrategy.keyChannels.join(', ')}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
+                    );
+                })}
+            </div>
+
+            <div className="flex gap-6 mt-5 justify-center">
+                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-500" /><span className="text-[10px] text-[#71717A]">YoY Growth</span></div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-blue-500" /><span className="text-[10px] text-[#71717A]">CSAT Score</span></div>
+            </div>
+        </div>
+    );
+};
+
+// ==================== PRODUCT & FUNDING COMPARISON ====================
+
+const ProductComparisonPanel: React.FC<{ companies: typeof HERO_COMPANIES }> = ({ companies }) => (
+    <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-[#FFF7ED] flex items-center justify-center">
+                <Package className="text-[#F97316]" size={20} />
+            </div>
+            <div>
+                <h3 className="font-bold text-[#18181B]">Product & Service Portfolio</h3>
+                <p className="text-xs text-[#71717A]">Side-by-side product comparison</p>
+            </div>
+        </div>
+
+        <div className={`grid gap-4 ${companies.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-' + Math.min(companies.length, 3)}`}>
+            {companies.map((c, idx) => {
+                const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+                const products = (c.products_new || c.products || '').split(',').map(p => p.trim()).filter(Boolean);
+                return (
+                    <div key={c.name} className={`rounded-xl border p-4 ${cc.bgLight} border-transparent`}>
+                        <h4 className={`text-sm font-bold ${cc.textDark} mb-3 flex items-center gap-2`}>
+                            <CircleDot size={14} />
+                            {shortName(c.name)} Products
+                        </h4>
+                        <div className="space-y-1.5">
+                            {products.slice(0, 8).map((prod, i) => (
+                                <div key={i} className="flex items-start gap-2">
+                                    <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0`} style={{ backgroundColor: cc.accent }} />
+                                    <span className="text-xs text-[#18181B] leading-relaxed">{prod}</span>
+                                </div>
+                            ))}
                         </div>
-                    )}
-                    
-                    {/* TIER 3: BATTLECARDS */}
-                    {activeSection === 'battlecards' && currentCompetitor && (
-                        <BattlecardSection competitor={currentCompetitor} userCompany={report.userCompany} />
-                    )}
-                    
-                    {/* TIER 4: EARLY WARNING SIGNALS */}
-                    {activeSection === 'signals' && currentCompetitor && (
-                        <EarlyWarningSignals competitor={currentCompetitor} />
-                    )}
-                    
-                    {/* TIER 5: DIGITAL FOOTPRINT */}
-                    {activeSection === 'digital' && currentCompetitor && (
-                        <DigitalFootprint competitor={currentCompetitor} />
-                    )}
-                </>
-            )}
+
+                        {/* Target Audience */}
+                        {c.target_audience && c.target_audience.length > 0 && (
+                            <div className="mt-4 pt-3 border-t border-[#E4E4E7]/50">
+                                <p className="text-[10px] font-bold text-[#71717A] uppercase mb-2">Target Audience</p>
+                                <div className="flex flex-wrap gap-1">
+                                    {c.target_audience.slice(0, 4).map((a, i) => (
+                                        <span key={i} className="inline-block px-2 py-1 rounded-lg bg-white border border-[#E4E4E7] text-[10px] text-[#18181B]">{a}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    </div>
+);
+
+// ==================== TECH STACK COMPARISON ====================
+
+const TechStackComparison: React.FC<{ companies: typeof HERO_COMPANIES }> = ({ companies }) => {
+    const allTechs = useMemo(() => {
+        const set = new Set<string>();
+        companies.forEach(c => (c.tech_stack || []).forEach(t => set.add(t)));
+        return Array.from(set).sort();
+    }, [companies]);
+
+    return (
+        <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                    <Zap className="text-cyan-600" size={20} />
+                </div>
+                <div>
+                    <h3 className="font-bold text-[#18181B]">Technology Stack Comparison</h3>
+                    <p className="text-xs text-[#71717A]">Core technologies used by each company</p>
+                </div>
+            </div>
+
+            <div className="overflow-x-auto -mx-1">
+                <table className="w-full min-w-[500px]">
+                    <thead>
+                        <tr className="bg-[#FAFAFA]">
+                            <th className="px-4 py-2 text-left text-xs font-bold text-[#71717A] uppercase">Technology</th>
+                            {companies.map((c, idx) => {
+                                const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+                                return (
+                                    <th key={c.name} className="px-4 py-2 text-center">
+                                        <span className={`text-xs font-bold ${cc.textDark}`}>{shortName(c.name)}</span>
+                                    </th>
+                                );
+                            })}
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#F4F4F5]">
+                        {allTechs.map(tech => (
+                            <tr key={tech} className="hover:bg-[#FAFAFA]">
+                                <td className="px-4 py-2 text-xs text-[#18181B] font-medium">{tech}</td>
+                                {companies.map((c, idx) => {
+                                    const has = (c.tech_stack || []).some(t => t.toLowerCase() === tech.toLowerCase());
+                                    const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+                                    return (
+                                        <td key={c.name} className="px-4 py-2 text-center">
+                                            {has ? (
+                                                <CheckCircle size={16} className={cc.textDark} />
+                                            ) : (
+                                                <span className="text-[#D4D4D8]">&mdash;</span>
+                                            )}
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Summary tags per company */}
+            <div className={`grid gap-4 mt-5 ${companies.length === 2 ? 'grid-cols-2' : 'grid-cols-' + Math.min(companies.length, 3)}`}>
+                {companies.map((c, idx) => {
+                    const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+                    return (
+                        <div key={c.name}>
+                            <p className={`text-[10px] font-bold ${cc.textDark} uppercase mb-1.5`}>{shortName(c.name)} Stack</p>
+                            <div className="flex flex-wrap gap-1">
+                                {(c.tech_stack || []).map((tech, i) => (
+                                    <span key={i} className="px-2 py-1 bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg text-[10px] text-[#18181B] font-medium">{tech}</span>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+// ==================== VULNERABILITIES COMPARISON ====================
+
+const VulnerabilitiesComparison: React.FC<{ companies: typeof HERO_COMPANIES }> = ({ companies }) => (
+    <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                <Shield className="text-amber-600" size={20} />
+            </div>
+            <div>
+                <h3 className="font-bold text-[#18181B]">Competitive Vulnerabilities</h3>
+                <p className="text-xs text-[#71717A]">Known pain points and competitive weaknesses</p>
+            </div>
+        </div>
+
+        <div className={`grid gap-4 ${companies.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-' + Math.min(companies.length, 3)}`}>
+            {companies.map((c, idx) => {
+                const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+                return (
+                    <div key={c.name}>
+                        <h4 className={`text-sm font-bold ${cc.textDark} mb-3 flex items-center gap-2`}>
+                            <Flag size={14} />
+                            {shortName(c.name)} Vulnerabilities
+                        </h4>
+                        <div className="space-y-2">
+                            {(c.key_pain_points || []).slice(0, 5).map((pain, i) => (
+                                <div key={i} className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-100">
+                                    <Flag size={12} className="text-amber-500 mt-0.5 shrink-0" />
+                                    <span className="text-xs text-[#18181B] leading-relaxed">{pain}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    </div>
+);
+
+// ==================== RECENT EVENTS COMPARISON ====================
+
+const RecentEventsComparison: React.FC<{ companies: typeof HERO_COMPANIES }> = ({ companies }) => (
+    <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] flex items-center justify-center">
+                <Rocket className="text-[#E11D48]" size={20} />
+            </div>
+            <div>
+                <h3 className="font-bold text-[#18181B]">Recent Events & Milestones</h3>
+                <p className="text-xs text-[#71717A]">Latest developments from selected companies</p>
+            </div>
+        </div>
+
+        <div className={`grid gap-4 ${companies.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-' + Math.min(companies.length, 3)}`}>
+            {companies.map((c, idx) => {
+                const cc = COMPANY_COLORS[idx % COMPANY_COLORS.length]!;
+                return (
+                    <div key={c.name}>
+                        <h4 className={`text-sm font-bold ${cc.textDark} mb-3 flex items-center gap-2`}>
+                            <Briefcase size={14} />
+                            {shortName(c.name)}
+                        </h4>
+                        <div className="space-y-2">
+                            {(c.recent_events || []).slice(0, 5).map((event, i) => (
+                                <div key={i} className="flex items-start gap-2 p-3 bg-[#FAFAFA] rounded-xl border border-[#E4E4E7]">
+                                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: cc.accent }} />
+                                    <span className="text-xs text-[#18181B] leading-relaxed">{event}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    </div>
+);
+
+// ==================== MAIN COMPONENT ====================
+
+// ==================== SECTION IDS FOR BOOKMARKS ====================
+
+const SECTION_IDS = [
+    { id: 'hero-cards', label: 'Company Overview' },
+    { id: 'market-map', label: 'Market Map' },
+    { id: 'head-to-head', label: 'Head-to-Head' },
+    { id: 'growth-csat', label: 'Growth vs CSAT' },
+    { id: 'products', label: 'Product Portfolio' },
+    { id: 'tech-stack', label: 'Tech Stack' },
+    { id: 'recent-events', label: 'Recent Events' },
+    { id: 'vulnerabilities', label: 'Vulnerabilities' },
+] as const;
+
+// ==================== SECTION WRAPPER (bookmark + note + highlight ring) ====================
+
+const SectionWrapper: React.FC<{
+    id: string;
+    highlight: boolean;
+    bookmarked: boolean;
+    onToggleBookmark: () => void;
+    children: React.ReactNode;
+}> = ({ id, highlight, bookmarked, onToggleBookmark, children }) => (
+    <div id={id} className={`relative transition-all duration-300 ${highlight ? 'ring-2 ring-amber-400 ring-offset-2 rounded-2xl shadow-lg shadow-amber-100' : ''}`}>
+        {/* Floating action buttons — top‑right */}
+        <div className="absolute -top-2 right-3 z-10 flex items-center gap-1">
+            <button
+                onClick={onToggleBookmark}
+                title={bookmarked ? 'Bỏ đánh dấu' : 'Đánh dấu mục này'}
+                className={`p-1.5 rounded-lg border shadow-sm transition-colors ${
+                    bookmarked
+                        ? 'bg-amber-50 border-amber-300 text-amber-600 hover:bg-amber-100'
+                        : 'bg-white border-[#E4E4E7] text-[#A1A1AA] hover:text-[#E11D48] hover:border-[#FFE4E6]'
+                }`}
+            >
+                {bookmarked ? <BookmarkCheck size={13} /> : <Bookmark size={13} />}
+            </button>
+        </div>
+        {children}
+        <SectionNote sectionId={id} />
+    </div>
+);
+
+// ==================== MAIN COMPONENT ====================
+
+export const CompetitorAnalysisPage: React.FC<CompetitorAnalysisPageProps> = ({ userData: _userData, competitors }) => {
+    // Match competitors from onboarding against HERO_COMPANIES by name (fuzzy)
+    const selectedCompanies = useMemo(() => {
+        const inputNames: string[] = (competitors || []).map((c: any) => (c.name || '').toLowerCase().trim());
+        if (inputNames.length === 0) return HERO_COMPANIES.slice(0, 3); // fallback
+
+        return HERO_COMPANIES.filter(hero => {
+            const heroLower = hero.name.toLowerCase();
+            return inputNames.some(input =>
+                heroLower.includes(input) || input.includes(heroLower) ||
+                heroLower.split('(')[0]?.trim() === input.split('(')[0]?.trim() ||
+                heroLower.startsWith(input.split(' ')[0] || '') && input.length > 2
+            );
+        });
+    }, [competitors]);
+
+    const selectedNames = useMemo(() => selectedCompanies.map(c => c.name), [selectedCompanies]);
+
+    // ── Feature state ──
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [highlightMode, setHighlightMode] = useState(false);
+    const [activeSection, setActiveSection] = useState<string>('');
+    const observerRef = useRef<IntersectionObserver | null>(null);
+
+    // ── Scroll spy — IntersectionObserver tracks which section is in the viewport ──
+    useEffect(() => {
+        // Clean up previous observer
+        if (observerRef.current) observerRef.current.disconnect();
+
+        const visibleMap = new Map<string, number>();
+
+        observerRef.current = new IntersectionObserver(
+            entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        visibleMap.set(entry.target.id, entry.intersectionRatio);
+                    } else {
+                        visibleMap.delete(entry.target.id);
+                    }
+                });
+
+                // Pick the section with the highest intersection ratio
+                let bestId = '';
+                let bestRatio = 0;
+                visibleMap.forEach((ratio, id) => {
+                    if (ratio > bestRatio) { bestRatio = ratio; bestId = id; }
+                });
+
+                // Fallback: if no best by ratio, pick topmost visible section in DOM order
+                if (!bestId && visibleMap.size > 0) {
+                    for (const s of SECTION_IDS) {
+                        if (visibleMap.has(s.id)) { bestId = s.id; break; }
+                    }
+                }
+
+                if (bestId) setActiveSection(bestId);
+            },
+            { threshold: [0, 0.2, 0.4, 0.6, 0.8, 1], rootMargin: '-80px 0px -30% 0px' }
+        );
+
+        // Observe all section elements
+        SECTION_IDS.forEach(s => {
+            const el = document.getElementById(s.id);
+            if (el) observerRef.current!.observe(el);
+        });
+
+        return () => { observerRef.current?.disconnect(); };
+    }, [selectedCompanies]); // re-bind when companies change
+
+    const [bookmarkedSections, setBookmarkedSections] = useState<Set<string>>(() => {
+        try {
+            const saved = localStorage.getItem('vico_competitor_bookmarks');
+            return saved ? new Set(JSON.parse(saved)) : new Set();
+        } catch { return new Set(); }
+    });
+
+    const toggleBookmarkSection = useCallback((id: string) => {
+        setBookmarkedSections(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            localStorage.setItem('vico_competitor_bookmarks', JSON.stringify(Array.from(next)));
+            return next;
+        });
+    }, []);
+
+    const handleExport = useCallback((format: 'html' | 'txt' | 'json') => {
+        const data = selectedCompanies as unknown as CompetitorExportData[];
+        if (format === 'html') exportCompetitorReportHTML(data);
+        else if (format === 'json') exportCompetitorReportJSON(data);
+        else exportCompetitorReportTXT(data);
+    }, [selectedCompanies]);
+
+    // If no matches found, show a friendly fallback
+    if (selectedCompanies.length === 0) {
+        return (
+            <div className="space-y-6 animate-fade-in">
+                <div>
+                    <div className="inline-flex items-center gap-2 bg-[#FFF1F2] px-3 py-1 rounded-full mb-2">
+                        <Rocket className="w-3.5 h-3.5 text-[#E11D48]" />
+                        <span className="text-[10px] font-bold text-[#E11D48] uppercase tracking-wider">Competitor Intelligence Engine</span>
+                    </div>
+                    <h1 className="text-3xl font-black text-[#18181B] uppercase tracking-tight">Competitor Analysis</h1>
+                </div>
+                <div className="bg-white border border-[#E4E4E7] rounded-2xl p-12 text-center">
+                    <Target className="w-12 h-12 text-[#A1A1AA] mx-auto mb-4" />
+                    <h3 className="text-lg font-bold text-[#18181B] mb-1">No matching companies found</h3>
+                    <p className="text-sm text-[#71717A]">
+                        The competitors selected during onboarding could not be matched to our premium database.
+                        Please go back and update your competitor selections.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6 animate-fade-in">
+            {/* Page Header */}
+            <div>
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="inline-flex items-center gap-2 bg-[#FFF1F2] px-3 py-1 rounded-full">
+                        <Rocket className="w-3.5 h-3.5 text-[#E11D48]" />
+                        <span className="text-[10px] font-bold text-[#E11D48] uppercase tracking-wider">Competitor Intelligence Engine</span>
+                    </div>
+                </div>
+                <h1 className="text-3xl font-black text-[#18181B] uppercase tracking-tight">
+                    Competitor Analysis
+                </h1>
+                <p className="text-[#71717A] text-sm mt-1">
+                    Head-to-head competitive comparison for your selected competitors
+                </p>
+            </div>
+
+            {/* ── Floating Toolbar ── */}
+            <div className="bg-white border border-[#E4E4E7] rounded-2xl p-3 flex flex-wrap items-center gap-2 sticky top-0 z-30 shadow-sm">
+                {/* Export */}
+                <button
+                    onClick={() => setShowExportModal(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#E11D48] text-white hover:bg-[#BE123C] transition-colors shadow-sm"
+                >
+                    <Download size={13} /> Xuất Báo Cáo
+                </button>
+
+                {/* Highlight Mode */}
+                <button
+                    onClick={() => setHighlightMode(h => !h)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors border ${
+                        highlightMode
+                            ? 'bg-amber-50 text-amber-700 border-amber-300'
+                            : 'bg-white text-[#71717A] border-[#E4E4E7] hover:text-amber-600 hover:border-amber-300'
+                    }`}
+                >
+                    <Highlighter size={13} /> {highlightMode ? 'Tắt Highlight' : 'Highlight'}
+                </button>
+
+                {/* Print */}
+                <button
+                    onClick={() => window.print()}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-[#71717A] border border-[#E4E4E7] hover:text-[#18181B] hover:border-[#A1A1AA] transition-colors"
+                >
+                    <Printer size={13} /> In
+                </button>
+
+                {/* Divider */}
+                <div className="w-px h-6 bg-[#E4E4E7] mx-1" />
+
+                {/* Section navigation with scroll-spy active indicator */}
+                {SECTION_IDS.map(s => {
+                    const isActive = activeSection === s.id;
+                    const isBookmarked = bookmarkedSections.has(s.id);
+                    return (
+                        <button
+                            key={s.id}
+                            onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                            className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all duration-200 border ${
+                                isActive
+                                    ? 'bg-[#E11D48] text-white border-[#E11D48] shadow-sm shadow-[#E11D48]/20 scale-[1.04]'
+                                    : isBookmarked
+                                        ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                                        : 'bg-white text-[#A1A1AA] border-transparent hover:text-[#71717A] hover:bg-[#FAFAFA]'
+                            }`}
+                            title={s.label}
+                        >
+                            {isBookmarked && !isActive && <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 mr-1" />}
+                            {s.label}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Export Modal */}
+            <ExportModal show={showExportModal} onClose={() => setShowExportModal(false)} onExport={handleExport} />
+
+            {/* Summary Bar */}
+            <div className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF1F2] text-[#E11D48] text-xs font-bold">
+                    <Sparkles size={12} /> Instant Comparison
+                </span>
+                <span className="text-sm text-[#71717A]">
+                    {selectedCompanies.map(c => shortName(c.name)).join(' vs ')}
+                </span>
+                <span className="text-xs text-[#A1A1AA]">
+                    ({selectedCompanies.length} companies from your onboarding selections)
+                </span>
+            </div>
+
+            {/* Hero Cards */}
+            <SectionWrapper id="hero-cards" highlight={highlightMode} bookmarked={bookmarkedSections.has('hero-cards')} onToggleBookmark={() => toggleBookmarkSection('hero-cards')}>
+                <ComparisonHeroCards companies={selectedCompanies} highlightMode={highlightMode} />
+            </SectionWrapper>
+
+            {/* Market Map + Share */}
+            <SectionWrapper id="market-map" highlight={highlightMode} bookmarked={bookmarkedSections.has('market-map')} onToggleBookmark={() => toggleBookmarkSection('market-map')}>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <MarketMapQuadrant companies={HERO_COMPANIES} selectedNames={selectedNames} />
+                    <MarketShareComparison companies={selectedCompanies} highlightMode={highlightMode} />
+                </div>
+            </SectionWrapper>
+
+            {/* Head-to-Head Table */}
+            <SectionWrapper id="head-to-head" highlight={highlightMode} bookmarked={bookmarkedSections.has('head-to-head')} onToggleBookmark={() => toggleBookmarkSection('head-to-head')}>
+                <HeadToHeadTable companies={selectedCompanies} highlightMode={highlightMode} />
+            </SectionWrapper>
+
+            {/* Growth vs CSAT */}
+            <SectionWrapper id="growth-csat" highlight={highlightMode} bookmarked={bookmarkedSections.has('growth-csat')} onToggleBookmark={() => toggleBookmarkSection('growth-csat')}>
+                <GrowthCsatComparison companies={selectedCompanies} highlightMode={highlightMode} />
+            </SectionWrapper>
+
+            {/* Product portfolios */}
+            <SectionWrapper id="products" highlight={highlightMode} bookmarked={bookmarkedSections.has('products')} onToggleBookmark={() => toggleBookmarkSection('products')}>
+                <ProductComparisonPanel companies={selectedCompanies} />
+            </SectionWrapper>
+
+            {/* Tech Stack */}
+            <SectionWrapper id="tech-stack" highlight={highlightMode} bookmarked={bookmarkedSections.has('tech-stack')} onToggleBookmark={() => toggleBookmarkSection('tech-stack')}>
+                <TechStackComparison companies={selectedCompanies} />
+            </SectionWrapper>
+
+            {/* Recent Events */}
+            <SectionWrapper id="recent-events" highlight={highlightMode} bookmarked={bookmarkedSections.has('recent-events')} onToggleBookmark={() => toggleBookmarkSection('recent-events')}>
+                <RecentEventsComparison companies={selectedCompanies} />
+            </SectionWrapper>
+
+            {/* Vulnerabilities */}
+            <SectionWrapper id="vulnerabilities" highlight={highlightMode} bookmarked={bookmarkedSections.has('vulnerabilities')} onToggleBookmark={() => toggleBookmarkSection('vulnerabilities')}>
+                <VulnerabilitiesComparison companies={selectedCompanies} />
+            </SectionWrapper>
+
+            {/* Data Sources & Methodology Footer */}
+            <div className="bg-white border border-[#E4E4E7] rounded-2xl p-5">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <Database className="w-4 h-4 text-[#A1A1AA]" />
+                            <span className="text-xs font-semibold text-[#18181B]">Data Sources &amp; Methodology</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {[
+                                'VICO Company Database (10,000+ companies)',
+                                'CafeF & VnExpress Financials',
+                                'Gartner & ISG Analyst Reports',
+                                'Company Annual Reports & IR Filings',
+                                'Vietnam Enterprise Registration (DPI)',
+                                'Crunchbase & PitchBook Funding Data',
+                            ].map((src, idx) => (
+                                <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FAFAFA] border border-[#E4E4E7] text-[10px] text-[#71717A]">
+                                    <CheckCircle className="w-2.5 h-2.5 text-emerald-500" />
+                                    {src}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                        <p className="text-[10px] text-[#A1A1AA] leading-relaxed">
+                            Last verified: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
+                        </p>
+                        <p className="text-[10px] text-[#A1A1AA]">
+                            VICO Intelligence &middot; Competitive Analysis
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

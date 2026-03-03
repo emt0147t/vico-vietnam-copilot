@@ -1,13 +1,18 @@
 /**
- * API Route: GTM Strategy Generation
- * POST /api/gtm/generate
- * Generate Go-To-Market recommendations
+ * API Route: GTM Living Playbook Generation
+ * POST /api/gtm/generate — Generate full AI-powered Living Playbook
+ * GET  /api/gtm/generate?company=X — Search company suggestions
+ * 
+ * Uses gtmPlaybookService (Gemini 2.0 Flash + VICO Database)
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { GTMStrategyService } from "@/services/gtmStrategyService";
-import { NewsDB, initializeNewsDB } from "@/utils/newsDatabase";
-import { COMPANIES } from "@/data/companies";
+import { generateLivingPlaybook } from "@/services/gtmPlaybookService";
+import CompaniesDataService from "@/services/companiesDataService";
+
+// ============================================================================
+// POST — Generate Living Playbook
+// ============================================================================
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,127 +20,79 @@ export async function POST(request: NextRequest) {
     const { companyName, targetMarkets } = body;
 
     // Validate input
-    if (!companyName) {
+    if (!companyName || typeof companyName !== 'string' || companyName.trim().length < 2) {
       return NextResponse.json(
-        { error: "Company name required" },
+        { error: "Company name is required (minimum 2 characters)" },
         { status: 400 }
       );
     }
 
-    // Find company in database
-    const company = COMPANIES.find(
-      (c) => c.name.toLowerCase() === companyName.toLowerCase()
+    // Generate the Living Playbook via AI service
+    // The service handles company lookup, competitor finding, and AI generation
+    const playbook = await generateLivingPlaybook(
+      companyName.trim(),
+      targetMarkets || ["Vietnam", "Southeast Asia"]
     );
 
-    if (!company) {
+    return NextResponse.json(playbook, { status: 200 });
+  } catch (error) {
+    console.error("GTM generation error:", error);
+
+    const message = error instanceof Error ? error.message : "Failed to generate playbook";
+
+    // Differentiate between AI errors and other errors
+    if (message.includes("API key") || message.includes("GEMINI")) {
       return NextResponse.json(
-        { error: "Company not found" },
-        { status: 404 }
+        { error: "AI service not configured. Please set GEMINI_API_KEY environment variable." },
+        { status: 503 }
       );
     }
 
-    // Get company news and signals
-    await initializeNewsDB();
-    const companyNews = await NewsDB.searchByCompany(companyName, 100);
-
-    // Extract signals from news
-    const signalMap = new Map<string, number>();
-    companyNews.forEach((news) => {
-      news.signals?.forEach((signal) => {
-        signalMap.set(signal, (signalMap.get(signal) || 0) + 1);
-      });
-    });
-
-    const topSignals = Array.from(signalMap.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([signal]) => signal);
-
-    // Get competitors
-    const competitors = COMPANIES.filter(
-      (c) => c.industry === company.industry && c.name !== companyName
-    )
-      .slice(0, 5)
-      .map((c) => c.name);
-
-    // Generate GTM recommendation
-    const context = {
-      name: companyName,
-      industry: company.industry || "Technology",
-      marketPosition: company.industry?.includes("Technology")
-        ? "emerging"
-        : "new_entrant",
-      signals: topSignals,
-      newsCount: companyNews.length,
-      competitors,
-      targetMarkets: targetMarkets || ["Vietnam"],
-    };
-
-    const recommendation = await GTMStrategyService.generateGTMRecommendation(
-      context as any
-    );
-
     return NextResponse.json(
-      {
-        success: true,
-        recommendation,
-        analysis: {
-          newsCount: companyNews.length,
-          topSignals,
-          competitors,
-        },
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("GTM generation error:", error);
-    return NextResponse.json(
-      { error: "Failed to generate GTM strategy" },
+      { error: message },
       { status: 500 }
     );
   }
 }
 
+// ============================================================================
+// GET — Company Search Suggestions
+// ============================================================================
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const companyName = searchParams.get("company");
+    const query = searchParams.get("company");
 
-    if (!companyName) {
+    if (!query || query.length < 2) {
       return NextResponse.json(
-        { error: "Company name required" },
+        { error: "Company query required (minimum 2 characters)" },
         { status: 400 }
       );
     }
 
-    // Find company
-    const company = COMPANIES.find(
-      (c) => c.name.toLowerCase() === companyName.toLowerCase()
-    );
+    const service = CompaniesDataService.getInstance();
+    const results = service.searchCompanies(query, 10);
 
-    if (!company) {
-      return NextResponse.json(
-        { error: "Company not found" },
-        { status: 404 }
-      );
-    }
+    // Return structured suggestions
+    const suggestions = results.map(c => ({
+      name: c.name,
+      industry: c.industry || "Unknown",
+      ticker: c.ticker || null,
+      dataTier: c.dataTier || "basic",
+      size: c.size || null,
+    }));
 
-    return NextResponse.json(
-      {
-        success: true,
-        company: {
-          name: company.name,
-          industry: company.industry,
-          description: company.description,
-          location: company.location,
-        },
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      success: true,
+      query,
+      count: suggestions.length,
+      suggestions,
+    }, { status: 200 });
   } catch (error) {
-    console.error("GTM fetch error:", error);
+    console.error("GTM search error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch company" },
+      { error: "Failed to search companies" },
       { status: 500 }
     );
   }

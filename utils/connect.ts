@@ -1,23 +1,23 @@
 
 // [VICO NEW ARCHITECTURE]
-// File này chỉ được phép chạy ở môi trường Node.js (Server)
-// Thư viện 'mongodb' sẽ gây lỗi crash nếu chạy trên trình duyệt.
+// This file is only allowed to run in Node.js environment (Server)
+// The 'mongodb' library will crash if run in the browser.
 
 import { MongoClient, Db } from 'mongodb';
 
-// [VICO OLD CODE] - Không nên để lộ mật khẩu trong code
+// [VICO OLD CODE] - Passwords should not be exposed in code
 /* 
 const MONGO_URI = 'mongodb+srv://thinv04012003_db_user:Thi04012003@cluster0.7rhap1z.mongodb.net/?appName=Cluster0';
 */
 
-// [VICO SECURITY FIX] - Ưu tiên lấy từ biến môi trường
-const MONGO_URI = process.env.MONGO_URI || 'Vui lòng cấu hình MONGO_URI trong .env';
+// [VICO SECURITY FIX] - Prioritize loading from environment variables
+const MONGO_URI = process.env.MONGO_URI || 'Please configure MONGO_URI in .env';
 const DB_NAME = 'vico-db';
 
 let db: Db;
 
 export async function connectMongo(): Promise<Db> {
-  // Kiểm tra nếu đang chạy ở trình duyệt
+  // Check if running in browser
   if (typeof window !== 'undefined') {
     throw new Error("CRITICAL: connectMongo cannot run in the browser. Use API endpoints instead.");
   }

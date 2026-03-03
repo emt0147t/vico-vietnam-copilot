@@ -16,9 +16,2067 @@ export interface CompanyProfile {
   intro_new?: string;
   products_new?: string;
   customers_new?: string;
+
+  // Stock market data
+  ticker?: string;                    // HOSE/HNX/UPCoM ticker (e.g., 'FPT', 'VNM', 'MSN')
+  exchange?: 'HOSE' | 'HNX' | 'UPCoM' | 'private' | 'foreign';
+
+  // Revenue verification
+  revenueVerified?: boolean;          // Whether revenue figure is from audited financials
+  revenueYear?: number;               // Year of revenue figure
+  dataProvenanceNote?: string;        // e.g., "Revenue from 2023 audited report via CafeF"
+
+  // Data quality tier — computed at runtime by companyFilter.ts
+  dataTier?: 'premium' | 'standard' | 'basic';
+  dataScore?: number;          // 0-100 based on available public data
+  lastEnriched?: string;       // ISO date of last enrichment
+  enrichmentSources?: string[]; // e.g. ['website', 'google_news', 'gemini_ai']
+
+  // ── Hero / Demo-enriched fields (Phase 14+) ──
+  sub_industry?: string;                // e.g. 'Fintech', 'SaaS', 'IT Services'
+  revenue_range?: string;               // e.g. '$100M - $500M'
+  employee_range?: string;              // e.g. '1000-5000'
+  headcount?: number;                   // Exact or approximate headcount number
+  total_funding?: string;               // e.g. '$300M', 'Bootstrapped', 'Undisclosed'
+  tech_stack?: string[];                // 5-7 key technologies
+  description?: string;                 // 2-sentence executive summary
+  key_pain_points?: string[];           // 3-5 pain points for ICP Builder
+  target_audience?: string[];           // 3-5 audience segments
+  recent_events?: string[];             // 3-5 recent events / funding / launches
+
+  // ── Customer Insights / ICP (Phase 16) ──
+  customer_insights?: {
+    firmographics: {
+      industry_vertical: string;
+      employee_count: string;
+      estimated_revenue: string;
+      geographic_focus: string[];
+      ownership: string;
+      tech_maturity: string;
+    };
+    technographics: string[];
+    buyer_personas: Array<{
+      title: string;
+      department: string;
+      seniority: string;
+      decision_role: 'Decision Maker' | 'Influencer' | 'Champion' | 'Gatekeeper' | 'End User';
+      kpis: string[];
+      pain_points: string[];
+      preferred_channels: string[];
+      vietnam_behavior?: string;
+      quote_snippet?: string;
+    }>;
+    buying_triggers: Array<{
+      event: string;
+      category: 'growth' | 'regulatory' | 'competitive' | 'operational' | 'technological' | 'seasonal';
+      urgency: 'critical' | 'high' | 'medium' | 'low';
+      description: string;
+      vietnam_context?: string;
+    }>;
+    pain_points_detailed: Array<{
+      title: string;
+      severity: 'critical' | 'high' | 'medium' | 'low';
+      description: string;
+      current_workaround: string;
+      cost_of_inaction: string;
+    }>;
+    executive_summary: string;
+    positioning_statement: string;
+    recommended_channels: string[];
+    vietnam_market_notes: string[];
+  };
+
+  // ── GTM Playbook (Phase 17) ──
+  gtm_playbook?: {
+    executive_summary: string;
+    target_audience: string;
+    phases: Array<{
+      phase_number: number;
+      title: string;
+      duration: string;
+      key_actions: string[];
+    }>;
+    growth_channels: string[];
+    kpis: string[];
+    vietnam_context: string;
+  };
+
+  // ── ICP Profile (Phase 19) ──
+  icp_profile?: {
+    executive_summary: string;
+    firmographics: {
+      company_size_range: string;
+      revenue_range: string;
+      industries: string[];
+      geographic_focus: string[];
+      company_maturity: string;
+      ownership_structure: string;
+      typical_tech_stack: string[];
+      regulatory_pressure: string;
+    };
+    buyer_personas: Array<{
+      id: string;
+      title: string;
+      department: string;
+      seniority: string;
+      age_range: string;
+      key_kpis: string[];
+      goals: string[];
+      frustrations: string[];
+      preferred_channels: string[];
+      vietnam_behavior: string;
+      decision_role: string;
+      quote_snippet: string;
+    }>;
+    buying_triggers: Array<{
+      id: string;
+      trigger: string;
+      category: string;
+      urgency_level: string;
+      description: string;
+      vietnam_context: string;
+    }>;
+    pain_points: Array<{
+      id: string;
+      title: string;
+      severity: string;
+      description: string;
+      current_workaround: string;
+      cost_of_inaction: string;
+      vietnam_specific: boolean;
+    }>;
+    positioning_statement: string;
+    recommended_channels: string[];
+    vietnam_market_notes: string[];
+  };
+
+  // ── Competitor Visual Fields (Phase 18) ──
+  market_share_percentage?: number;
+  yoy_growth?: string;
+  csat_score?: number;
+  quadrant_position?: 'Leader' | 'Challenger' | 'Visionary' | 'Niche Player';
 }
 
+
 export const COMPANIES: CompanyProfile[] = [
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 🌟 HERO COMPANIES — P-Innovation Demo (Technology Sector)
+  // 15 premium-enriched profiles for Competitor, Market, ICP & Playbook demos
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
+    name: "FPT Software",
+    intro: "Vietnam's largest software outsourcing powerhouse, serving Fortune 500 clients across 30+ countries with deep expertise in AI, cloud migration, and automotive software.",
+    address: "Cầu Giấy, Hà Nội, Việt Nam",
+    year: 1999,
+    size: "> 30.000 người",
+    headcount: 29000,
+    total_funding: "Public (HOSE: FPT) — Parent FPT Corp market cap ~$8B",
+    products: "IT Outsourcing, Cloud Migration, AI/ML Solutions, Automotive Software, Digital Transformation, SAP Consulting, Low-Code Platform (akaBot)",
+    customers: "Fortune 500 companies, Global Banks, Automotive OEMs (Toyota, Renault), Airbus, AWS, Microsoft.",
+    industry: "Technology",
+    sub_industry: "IT Services & Outsourcing",
+    website: "fpt-software.com",
+    revenue: "$1.1B",
+    revenue_range: "$1B - $1.5B",
+    employee_range: "27000-32000",
+    growth: 25.2,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/fpt-software.com",
+    ticker: "FPT",
+    exchange: "HOSE",
+    revenueVerified: true,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue from FPT Group 2025 Q4 consolidated report via CafeF; FPT Software segment breakout",
+    dataTier: "premium",
+    dataScore: 99,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "cafef", "hose_filings"],
+    tech_stack: ["Java", "Spring Boot", ".NET", "AWS", "Azure", "Kubernetes", "RPA (akaBot)"],
+    description: "FPT Software is the flagship IT services subsidiary of FPT Corporation and Vietnam's largest software company by revenue, delivering digital transformation, cloud, and AI solutions to over 1,100 global clients. With 27,000+ engineers across 30 countries, it is ranked among Gartner's top IT outsourcing providers in APAC.",
+    key_pain_points: [
+      "Talent retention in hyper-competitive global IT labor market",
+      "Margin pressure from rising developer salaries in Vietnam",
+      "Need to shift from labor-arbitrage outsourcing to high-value consulting",
+      "Client concentration risk — top 10 clients represent 35% of revenue",
+      "Scaling delivery centers in Latin America & Eastern Europe"
+    ],
+    target_audience: [
+      "Enterprise CIOs & CTOs seeking offshore development partners",
+      "Automotive OEMs requiring embedded software & ADAS solutions",
+      "Banks & insurers undergoing core system modernization",
+      "SaaS companies needing staff augmentation at scale",
+      "Government agencies pursuing digital transformation"
+    ],
+    recent_events: [
+      "Opened new delivery center in Costa Rica (Q4 2025) targeting LATAM market",
+      "Won $100M+ multi-year deal with a top-5 European automotive OEM",
+      "Launched FPT AutoGen — proprietary generative AI coding assistant for enterprise",
+      "Strategic partnership with NVIDIA for sovereign AI infrastructure in Vietnam",
+      "Crossed $1B annual revenue milestone for the first time in FY2025"
+    ],
+    customer_insights: {
+      firmographics: {
+        industry_vertical: "IT Services & Software Outsourcing",
+        employee_count: "27,000 – 32,000",
+        estimated_revenue: "$1.1B (FY2025)",
+        geographic_focus: ["Vietnam", "Japan", "USA", "Europe (DACH, Nordics)", "APAC", "LATAM"],
+        ownership: "Public — HOSE: FPT (subsidiary of FPT Corporation)",
+        tech_maturity: "Very High — ISO 27001, CMMI-5, AWS/Azure Advanced Partner"
+      },
+      technographics: ["Java", "Spring Boot", ".NET / C#", "AWS", "Azure", "Kubernetes", "SAP", "Salesforce", "ServiceNow", "akaBot (RPA)", "Jira", "Confluence", "Jenkins", "React", "Angular"],
+      buyer_personas: [
+        {
+          title: "Chief Technology Officer (CTO)",
+          department: "Engineering / Technology",
+          seniority: "C-Level",
+          decision_role: "Decision Maker",
+          kpis: ["Time-to-market reduction", "Engineering velocity (PRs/sprint)", "System uptime (99.9% SLA)", "Tech debt ratio"],
+          pain_points: ["Talent shortage for specialized skills (AI/ML, cloud-native)", "Vendor lock-in risk with large outsourcing partners", "Communication overhead across time zones", "Security compliance for regulated industries"],
+          preferred_channels: ["Industry conferences (Gartner, Web Summit)", "Gartner Peer Insights reviews", "CTO peer referral networks", "LinkedIn thought leadership"],
+          vietnam_behavior: "Vietnamese CTOs in FDI companies heavily rely on Gartner and peer reviews; prefer face-to-face PoC workshops before signing multi-year deals.",
+          quote_snippet: "We need a partner who can scale from 20 to 200 engineers in 6 months without quality drop."
+        },
+        {
+          title: "VP of Engineering / Delivery Head",
+          department: "Engineering",
+          seniority: "VP / Director",
+          decision_role: "Influencer",
+          kpis: ["Sprint velocity", "Defect escape rate", "Team ramp-up time", "Resource utilization"],
+          pain_points: ["Inconsistent code quality from offshore teams", "Knowledge transfer gaps during team transitions", "Difficulty integrating offshore devs into agile ceremonies"],
+          preferred_channels: ["Technical blogs & case studies", "GitHub & open-source contributions", "Webinars with engineering leads"],
+          vietnam_behavior: "Prefers detailed technical proposals with architecture diagrams; values certifications (AWS, Azure) as proof of competence."
+        },
+        {
+          title: "Chief Procurement Officer (CPO)",
+          department: "Procurement / Finance",
+          seniority: "C-Level",
+          decision_role: "Gatekeeper",
+          kpis: ["Cost savings vs. onshore development", "Vendor compliance score", "Contract SLA adherence"],
+          pain_points: ["Opaque pricing models from large SI firms", "Currency fluctuation risk (VND/USD)", "Long contract negotiation cycles"],
+          preferred_channels: ["RFP/RFI responses", "Analyst reports (ISG, Everest)", "Reference customer calls"],
+          vietnam_behavior: "Vietnamese procurement in state-owned enterprises follows strict public bidding rules; private-sector CPOs prioritize total cost of ownership over hourly rates."
+        }
+      ],
+      buying_triggers: [
+        { event: "Cloud migration mandate from board / parent company", category: "technological", urgency: "critical", description: "Enterprise boards increasingly mandate cloud-first strategies, creating urgent demand for migration partners with proven playbooks.", vietnam_context: "Vietnam's National Digital Transformation Program (QĐ 749) is pushing government agencies and SOEs to migrate to cloud by 2027." },
+        { event: "M&A or rapid headcount scaling requiring staff augmentation", category: "growth", urgency: "high", description: "Post-acquisition integration or hyper-growth phases require 50–200 additional engineers within 3–6 months.", vietnam_context: "Many Japanese and Korean manufacturers expanding factories in Vietnam need local IT support teams quickly." },
+        { event: "Legacy system modernization deadline", category: "operational", urgency: "high", description: "End-of-life for core banking, ERP, or mainframe systems forces enterprises to seek modernization partners.", vietnam_context: "Vietnamese banks under SBV pressure to modernize core banking before 2028 Basel III deadline." },
+        { event: "New AI/GenAI initiative with no in-house expertise", category: "competitive", urgency: "high", description: "Boards allocating AI budgets but lacking internal ML engineering talent turn to outsourcing partners.", vietnam_context: "Vietnam's AI National Strategy aims for 50% of enterprises adopting AI by 2030, creating huge consulting demand." }
+      ],
+      pain_points_detailed: [
+        { title: "Talent shortage in specialized tech (AI/ML, automotive embedded)", severity: "critical", description: "Global shortage of engineers with niche skills in ADAS, AUTOSAR, or LLM fine-tuning forces companies to look offshore.", current_workaround: "Hire expensive contractors or delay projects", cost_of_inaction: "6-12 month project delays; $2M+ opportunity cost per quarter" },
+        { title: "Quality consistency at scale", severity: "high", description: "Scaling from 10 to 200+ offshore engineers often degrades code quality and increases defect rates.", current_workaround: "Intensive code reviews and dedicated QA overlay teams", cost_of_inaction: "20-40% rework rate; damaged customer trust" },
+        { title: "Intellectual property and data security concerns", severity: "high", description: "Enterprises in regulated industries (banking, healthcare) worry about IP leakage when working with offshore partners.", current_workaround: "On-premise dev environments, strict NDAs, limited access", cost_of_inaction: "Regulatory fines; reputational damage" }
+      ],
+      executive_summary: "FPT Software's ideal customers are Fortune 500 enterprises and mid-market companies undergoing digital transformation, cloud migration, or AI adoption who need a scaled offshore engineering partner with deep vertical expertise. Key decision makers are CTOs and VPs of Engineering prioritizing speed-to-market and talent access, gated by procurement teams focused on cost optimization and compliance.",
+      positioning_statement: "For enterprise CTOs who need to scale engineering capacity without sacrificing quality, FPT Software is the #1 Vietnamese IT services partner that delivers CMMI-5 quality across cloud, AI, and automotive verticals — unlike generic outsourcing firms, FPT offers pre-built accelerators and 25 years of Fortune 500 delivery track record.",
+      recommended_channels: ["Gartner / ISG / Everest analyst relations", "Industry conferences (CES, Web Summit, Viva Tech)", "LinkedIn ABM campaigns targeting CTO/VP Eng titles", "Customer reference programs with video testimonials", "Technical whitepapers & open-source contributions"],
+      vietnam_market_notes: [
+        "FPT is the default 'safe choice' for Vietnamese government digital transformation projects",
+        "Strong alumni network (30K+ employees) acts as organic referral channel",
+        "Japanese market accounts for ~40% of revenue — deep cultural localization expertise",
+        "FPT's NVIDIA partnership positions it as the sovereign AI infrastructure leader in Vietnam"
+      ]
+    },
+    gtm_playbook: {
+      executive_summary: "FPT Software's GTM strategy centers on a 'Land & Expand' model — winning initial engagements through competitive staffing rates and CMMI-5 quality assurance, then expanding into higher-margin managed services and AI consulting. The 18-month playbook prioritizes three corridors: (1) deepening Japanese market share via automotive embedded and AUTOSAR practices, (2) accelerating US and European enterprise penetration through Gartner/ISG analyst positioning, and (3) establishing FPT as Vietnam's sovereign AI infrastructure partner via the NVIDIA DGX alliance. Revenue target: $2B by FY2027.",
+      target_audience: "Fortune 500 CTOs and VPs of Engineering seeking scaled offshore delivery partners for cloud migration, AI/ML, and automotive software — with secondary focus on mid-market enterprises undergoing legacy modernization in banking, insurance, and manufacturing.",
+      phases: [
+        { phase_number: 1, title: "Market Intelligence & Analyst Positioning", duration: "Weeks 1–6", key_actions: ["Commission Gartner and ISG Provider Lens briefings for IT Outsourcing — Vietnam", "Publish 3 proprietary whitepapers: 'Vietnam as AI Talent Hub', 'AUTOSAR Offshore Delivery Model', 'Cloud Migration Playbook for APAC Banking'", "Execute ABM campaigns targeting 200 named accounts (CTO/VP Eng) via LinkedIn Sales Navigator", "Host invitation-only CTO roundtable at Web Summit 2026 — 'Scaling Engineering Teams in APAC'"] },
+        { phase_number: 2, title: "Demand Generation & Pipeline Acceleration", duration: "Weeks 7–14", key_actions: ["Launch 'FPT AI Lab' microsite with interactive demos of akaBot RPA and FPT.AI platform", "Run co-branded webinar series with AWS ('Migrate to Cloud in 90 Days') and NVIDIA ('Sovereign AI in Vietnam')", "Deploy intent-data signals via Bombora/6sense to identify in-market accounts for cloud migration", "Activate customer reference program — film 5 video testimonials with Airbus, SMBC, and Unilever"] },
+        { phase_number: 3, title: "Enterprise Sales Execution", duration: "Weeks 15–22", key_actions: ["Run 15-day PoC sprints for top-50 pipeline accounts — offer free 2-week trial team of 5 engineers", "Negotiate 3-year Master Service Agreements (MSAs) with tiered pricing for scale commitments (100+ FTEs)", "Establish dedicated Delivery Centers of Excellence (CoE) in Hanoi and Da Nang for automotive and AI verticals", "Launch 'FPT Fast Track' — guaranteed 30-day ramp-up SLA for new engagements with penalty clause"] },
+        { phase_number: 4, title: "Expansion & Market Leadership", duration: "Weeks 23–36", key_actions: ["Cross-sell AI consulting and managed services to existing IT outsourcing clients (target 30% attach rate)", "Open satellite delivery centers in Latin America (Colombia, Mexico) to serve US clients in nearshore model", "Submit for Gartner Magic Quadrant inclusion in 'IT Services for AI and Automation'", "Target 3 strategic acquisitions: EU-based DevOps consultancy, US AI startup, Vietnam robotics company"] }
+      ],
+      growth_channels: ["Gartner / ISG / Everest analyst relations and sponsored research", "LinkedIn ABM targeting CTO/VP Eng at Fortune 500 accounts", "AWS, Azure, NVIDIA, SAP partner co-marketing programs", "Industry conferences (Web Summit, CES, Viva Tech, GITEX)", "Customer reference programs with video testimonials", "FPT University talent pipeline as employer branding channel"],
+      kpis: ["New contract value (NCV): $400M/year target", "Pipeline-to-close ratio: 3:1 within 6 months", "Client NPS: >55 across all delivery centers", "Average deal size: $2M+ (up from $1.2M)", "Time-to-ramp: <30 days for teams of 20+ engineers", "Analyst positioning: Top 5 in ISG Provider Lens — Vietnam IT Outsourcing"],
+      vietnam_context: "Vietnam's National Digital Transformation Program (Quyết định 749) mandates government agencies adopt cloud and AI by 2027 — FPT is the default partner for these state contracts. Additionally, Vietnam's rising as a 'China+1' manufacturing destination drives demand for IT modernization from Japanese and Korean manufacturers expanding factories in the North."
+    },
+    icp_profile: {
+      executive_summary: "FPT Software's ideal customer is a mid-to-large enterprise (500–50,000 employees) in manufacturing, banking, telecom, or automotive that is under board-level pressure to accelerate digital transformation while controlling IT labor costs. These organizations typically operate across APAC and Europe, rely on legacy ERP/core-banking stacks, and are actively seeking a trusted offshore delivery partner with CMMI Level 5 credentials, AI/cloud capabilities, and the ability to ramp 100+ engineers within 30 days.",
+      firmographics: {
+        company_size_range: "500 – 50,000 employees",
+        revenue_range: "$50M – $5B",
+        industries: ["Manufacturing", "Banking & Financial Services", "Telecommunications", "Automotive", "Retail & E-commerce", "Healthcare & Pharma"],
+        geographic_focus: ["Japan", "South Korea", "ASEAN", "Western Europe", "North America"],
+        company_maturity: "Established / Mature",
+        ownership_structure: "Public, MNC subsidiary, or state-linked enterprise",
+        typical_tech_stack: ["SAP ERP", "Oracle", "Salesforce", "AWS / Azure", "Java / .NET", "Kubernetes", "ServiceNow"],
+        regulatory_pressure: "High — GDPR, Basel III/IV, PCI-DSS, industry-specific ISO certifications"
+      },
+      buyer_personas: [
+        {
+          id: "fpt-p1",
+          title: "Chief Technology Officer",
+          department: "Technology / Engineering",
+          seniority: "C-Suite",
+          age_range: "42–58",
+          key_kpis: ["Time-to-market for digital products", "IT cost-to-revenue ratio", "System uptime (99.95%+ SLA)", "Cloud migration completion %"],
+          goals: ["Reduce IT delivery backlog by 40% within 12 months", "Migrate 60% of on-prem workloads to cloud by 2026", "Stand up AI/ML center of excellence without hiring 50 in-house data scientists"],
+          frustrations: ["Indian IT vendors have become expensive and complacent", "Internal engineering team cannot scale fast enough for transformation timelines", "Quality drops when ramping with freelancers or body shops"],
+          preferred_channels: ["Gartner / ISG analyst briefings", "Executive peer roundtables", "LinkedIn thought leadership", "AWS re:Invent / Microsoft Ignite"],
+          vietnam_behavior: "Japanese and Korean CTOs rely heavily on analyst rankings (ISG, Gartner) and personal referrals from industry peers before shortlisting offshore partners. Face-to-face meetings in Tokyo or Seoul are essential before signing.",
+          decision_role: "Decision Maker",
+          quote_snippet: "I need a partner who can ramp 100 engineers in 30 days without sacrificing code quality — and FPT is the only Vietnam-based firm that has proven this at Tier-1 scale."
+        },
+        {
+          id: "fpt-p2",
+          title: "VP of Procurement — IT Services",
+          department: "Procurement / Vendor Management",
+          seniority: "VP / Director",
+          age_range: "38–52",
+          key_kpis: ["Cost savings vs. incumbent vendors", "Vendor compliance audit pass rate", "Contract negotiation cycle time", "Supplier diversity metrics"],
+          goals: ["Reduce blended offshore rate by 15–20% vs. current Indian vendors", "Consolidate IT vendor portfolio from 12 to 5 strategic partners", "Ensure all vendors meet GDPR and ISO 27001 compliance"],
+          frustrations: ["Vendor lock-in with legacy IT service providers", "Hidden costs in change requests and scope creep", "Difficulty benchmarking Vietnam vs. India vs. Philippines rates"],
+          preferred_channels: ["RFP/RFI processes", "Procurement industry events", "Analyst reports (Everest, HfS)", "Direct vendor presentations"],
+          vietnam_behavior: "Procurement teams in MNCs are increasingly mandated to evaluate 'China+1' or 'India+1' alternatives — Vietnam appears on every shortlist. Price benchmarking against Infosys/Wipro blended rates is standard.",
+          decision_role: "Gatekeeper",
+          quote_snippet: "We're paying $45/hour blended for our India center — if FPT can deliver equivalent quality at $28–32, that's a $4M annual saving on our largest program."
+        },
+        {
+          id: "fpt-p3",
+          title: "Digital Transformation Director",
+          department: "Strategy / Digital Office",
+          seniority: "Director / Senior Director",
+          age_range: "35–48",
+          key_kpis: ["Digital revenue as % of total revenue", "Legacy system retirement milestones", "Employee digital adoption rate", "ROI on transformation investments"],
+          goals: ["Deliver board-mandated transformation roadmap on time and under budget", "Establish AI-powered customer experience across 3 key touchpoints", "Modernize monolithic ERP to microservices architecture"],
+          frustrations: ["Internal IT team resists change and lacks cloud-native skills", "Transformation budget keeps getting cut mid-year", "Previous offshore partners failed to understand our domain context"],
+          preferred_channels: ["McKinsey / BCG thought pieces", "CIO peer networks", "Industry conferences (Gartner IT Symposium)", "Case study-driven content"],
+          vietnam_behavior: "Transformation leads in Japanese manufacturing firms increasingly visit FPT's Hanoi and Da Nang campuses as part of vendor evaluation — the physical delivery center tour is a trust-building ritual that closes deals.",
+          decision_role: "Champion",
+          quote_snippet: "Our board wants a transformation partner, not just a body shop. FPT's automotive AI lab and their own digital transformation story resonated strongly with our CEO."
+        }
+      ],
+      buying_triggers: [
+        {
+          id: "fpt-t1",
+          trigger: "Board-mandated digital acceleration deadline",
+          category: "growth",
+          urgency_level: "critical",
+          description: "Enterprise boards set hard deadlines for cloud migration, AI adoption, or legacy retirement — creating urgent demand for scaled engineering capacity that internal teams cannot fulfil alone.",
+          vietnam_context: "Japanese manufacturers expanding in Vietnam under 'China+1' strategy simultaneously need IT modernization for their new factories — FPT's proximity and Japanese-language capability make it the natural choice."
+        },
+        {
+          id: "fpt-t2",
+          trigger: "Cost reduction pressure on IT budgets",
+          category: "operational",
+          urgency_level: "high",
+          description: "CFOs demand 15–25% IT cost reduction while maintaining or improving delivery velocity — driving enterprises to evaluate Vietnam as an offshore alternative to India.",
+          vietnam_context: "Vietnam's average developer salary is 30–40% lower than India's Tier-1 cities, with comparable technical skill levels — but the talent pool (500K developers) is much smaller, making trusted partners like FPT essential gatekeepers."
+        },
+        {
+          id: "fpt-t3",
+          trigger: "Regulatory compliance deadline approaching",
+          category: "regulatory",
+          urgency_level: "high",
+          description: "New data protection regulations (GDPR enforcement, PDPA, PIPL) or industry standards (Basel IV, PCI-DSS 4.0) create compliance engineering backlogs that enterprises rush to address with external capacity.",
+          vietnam_context: "Vietnam's own Personal Data Protection Decree (Nghị định 13/2023) is pushing Vietnamese state enterprises to modernize their data handling — FPT captures these domestic compliance contracts while also serving international clients."
+        },
+        {
+          id: "fpt-t4",
+          trigger: "AI/ML capability gap realization",
+          category: "technological",
+          urgency_level: "critical",
+          description: "Post-ChatGPT, every enterprise wants generative AI solutions but lacks in-house ML engineering teams — creating a massive demand spike for AI consulting and development partners.",
+          vietnam_context: "FPT's FPT.AI platform and partnerships with NVIDIA give it credibility in AI conversations that most Vietnamese IT companies cannot match. The FPT University AI program produces 2,000+ AI graduates annually."
+        }
+      ],
+      pain_points: [
+        {
+          id: "fpt-pp1",
+          title: "Legacy system modernization bottleneck",
+          severity: "critical",
+          description: "Enterprises are trapped on 15–20 year old ERP and core-banking systems that are expensive to maintain, impossible to innovate on, and running on increasingly scarce COBOL/mainframe talent.",
+          current_workaround: "Patching legacy systems with middleware adapters and employing expensive retired consultants to maintain mainframe code.",
+          cost_of_inaction: "$5–15M/year in maintenance costs plus 3–6 month delays on every new product launch due to integration bottlenecks.",
+          vietnam_specific: false
+        },
+        {
+          id: "fpt-pp2",
+          title: "Inability to scale engineering team fast enough",
+          severity: "high",
+          description: "Hiring 50–200 engineers in 90 days for a transformation program is nearly impossible in developed markets due to talent wars and 3–6 month notice periods.",
+          current_workaround: "Using a mix of freelancers, multiple small agencies, and internal redeployment — resulting in inconsistent quality and project management overhead.",
+          cost_of_inaction: "6–12 month delays on transformation roadmap, risk of board losing confidence in CTO's execution capability.",
+          vietnam_specific: false
+        },
+        {
+          id: "fpt-pp3",
+          title: "Vendor quality and IP protection concerns",
+          severity: "high",
+          description: "Previous negative experiences with offshore vendors (code quality issues, IP leaks, communication gaps) make enterprises cautious about new partnerships.",
+          current_workaround: "Over-relying on expensive incumbent vendors (Accenture, Infosys) despite budget pressure, or keeping everything in-house at higher cost.",
+          cost_of_inaction: "20–30% premium on IT delivery costs compared to optimized offshore model with proper governance.",
+          vietnam_specific: true
+        },
+        {
+          id: "fpt-pp4",
+          title: "Cross-timezone collaboration friction",
+          severity: "medium",
+          description: "Enterprises working with offshore teams face communication delays, misaligned working hours, and cultural misunderstandings that slow delivery velocity.",
+          current_workaround: "Requiring offshore teams to work night shifts or overlap hours, leading to burnout and attrition.",
+          cost_of_inaction: "15–25% productivity loss in distributed teams compared to co-located development.",
+          vietnam_specific: true
+        }
+      ],
+      positioning_statement: "FPT Software is the only Vietnam-headquartered global IT services firm with 27,000+ engineers across 30 countries, CMMI Level 5 certification, and proven ability to ramp 100+ engineers in 30 days — delivering enterprise-grade digital transformation at 30–40% lower cost than incumbent Indian IT vendors, with dedicated delivery centers, AI capabilities, and deep domain expertise in automotive, banking, and manufacturing.",
+      recommended_channels: ["Gartner / ISG / Everest Group analyst relations and sponsored research", "LinkedIn ABM campaigns targeting CTO/VP Engineering at Fortune 500", "AWS, Azure, and SAP partner co-marketing programs", "Executive peer roundtables at Gartner IT Symposium, CES, Web Summit", "Customer reference programs with ROI-focused video testimonials", "Campus tours at FPT Hanoi / Da Nang delivery centers for prospect CxOs"],
+      vietnam_market_notes: ["Vietnam's 'China+1' positioning is driving unprecedented demand for IT outsourcing — Japanese manufacturers alone represent a $2B+ addressable market for FPT.", "The National Digital Transformation Program (Quyết định 749) mandates government AI/cloud adoption by 2027, creating a captive domestic market for FPT.", "Vietnam produces 80,000+ STEM graduates annually, but only 15–20% meet enterprise-grade standards — FPT University's pipeline is a critical talent moat.", "Cultural alignment with Japan (largest market) runs deep — FPT has 5,000+ Japanese-speaking engineers and conducts training in Japanese business etiquette."]
+    },
+    market_share_percentage: 25,
+    yoy_growth: "+25%",
+    csat_score: 88,
+    quadrant_position: "Leader"
+  },
+  {
+    name: "VNG Corporation",
+    intro: "Vietnam's first tech unicorn — owner of Zalo (75M+ users), ZaloPay, ZingMP3, and VNG Cloud. Listed on UPCoM, valued at $1.5B+.",
+    address: "Q7, TP.HCM, Việt Nam",
+    year: 2004,
+    size: "> 3.500 người",
+    headcount: 3500,
+    total_funding: "$500M+ (incl. Temasek, GIC — UPCoM: VNZ)",
+    products: "Zalo (Messaging + Mini App + Zalo OA), ZaloPay (E-wallet), ZingMP3, VNG Cloud, Game Publishing",
+    customers: "75 triệu người dùng Zalo, SME advertisers, Game thủ, Music listeners, Cloud enterprise clients.",
+    industry: "Technology",
+    sub_industry: "Platform & Ecosystem",
+    website: "vng.com.vn",
+    revenue: "$500M",
+    revenue_range: "$400M - $600M",
+    employee_range: "3000-4000",
+    growth: 28.5,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/vng.com.vn",
+    ticker: "VNZ",
+    exchange: "UPCoM",
+    revenueVerified: true,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue from VNZ UPCoM 2025 annual filing via SSI iBoard",
+    dataTier: "premium",
+    dataScore: 99,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "cafef", "upcom_filings"],
+    tech_stack: ["Go", "Java", "React Native", "GCP", "Kubernetes", "Kafka", "TensorFlow"],
+    description: "VNG Corporation is Vietnam's pioneering internet conglomerate, operating the dominant Zalo messaging super-app (75M+ MAU), ZaloPay fintech wallet, and VNG Cloud. With a UPCoM listing valuing the company above $1.5B, VNG is the bellwether of Vietnam's consumer-tech ecosystem.",
+    key_pain_points: [
+      "Monetization of Zalo's massive user base without alienating consumers",
+      "ZaloPay profitability — fierce competition from Momo, VNPay, and ShopeePay",
+      "Gaming revenue declining as mobile gaming market matures",
+      "Cloud business requires heavy capex to compete with AWS/GCP/Azure",
+      "Talent war with global tech companies opening Vietnam offices"
+    ],
+    target_audience: [
+      "Vietnamese consumers aged 18-55 on Zalo platform",
+      "SME businesses advertising via Zalo Official Accounts",
+      "Enterprises adopting VNG Cloud for data sovereignty",
+      "Mobile gamers in Southeast Asia",
+      "Fintech users seeking integrated payment & banking"
+    ],
+    recent_events: [
+      "Zalo Mini-App ecosystem surpassed 5,000 active mini-apps (Jan 2026)",
+      "VNG Cloud launched GPU-as-a-Service for Vietnamese AI startups",
+      "ZaloPay obtained e-money license expansion for cross-border remittance",
+      "Completed Series D investment in Funding Societies (Modalku)",
+      "VNZ share price rallied 40% in H2 2025 after profitability turnaround"
+    ],
+    customer_insights: {
+      firmographics: {
+        industry_vertical: "Internet / Platform & Ecosystem",
+        employee_count: "3,000 – 4,000",
+        estimated_revenue: "$500M (FY2025)",
+        geographic_focus: ["Vietnam", "Southeast Asia (gaming)", "Global (gaming distribution)"],
+        ownership: "Public — UPCoM: VNZ (Temasek, GIC are key institutional investors)",
+        tech_maturity: "High — Cloud-native, Kubernetes, AI/ML at scale across Zalo & gaming"
+      },
+      technographics: ["Go", "Java", "React Native", "GCP", "Kubernetes", "Kafka", "TensorFlow", "Redis", "Elasticsearch", "Firebase", "BigQuery", "Zalo Mini App SDK", "Unity (gaming)"],
+      buyer_personas: [
+        {
+          title: "Head of Digital Marketing / Brand Manager",
+          department: "Marketing",
+          seniority: "Director / VP",
+          decision_role: "Decision Maker",
+          kpis: ["Zalo OA follower growth", "Mini-app conversion rate", "Cost per acquisition (CPA)", "ROAS on Zalo Ads"],
+          pain_points: ["Limited ad targeting granularity vs. Meta/Google", "Difficulty measuring offline-to-online attribution from Zalo campaigns", "Competing for user attention against TikTok and Facebook within Vietnam"],
+          preferred_channels: ["Zalo for Business webinars", "Vietnam digital marketing conferences", "Case study showcases from Zalo OA success stories"],
+          vietnam_behavior: "Vietnamese brand managers prioritize Zalo OA because 95%+ of their customers already use Zalo daily — it's the de facto business messaging channel in Vietnam.",
+          quote_snippet: "Zalo OA is not optional — it's where our customers are. We need better analytics to prove ROI."
+        },
+        {
+          title: "CTO / VP Engineering (Cloud customers)",
+          department: "Technology",
+          seniority: "C-Level / VP",
+          decision_role: "Decision Maker",
+          kpis: ["Infrastructure cost optimization", "Data sovereignty compliance", "Latency (ms) for Vietnam users"],
+          pain_points: ["AWS/GCP latency from Singapore regions", "Data residency requirements under Vietnam's Cybersecurity Law", "Lack of local-language cloud support"],
+          preferred_channels: ["VNG Cloud tech meetups", "Direct enterprise sales team", "Cloud migration ROI calculators"],
+          vietnam_behavior: "Vietnamese CTOs in banking and government are mandated to store data on Vietnamese soil — VNG Cloud's sovereign cloud positioning directly addresses this compliance need."
+        },
+        {
+          title: "Game Studio CEO / Publishing Director",
+          department: "Business Development",
+          seniority: "C-Level / Director",
+          decision_role: "Champion",
+          kpis: ["DAU / MAU", "ARPDAU", "Day-1 and Day-7 retention", "Revenue per title"],
+          pain_points: ["High user acquisition costs in SEA mobile gaming market", "Difficulty localizing games for Vietnamese culture and payment methods", "Regulatory uncertainty around online gaming licenses in Vietnam"],
+          preferred_channels: ["Game developer conferences (GDC, G-Star)", "Direct BD outreach", "VNG's publishing portfolio case studies"],
+          vietnam_behavior: "Vietnamese gamers prefer localized content with VND pricing and domestic payment methods (MoMo, VNPay) — studios need VNG's distribution for market access."
+        }
+      ],
+      buying_triggers: [
+        { event: "Brand launching digital-first campaign targeting Vietnamese consumers", category: "growth", urgency: "high", description: "Brands entering or expanding in Vietnam need Zalo OA & Zalo Ads to reach 75M+ users.", vietnam_context: "Zalo penetration in Vietnam exceeds 90% of smartphone users — it's the #1 messaging app, not WhatsApp or Messenger." },
+        { event: "Cybersecurity Law data localization enforcement", category: "regulatory", urgency: "critical", description: "Government enforcement of Decree 13 requires companies to store Vietnamese user data on local servers.", vietnam_context: "VNG Cloud's Tier-III data centers in HCMC and Hanoi are the primary alternative to building on-premise infrastructure." },
+        { event: "Indie studio seeking SEA game publishing partner", category: "competitive", urgency: "medium", description: "Small studios need a publisher with Vietnamese market expertise, UA budgets, and local payment integration.", vietnam_context: "VNG has published 50+ game titles in Vietnam — it's the most experienced local game publisher." }
+      ],
+      pain_points_detailed: [
+        { title: "Zalo Ads ROI attribution is less mature than Meta/Google", severity: "high", description: "Advertisers struggle to track full-funnel attribution from Zalo Ads to offline conversions.", current_workaround: "Manual UTM tracking and survey-based attribution", cost_of_inaction: "20-30% of ad budget may be misallocated" },
+        { title: "VNG Cloud lacks breadth of AWS/GCP managed services", severity: "medium", description: "Enterprise customers need VNG Cloud to expand managed database, ML, and serverless offerings.", current_workaround: "Hybrid setup using VNG Cloud for storage + AWS for compute", cost_of_inaction: "Increased operational complexity and cost" },
+        { title: "Gaming revenue volatility as mobile market matures", severity: "high", description: "Declining ARPU in casual gaming segment forces pivot to mid-core and cloud gaming.", current_workaround: "Diversifying into cloud and fintech (ZaloPay)", cost_of_inaction: "Stagnant topline growth; investor pressure" }
+      ],
+      executive_summary: "VNG Corporation's customers span three distinct segments: (1) Vietnamese businesses and brands advertising through Zalo OA and Zalo Ads to reach 75M+ consumers, (2) enterprises adopting VNG Cloud for data-sovereign infrastructure, and (3) game studios seeking SEA publishing and distribution. Key buyers are marketing directors for Zalo, CTOs for Cloud, and studio heads for gaming.",
+      positioning_statement: "For Vietnamese businesses that need to reach consumers where they already are, VNG's Zalo platform offers unmatched reach (75M+ users), native commerce via Mini Apps, and data-sovereign cloud infrastructure — unlike Meta or Google, VNG operates entirely within Vietnam's regulatory framework.",
+      recommended_channels: ["Zalo for Business partner program & webinars", "VNG Cloud enterprise sales team with free trial credits", "Vietnam tech conferences (Tech Summit, VNITO)", "Gaming industry events (G-Star, GDC)", "Local PR & media partnerships (CafeF, VnExpress)"],
+      vietnam_market_notes: [
+        "Zalo is effectively a 'super-app' in Vietnam — messaging, payments (ZaloPay), mini-apps, and news feed",
+        "Government agencies use Zalo OA for citizen communication — 63/63 provinces have official accounts",
+        "VNG Cloud is the top Vietnamese-owned cloud provider, critical for companies needing local data storage",
+        "ZaloPay competes directly with MoMo but benefits from Zalo's captive 75M user base"
+      ]
+    },
+    gtm_playbook: {
+      executive_summary: "VNG's GTM strategy is a three-pillar ecosystem play: (1) Monetize Zalo's 75M captive audience through Zalo Ads, Zalo OA, and Mini App commerce — targeting $200M ad revenue by 2027, (2) Position VNG Cloud as Vietnam's sovereign cloud — capturing government and banking workloads mandated to stay on Vietnamese soil, and (3) Pivot gaming from publishing-only to a global indie studio platform with revenue-share model. The playbook prioritizes Zalo monetization as the highest-margin growth vector.",
+      target_audience: "Vietnamese brand marketers and digital agencies seeking Zalo advertising reach (75M+ users), enterprise CTOs requiring data-sovereign cloud infrastructure under Vietnam's Cybersecurity Law, and indie game studios seeking Southeast Asian publishing and distribution partnerships.",
+      phases: [
+        { phase_number: 1, title: "Zalo Ecosystem Monetization Deep-Dive", duration: "Weeks 1–6", key_actions: ["Launch Zalo Ads Manager 2.0 with lookalike audiences, retargeting pixels, and conversion tracking API", "Onboard top 50 Vietnamese brands onto Zalo OA Premium tier with dedicated account managers", "Launch 'Zalo Commerce' — native checkout within Mini Apps with integrated ZaloPay settlement", "Publish Zalo advertising effectiveness benchmarks vs. Meta/Google for Vietnam market"] },
+        { phase_number: 2, title: "VNG Cloud Enterprise Push", duration: "Weeks 7–14", key_actions: ["Achieve Tier-III data center certification for HCMC-2 facility", "Launch managed Kubernetes (vK8s) and managed PostgreSQL to compete with AWS RDS", "Sign 5 anchor enterprise customers (targeting: VP Bank, Vingroup, PetroVietnam, VNPT, EVN)", "Partner with Ministry of Information & Communications for Government Cloud pilot program"] },
+        { phase_number: 3, title: "Gaming Platform Transformation", duration: "Weeks 15–22", key_actions: ["Launch 'VNG Indie' — self-service publishing platform for indie studios with 70/30 revenue share", "Integrate VNG's payment infrastructure (ZaloPay, bank cards) as default payment for all published games", "Expand game publishing to Thailand, Indonesia, and Philippines with localized UA campaigns", "Invest in 3 promising Vietnamese indie studios via VNG Ventures ($500K–$2M seed rounds)"] },
+        { phase_number: 4, title: "Ecosystem Flywheel & IPO Readiness", duration: "Weeks 23–36", key_actions: ["Cross-pollinate: Zalo Mini App game distribution → ZaloPay transactions → VNG Cloud hosting", "Achieve consolidated profitability across Gaming + Cloud + Zalo Ads segments", "Prepare HOSE listing materials (upgrade from UPCoM) — target $3B valuation", "Launch enterprise Zalo API marketplace for third-party developers (CRM, ERP, HR integrations)"] }
+      ],
+      growth_channels: ["Zalo for Business partner program and webinar series", "VNG Cloud enterprise sales team with free $5K trial credits", "Gaming industry BD at G-Star, GDC, and Tokyo Game Show", "Vietnam tech conferences (VNITO, Tech Summit Vietnam)", "Government relations for cloud and e-government contracts", "ZaloPay merchant acquisition field team"],
+      kpis: ["Zalo Ads revenue: $200M/year by 2027", "VNG Cloud enterprise customers: 50+ (from current ~15)", "Zalo Mini App GMV: $500M/year", "Gaming revenue stability: <10% YoY variance", "VNG Cloud revenue: $80M/year (3x current)", "HOSE IPO readiness: Q4 2027"],
+      vietnam_context: "Vietnam's Cybersecurity Law (Luật An ninh mạng) requires companies handling Vietnamese user data to store it domestically — this is VNG Cloud's primary competitive moat against AWS and GCP. Additionally, Zalo's dominance as Vietnam's #1 messaging app (90%+ smartphone penetration) gives VNG unparalleled distribution for any digital product launched through the Zalo ecosystem."
+    },
+    icp_profile: {
+      executive_summary: "VNG's ideal B2B customer is a Vietnamese digital-first company (50–500 employees) in e-commerce, fintech, gaming, or digital media that needs local cloud infrastructure for data sovereignty compliance and wants to leverage Zalo's 75M+ user base for customer engagement. These companies are typically Series A–C funded, growing 30%+ YoY, and frustrated that AWS/GCP bills are denominated in USD with no Vietnamese-language support.",
+      firmographics: {
+        company_size_range: "50 – 500 employees",
+        revenue_range: "$1M – $50M",
+        industries: ["E-commerce", "Fintech", "Gaming / Entertainment", "Digital Media", "SaaS / Technology", "Healthcare Tech"],
+        geographic_focus: ["Vietnam", "Southeast Asia"],
+        company_maturity: "Growth-stage to Mid-stage",
+        ownership_structure: "Private / VC-backed / Startup",
+        typical_tech_stack: ["AWS / GCP (migrating)", "Python / Node.js", "React / Vue.js", "PostgreSQL / MongoDB", "Docker / Kubernetes"],
+        regulatory_pressure: "Medium-High — Cybersecurity Law data localization, PDPD compliance"
+      },
+      buyer_personas: [
+        {
+          id: "vng-p1",
+          title: "Chief Technology Officer",
+          department: "Engineering / Infrastructure",
+          seniority: "C-Suite",
+          age_range: "30–45",
+          key_kpis: ["Infrastructure cost as % of revenue", "System uptime (99.9%+ SLA)", "Data sovereignty compliance status", "Time-to-deploy for new services"],
+          goals: ["Reduce cloud infrastructure costs by 25% by switching from AWS to VNG Cloud", "Achieve full Cybersecurity Law compliance without re-architecting applications", "Get Vietnamese-language technical support for P1 incidents at 2am"],
+          frustrations: ["AWS bills in USD are unpredictable with VND exchange rate fluctuations", "No Vietnamese-language support from international cloud providers", "Data residency audits are stressful with data stored in Singapore or Tokyo regions"],
+          preferred_channels: ["Tech community meetups (Vietnam DevOps, VNUG)", "Vietnamese tech blogs and forums", "Direct outreach from VNG Cloud sales team", "Referrals from CTO peer networks"],
+          vietnam_behavior: "Vietnamese CTOs at startups heavily rely on peer recommendations in private Telegram/Zalo groups before evaluating cloud providers. A personal introduction from a trusted CTO friend is worth 10 cold emails.",
+          decision_role: "Decision Maker",
+          quote_snippet: "We were paying $18K/month on AWS with zero Vietnamese support. VNG Cloud cut that to $12K, gave us a dedicated Vietnamese-speaking account manager, and our data stays in-country."
+        },
+        {
+          id: "vng-p2",
+          title: "Head of Marketing / Growth",
+          department: "Marketing / Growth",
+          seniority: "Director / VP",
+          age_range: "28–40",
+          key_kpis: ["Customer acquisition cost (CAC)", "Monthly active users (MAU)", "Zalo OA follower growth rate", "Campaign conversion rate"],
+          goals: ["Reach 500K+ consumers through Zalo Official Account without Facebook's rising CPM costs", "Launch Mini App on Zalo to reduce app download friction", "Integrate ZaloPay for seamless in-chat payment conversion"],
+          frustrations: ["Facebook/Google ad costs increasing 20–30% YoY in Vietnam", "App download conversion rates dropping below 2% for new apps", "No unified CRM that connects Zalo OA, website, and offline channels"],
+          preferred_channels: ["Zalo for Business webinars and case studies", "Marketing community events (Vietnam MarTech)", "Vietnamese marketing influencers on TikTok/YouTube", "LinkedIn content from Zalo business team"],
+          vietnam_behavior: "Vietnamese marketing directors make decisions fast once they see a competitor succeeding on Zalo — the 'me too' effect is powerful. Sharing case studies with specific ROI numbers from similar-industry companies is the fastest path to conversion.",
+          decision_role: "Champion",
+          quote_snippet: "Our Zalo Official Account reaches 200K followers with 35% open rates — that's 10x our email performance and 3x cheaper than Facebook Ads for our Vietnamese audience."
+        },
+        {
+          id: "vng-p3",
+          title: "Chief Compliance Officer / Legal Director",
+          department: "Legal / Compliance",
+          seniority: "Director / VP",
+          age_range: "35–50",
+          key_kpis: ["Regulatory audit pass rate", "Data breach incident count (target: 0)", "Compliance certification status", "Cross-border data transfer approval timeline"],
+          goals: ["Ensure 100% compliance with Cybersecurity Law Article 26 (data localization)", "Pass MIC (Ministry of Information and Communications) data audit without findings", "Establish data processing agreements that satisfy both Vietnamese and international standards"],
+          frustrations: ["Unclear enforcement timeline for Decree 13/2023 on personal data protection", "International cloud providers cannot guarantee Vietnamese data residency", "Legal team lacks technical understanding to evaluate cloud architecture compliance"],
+          preferred_channels: ["Legal and compliance conferences in Vietnam", "MIC and MPS regulatory briefings", "Big 4 advisory publications (Deloitte, PwC Vietnam)", "Direct VNG Cloud compliance team consultations"],
+          vietnam_behavior: "Vietnamese compliance officers are deeply risk-averse and will choose the 'safe' option (local provider) over the 'optimal' option (international provider) when regulations are ambiguous. VNG Cloud as a Vietnamese company eliminates perceived regulatory risk.",
+          decision_role: "Influencer",
+          quote_snippet: "When MIC auditors come, I can point to VNG Cloud's Hanoi data center and say 'everything is right here, on Vietnamese soil.' That conversation is worth any premium."
+        }
+      ],
+      buying_triggers: [
+        {
+          id: "vng-t1",
+          trigger: "Cybersecurity Law data localization enforcement",
+          category: "regulatory",
+          urgency_level: "critical",
+          description: "Vietnam's Cybersecurity Law (2018) and Decree 13/2023 on personal data protection require companies handling Vietnamese user data to store and process it domestically — creating urgent demand for local cloud infrastructure.",
+          vietnam_context: "MIC is stepping up enforcement with publicized audits of major tech companies. Any company storing Vietnamese user data on AWS Singapore or GCP Taiwan faces potential fines and business license suspension."
+        },
+        {
+          id: "vng-t2",
+          trigger: "Rising international cloud costs in USD",
+          category: "operational",
+          urgency_level: "high",
+          description: "Vietnamese companies paying AWS/GCP bills in USD face double exposure — rising cloud prices plus VND depreciation (6–8% annually) making international cloud 15–25% more expensive year over year in local currency terms.",
+          vietnam_context: "VND has depreciated from 23,000/USD to 25,500/USD in 3 years. A $10K/month AWS bill now costs 255M VND vs. 230M VND — that 11% increase alone justifies evaluating VNG Cloud's VND-denominated pricing."
+        },
+        {
+          id: "vng-t3",
+          trigger: "Facebook/Google ad cost inflation",
+          category: "competitive",
+          urgency_level: "high",
+          description: "Vietnamese digital businesses facing 20–30% annual increases in Facebook/Google ad CPMs are actively seeking alternative customer engagement channels — Zalo's 75M+ users represent the largest untapped distribution platform.",
+          vietnam_context: "Zalo has 90%+ smartphone penetration in Vietnam vs. Facebook Messenger at 65%. For businesses targeting Vietnamese consumers, Zalo OA + Mini Apps offer fundamentally lower CAC than international ad platforms."
+        },
+        {
+          id: "vng-t4",
+          trigger: "Rapid scaling infrastructure needs",
+          category: "growth",
+          urgency_level: "medium",
+          description: "Vietnamese startups raising Series A/B funding need to scale infrastructure quickly while maintaining cost efficiency — VNG Cloud's pay-as-you-go model with Vietnamese-language onboarding reduces time-to-production.",
+          vietnam_context: "Vietnamese startup ecosystem is producing 50+ funded companies per year. These companies typically outgrow shared hosting at 100K users and need dedicated cloud — VNG Cloud's $5K free trial credits capture them at this inflection point."
+        }
+      ],
+      pain_points: [
+        {
+          id: "vng-pp1",
+          title: "Data sovereignty compliance uncertainty",
+          severity: "critical",
+          description: "Vietnamese companies using international cloud providers cannot guarantee that all personal data of Vietnamese users is stored and processed exclusively within Vietnam, creating regulatory risk under the Cybersecurity Law.",
+          current_workaround: "Maintaining a hybrid architecture with 'sensitive' data on local servers and 'non-sensitive' data on AWS — creating operational complexity and unclear compliance boundaries.",
+          cost_of_inaction: "Potential fines up to 5% of Vietnam revenue, business license suspension, and reputational damage from publicized MIC audit failures.",
+          vietnam_specific: true
+        },
+        {
+          id: "vng-pp2",
+          title: "No Vietnamese-language cloud support for P1 incidents",
+          severity: "high",
+          description: "When production goes down at 2am in Vietnam, AWS/GCP support operates in English with response times geared toward US/EU business hours — Vietnamese engineering teams struggle with language barriers during high-stress incidents.",
+          current_workaround: "Having a senior English-speaking engineer always on-call as 'translator' for cloud provider support tickets, creating single points of failure.",
+          cost_of_inaction: "30–60 minute longer MTTR (Mean Time to Resolution) for P1 incidents due to communication overhead, translating to $5K–$50K in downtime costs per incident.",
+          vietnam_specific: true
+        },
+        {
+          id: "vng-pp3",
+          title: "Customer engagement platform fragmentation",
+          severity: "high",
+          description: "Vietnamese digital businesses manage customer interactions across Facebook Messenger, Zalo, email, SMS, and their own app — with no unified platform to orchestrate messaging across channels.",
+          current_workaround: "Using 3–5 separate tools (Intercom for chat, Mailchimp for email, separate Zalo OA dashboard, SMS gateway) with no unified customer view.",
+          cost_of_inaction: "15–20% of customer inquiries fall through cracks between channels, and marketing campaigns cannot be personalized based on cross-channel behavior.",
+          vietnam_specific: true
+        },
+        {
+          id: "vng-pp4",
+          title: "Cloud cost unpredictability in VND terms",
+          severity: "medium",
+          description: "Vietnamese companies budgeting in VND face 15–25% annual cost inflation on USD-denominated cloud services due to currency depreciation and international price increases.",
+          current_workaround: "Over-provisioning annual cloud budgets by 20–30% as a buffer against exchange rate movements, tying up capital that could fund product development.",
+          cost_of_inaction: "$20K–$100K/year in excess cloud spending or unexpected budget overruns that delay product roadmap priorities.",
+          vietnam_specific: true
+        }
+      ],
+      positioning_statement: "VNG is the only Vietnamese-native technology platform that combines enterprise cloud infrastructure (VNG Cloud), 75M+ consumer reach (Zalo), and integrated digital payments (ZaloPay) — enabling Vietnamese digital businesses to achieve Cybersecurity Law compliance, reduce infrastructure costs by 25–30% vs. international providers, and access the largest consumer distribution channel in Vietnam through a single ecosystem.",
+      recommended_channels: ["VNG Cloud enterprise sales team with personalized $5K trial credit offers", "Zalo for Business webinar series targeting Vietnamese startup CTOs and CMOs", "Vietnamese tech community sponsorships (Vietnam DevOps, VNUG, Vietnam Startup)", "Case study content marketing on LinkedIn Vietnam and Vietnamese tech blogs", "Government relations for e-government cloud and Zalo integration contracts", "Partnership co-marketing with Vietnamese VC firms (Do Ventures, VinaCapital Ventures)"],
+      vietnam_market_notes: ["Vietnam's Cybersecurity Law is VNG Cloud's most powerful sales weapon — every enforcement action drives a wave of cloud migration inquiries from companies currently on AWS/GCP.", "Zalo's 90%+ penetration means it is the default communication channel for Vietnamese businesses — even competitors like Tiki and MoMo use Zalo OA for customer support.", "VNG's gaming revenue ($300M+) cross-subsidizes VNG Cloud's aggressive pricing — they can afford to undercut AWS by 25–30% to build market share.", "The Vietnamese government's Digital Economy strategy targets 30% of GDP from digital economy by 2030 — VNG is positioned as the national champion cloud provider for this initiative."]
+    },
+    market_share_percentage: 18,
+    yoy_growth: "+22%",
+    csat_score: 85,
+    quadrant_position: "Leader"
+  },
+  {
+    name: "MoMo (M_Service)",
+    intro: "Vietnam's largest digital wallet with 31M+ users, full-spectrum super-app covering payments, lending, insurance, and investment.",
+    address: "Q1, TP.HCM, Việt Nam",
+    year: 2009,
+    size: "> 1.500 người",
+    headcount: 1800,
+    total_funding: "$633M (Series E — Warburg Pincus, Mizuho, Goodwater)",
+    products: "Digital Wallet, QR Payment, Micro-lending, Fund Investment, Insurance Distribution, MoMo Business",
+    customers: "31 triệu+ người dùng, 200K+ merchants, Ngân hàng đối tác, Bảo hiểm.",
+    industry: "Technology",
+    sub_industry: "Fintech",
+    website: "momo.vn",
+    revenue: "$250M",
+    revenue_range: "$200M - $350M",
+    employee_range: "1500-2000",
+    growth: 105.2,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/momo.vn",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from DealStreetAsia / TechinAsia reporting; private company",
+    dataTier: "premium",
+    dataScore: 98,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "dealstreetasia"],
+    tech_stack: ["Kotlin", "Swift", "Node.js", "AWS", "Apache Kafka", "Redis", "TensorFlow Lite"],
+    description: "MoMo (operated by M_Service) is Vietnam's dominant mobile wallet super-app with 31 million users and the widest offline merchant acceptance network. Backed by Warburg Pincus and Mizuho, it is expanding aggressively into lending, wealth management, and insurance — positioning as Vietnam's answer to Alipay.",
+    key_pain_points: [
+      "Path to profitability under pressure from investors after multiple funding rounds",
+      "Regulatory tightening on e-wallet lending and data privacy (Decree 13/2023)",
+      "Intense competition from ZaloPay, VNPay-QR, and ShopeePay",
+      "Rising customer acquisition cost in saturated urban markets",
+      "Need to expand into Tier-2/3 cities where cash remains dominant"
+    ],
+    target_audience: [
+      "Urban Vietnamese consumers aged 18-40 using mobile payments",
+      "Offline merchants (F&B, convenience stores) accepting QR payments",
+      "Underbanked individuals seeking micro-loans and insurance",
+      "Young professionals investing via MoMo's wealth management features",
+      "E-commerce platforms integrating MoMo as a checkout option"
+    ],
+    recent_events: [
+      "MoMo Business launched — merchant SaaS suite for SME payment management",
+      "Secured banking-as-a-service partnership with Timo/VP Bank for deposits",
+      "Reached 31M verified users milestone (Q1 2026)",
+      "Launched AI-driven credit scoring model reducing NPL by 32%",
+      "Expanded cross-border payment to Japan and South Korea via QR alliance"
+    ],
+    customer_insights: {
+      firmographics: {
+        industry_vertical: "Fintech — Mobile Payments & Digital Wallet",
+        employee_count: "1,500 – 2,000",
+        estimated_revenue: "$250M (FY2025 est.)",
+        geographic_focus: ["Vietnam (primary)", "Japan & South Korea (cross-border QR)"],
+        ownership: "Private — Backed by Warburg Pincus, Mizuho, Goodwater Capital",
+        tech_maturity: "Very High — AI-driven credit scoring, real-time payments, biometric KYC"
+      },
+      technographics: ["Kotlin", "Swift", "Node.js", "AWS", "Apache Kafka", "Redis", "TensorFlow Lite", "Firebase", "Appsflyer", "Amplitude", "gRPC", "PostgreSQL"],
+      buyer_personas: [
+        {
+          title: "Head of Payments / CFO (Merchant)",
+          department: "Finance / Operations",
+          seniority: "Director / C-Level",
+          decision_role: "Decision Maker",
+          kpis: ["Payment acceptance rate", "Settlement speed (T+0 vs T+1)", "Transaction fees as % of GMV", "Fraud rate"],
+          pain_points: ["High MDR fees from traditional card networks", "Cash-heavy customer base reluctant to go digital", "Fragmented payment methods (10+ wallets in Vietnam)"],
+          preferred_channels: ["MoMo Business sales team", "F&B / retail industry events", "Peer merchant referrals"],
+          vietnam_behavior: "Vietnamese merchants prioritize zero or near-zero MDR — MoMo's volume-based pricing wins over flat-rate competitors.",
+          quote_snippet: "My customers want to pay by phone but I can't afford 2% MDR on every bún bò sale."
+        },
+        {
+          title: "Chief Digital Officer (Banking Partner)",
+          department: "Digital Banking",
+          seniority: "C-Level",
+          decision_role: "Influencer",
+          kpis: ["Digital transaction volumes", "Mobile banking MAU", "Cross-sell ratio (loans, insurance)", "Digital-to-branch cost ratio"],
+          pain_points: ["Cannibalization fear — e-wallets reducing bank app usage", "Regulatory ambiguity on e-wallet lending partnerships", "Integration complexity with legacy core banking systems"],
+          preferred_channels: ["SBV regulatory forums", "Banking CxO roundtables", "Direct partnership meetings"],
+          vietnam_behavior: "Vietnamese banks view MoMo as both partner (distribution) and competitor (deposit cannibalization) — dual positioning is key."
+        },
+        {
+          title: "Product Manager — Fintech Features",
+          department: "Product",
+          seniority: "Manager / Senior",
+          decision_role: "Champion",
+          kpis: ["Feature adoption rate", "NPS of new fintech features", "Conversion funnel drop-off"],
+          pain_points: ["Balancing UX simplicity with regulatory KYC/AML requirements", "Competing with bank super-apps for share of wallet", "Low digital literacy among Tier-2/3 city users"],
+          preferred_channels: ["Product Hunt / tech blogs", "Fintech meetups (VN Fintech Club)", "A/B testing and user research panels"],
+          vietnam_behavior: "Vietnamese users expect gamification (scratch cards, lucky draws) in financial apps — MoMo's gamified UX drives 3x engagement vs. plain banking apps."
+        }
+      ],
+      buying_triggers: [
+        { event: "Merchant expanding to cashless-only or QR-first checkout", category: "operational", urgency: "critical", description: "F&B chains, convenience stores, and pharmacies converting to cashless operations need MoMo merchant integration.", vietnam_context: "Vietnam's cashless transaction ratio hit 40% in 2025, up from 10% in 2020 — government targeting 80% by 2030." },
+        { event: "Bank launching digital lending or insurance distribution", category: "growth", urgency: "high", description: "Banks partner with MoMo to distribute micro-loans and insurance to MoMo's 31M underbanked users.", vietnam_context: "65% of Vietnamese adults remain underbanked — MoMo is the primary digital financial inclusion channel." },
+        { event: "New SBV regulation on e-wallet interoperability", category: "regulatory", urgency: "high", description: "State Bank of Vietnam mandates on interoperability create integration work across all payment players.", vietnam_context: "SBV's NAPAS-based QR interoperability standard forces all wallets to connect — MoMo benefits from its large merchant base." },
+        { event: "Young consumer switching from cash to mobile for first time", category: "growth", urgency: "medium", description: "Gen Z users in Tier-2/3 cities adopting smartphones create new addressable market for basic payments.", vietnam_context: "Vietnam has 70M smartphone users — rural penetration is the next frontier for MoMo beyond saturated urban markets." }
+      ],
+      pain_points_detailed: [
+        { title: "Path to profitability under investor pressure", severity: "critical", description: "After $633M in funding, investors expect profitability — but lending NPLs and promotional burn remain high.", current_workaround: "Shifting focus from user acquisition to monetization (lending, insurance commissions)", cost_of_inaction: "Down-round risk; potential forced consolidation" },
+        { title: "Regulatory tightening on e-wallet lending", severity: "high", description: "SBV Decree 13/2023 imposes stricter capital adequacy and lending limits on e-wallet operators.", current_workaround: "Partnering with licensed banks (VP Bank/Timo) rather than direct lending", cost_of_inaction: "License revocation risk; $50M+ revenue at stake" },
+        { title: "Tier-2/3 city expansion is cost-intensive", severity: "high", description: "Rural users have lower ARPU but require expensive agent-network onboarding and offline education.", current_workaround: "Agent network + gamified referral programs", cost_of_inaction: "Ceding rural market to VNPay-QR (bank-led) and ShopeePay (e-commerce-led)" }
+      ],
+      executive_summary: "MoMo's customer base spans three tiers: (1) 31M+ end consumers using the super-app for daily payments, lending, and investments, (2) 200K+ merchants accepting MoMo QR at point-of-sale, and (3) banking and insurance partners distributing financial products through MoMo's platform. The key insight is MoMo's dual role as both a consumer brand and a B2B fintech infrastructure layer.",
+      positioning_statement: "For Vietnamese consumers who want one app for all financial needs, MoMo is the super-app that combines payments, lending, insurance, and investments — unlike bank apps, MoMo offers gamified UX and the widest offline merchant network in Vietnam.",
+      recommended_channels: ["In-app push notifications & gamified campaigns", "MoMo Business merchant acquisition team", "Banking partnership BD", "Social media influencer campaigns (TikTok, Facebook)", "Agent network in Tier-2/3 cities"],
+      vietnam_market_notes: [
+        "MoMo pioneered QR payments in Vietnam — its pink QR code is ubiquitous at street vendors and shops",
+        "Gamification is central to MoMo's engagement strategy — 'lắc' (shake) campaigns drive 10M+ daily interactions",
+        "MoMo's credit scoring AI uses alternative data (bill payments, top-up history) to serve the unbanked",
+        "Cross-border QR with Japan and South Korea enables Vietnamese tourists to pay abroad with MoMo"
+      ]
+    },
+    gtm_playbook: {
+      executive_summary: "MoMo's GTM strategy pivots from user acquisition (largely saturated at 31M users in urban areas) to monetization and rural expansion. The 18-month playbook has three pillars: (1) Financial services cross-sell — achieve $500M loan disbursement book via bank-partnered micro-lending, (2) Merchant monetization — convert 200K+ merchants from free QR to premium analytics and loyalty tools at $50/month ARPU, and (3) Tier-2/3 city penetration via agent networks and gamified onboarding. Profitability target: EBITDA-positive by Q4 2027.",
+      target_audience: "Vietnamese consumers ages 18–45 in urban and increasingly peri-urban areas who use mobile payments for daily transactions, F&B and retail merchants seeking cashless POS, and banking/insurance partners seeking distribution to MoMo's 31M underbanked user base.",
+      phases: [
+        { phase_number: 1, title: "Lending Product-Market Fit & Risk Calibration", duration: "Weeks 1–6", key_actions: ["Launch MoMo Credit 2.0 with AI-driven dynamic credit limits based on transaction history and bill payment behavior", "Partner with VP Bank and Timo for balance-sheet lending (MoMo as origination channel, bank holds risk)", "Implement real-time NPL monitoring dashboard — target <3% NPL ratio across micro-loan portfolio", "Roll out 'Buy Now Pay Later' (Mua Trước Trả Sau) feature for top 100 e-commerce merchants"] },
+        { phase_number: 2, title: "Merchant Monetization Engine", duration: "Weeks 7–14", key_actions: ["Launch 'MoMo Business Pro' — premium merchant tier with analytics dashboard, loyalty programs, and CRM integration ($50/month)", "Deploy MoMo Smart POS terminal to top 10K merchants with integrated inventory and sales reporting", "Build merchant data marketplace — anonymized transaction insights sold to FMCG brands for $10K+/report", "Launch MoMo Ads — sponsored placement in the 'Nearby' merchant discovery feed"] },
+        { phase_number: 3, title: "Tier-2/3 City & Rural Expansion", duration: "Weeks 15–22", key_actions: ["Recruit 5,000 MoMo Agents in 40 provinces — commission-based model for cash-in/cash-out and user onboarding", "Launch 'MoMo Lite' — stripped-down app (<10MB) optimized for low-end Android devices and 3G connections", "Partner with Vietnam Post (VNPost) for rural agent network — leverage 13,000 post offices as cash-in points", "Run hyper-local gamified campaigns: 'Lắc Momo' (Shake MoMo) with province-specific prizes"] },
+        { phase_number: 4, title: "Platform Consolidation & Profitability", duration: "Weeks 23–36", key_actions: ["Achieve EBITDA profitability through lending margins + merchant SaaS fees (target: 15% margin)", "Launch MoMo Invest 2.0 — mutual fund and gold investment products with $0 minimum", "Expand cross-border QR to 5 additional ASEAN countries via bilateral central bank agreements", "Explore strategic options: HOSE IPO, SPAC merger, or strategic sale to regional super-app (Grab/GoTo)"] }
+      ],
+      growth_channels: ["In-app gamification campaigns (Lắc MoMo, scratch cards, daily check-in rewards)", "MoMo Agent network in Tier-2/3 cities (commission-based cash-in/cash-out)", "Banking and insurance partner co-marketing (VP Bank, Timo, Bảo Việt)", "TikTok and Facebook influencer campaigns targeting Gen Z first-time digital payment users", "Merchant field sales team (direct B2B) for MoMo Business Pro", "VNPost partnership for rural distribution"],
+      kpis: ["Monthly active users (MAU): 35M by 2027 (from 31M)", "Loan disbursement volume: $500M/year", "Merchant Pro subscribers: 50K at $50/month ARPU", "Rural user acquisition: 4M new users from Tier-2/3 cities", "NPL ratio: <3% across micro-lending book", "EBITDA margin: 15% by Q4 2027"],
+      vietnam_context: "Vietnam's State Bank (SBV) is tightening regulations on e-wallet lending through Decree 13/2023 — MoMo must operate through licensed banking partners rather than direct lending. The government's cashless economy target of 80% non-cash transactions by 2030 creates enormous tailwinds, but 65% of Vietnamese adults remain underbanked, requiring offline agent networks and simplified UX for onboarding."
+    },
+    icp_profile: {
+      executive_summary: "MoMo's ideal B2B customer is a Vietnamese merchant or SME (1–200 employees) in retail, F&B, services, or healthcare that processes 50+ transactions per day and wants to accept mobile payments, run loyalty campaigns, and access working capital — all from a single platform. These businesses are typically cash-heavy, lack digital marketing capabilities, and are motivated by the government's cashless economy push and rising consumer demand for QR/mobile payments.",
+      firmographics: {
+        company_size_range: "1 – 200 employees",
+        revenue_range: "$50K – $5M",
+        industries: ["Retail / Convenience Stores", "Food & Beverage", "Healthcare / Pharmacies", "Services / Salons", "E-commerce", "Education / Tutoring Centers"],
+        geographic_focus: ["Vietnam — Tier 1, 2, and 3 cities"],
+        company_maturity: "Small to Growth-stage",
+        ownership_structure: "Private / Sole proprietor / Family-owned",
+        typical_tech_stack: ["Basic POS system or no POS", "Excel / Paper ledgers", "Facebook Page for marketing", "Zalo for customer communication"],
+        regulatory_pressure: "Low-Medium — Tax invoice requirements, basic food safety for F&B"
+      },
+      buyer_personas: [
+        {
+          id: "momo-p1",
+          title: "Business Owner / Chủ cửa hàng",
+          department: "Owner / General Management",
+          seniority: "Owner / Founder",
+          age_range: "28–55",
+          key_kpis: ["Daily transaction volume & revenue", "Customer repeat visit rate", "Cash handling costs and shrinkage", "Monthly profit margin"],
+          goals: ["Accept mobile payments to attract younger customers who don't carry cash", "Reduce cash handling costs and theft risk by going 50%+ cashless", "Access short-term working capital loans without bank paperwork"],
+          frustrations: ["Banks require 2 weeks of paperwork for a simple business loan", "Managing cash is risky (theft, counterfeits) and time-consuming (daily bank deposits)", "No way to run targeted promotions to bring back lapsed customers"],
+          preferred_channels: ["MoMo field sales agents visiting the store directly", "Word-of-mouth from neighboring businesses already using MoMo", "Zalo groups for local business owners", "Facebook business owner communities"],
+          vietnam_behavior: "Vietnamese SME owners make decisions intuitively and fast — they'll start using MoMo if the field agent shows them a neighbor's success story and helps them set up on the spot. A 15-minute in-person demo closes more deals than any digital campaign.",
+          decision_role: "Decision Maker",
+          quote_snippet: "Since accepting MoMo, my bubble tea shop sees 40% more orders from university students. They don't carry cash — if I didn't have MoMo QR, they'd go next door."
+        },
+        {
+          id: "momo-p2",
+          title: "Store Manager / Quản lý cửa hàng",
+          department: "Operations",
+          seniority: "Manager",
+          age_range: "24–40",
+          key_kpis: ["Transaction processing speed", "Daily reconciliation accuracy", "Staff productivity", "Customer wait time"],
+          goals: ["Speed up checkout by 30% with QR payments vs. cash counting", "Eliminate daily cash reconciliation headaches at closing time", "Get real-time sales dashboard instead of manually tallying receipts"],
+          frustrations: ["Cash register doesn't match actual cash count at end of day", "No visibility into sales patterns by hour, day, or product", "Staff spending 30+ minutes daily counting and bundling cash"],
+          preferred_channels: ["In-app tutorials and guides within MoMo Business app", "WhatsApp/Zalo support groups for MoMo merchants", "YouTube how-to videos in Vietnamese", "MoMo merchant community events"],
+          vietnam_behavior: "Vietnamese store managers are typically young (25–35) and tech-savvy — they're often the ones who push the owner to adopt digital payments. They care most about operational efficiency and will champion any tool that saves them 30 minutes at closing.",
+          decision_role: "Champion",
+          quote_snippet: "Reconciliation used to take me 45 minutes every night. With MoMo Business, every transaction is logged automatically — I'm done in 5 minutes and the numbers always match."
+        },
+        {
+          id: "momo-p3",
+          title: "Accountant / Kế toán",
+          department: "Finance / Accounting",
+          seniority: "Staff / Senior Staff",
+          age_range: "25–45",
+          key_kpis: ["Tax reporting accuracy", "Cash flow visibility", "Expense tracking completeness", "Audit readiness"],
+          goals: ["Get digital transaction records that automatically feed into accounting software", "Reduce manual data entry from paper receipts", "Ensure all MoMo transactions generate proper e-invoices for tax compliance"],
+          frustrations: ["Cash transactions leave no digital trail — manual entry into MISA software is error-prone", "Multiple payment channels (cash, bank transfer, MoMo, ZaloPay) each have separate reporting", "Month-end reconciliation across channels takes 2+ days"],
+          preferred_channels: ["MISA software integration announcements", "Vietnamese accounting community forums", "Tax authority (Tổng cục Thuế) compliance updates", "Direct MoMo Business support for accounting queries"],
+          vietnam_behavior: "Vietnamese accountants are extremely conservative and worried about tax compliance. They'll support MoMo adoption only if it generates proper e-invoices (hóa đơn điện tử) and integrates with MISA — the dominant Vietnamese accounting software.",
+          decision_role: "Influencer",
+          quote_snippet: "I told the boss: if MoMo can auto-generate e-invoices that feed straight into our MISA software, I'll save 3 days per month on data entry. That convinced him."
+        }
+      ],
+      buying_triggers: [
+        {
+          id: "momo-t1",
+          trigger: "Government cashless economy mandate",
+          category: "regulatory",
+          urgency_level: "high",
+          description: "Vietnam's target of 80% non-cash transactions by 2030 (Decision 1813/QĐ-TTg) is driving policy incentives for cashless merchants — including tax benefits, simplified reporting, and preferential treatment in government procurement.",
+          vietnam_context: "Provincial governments are piloting 'cashless districts' (quận không tiền mặt) where merchants receive tax incentives for accepting 100% digital payments. MoMo is the default payment partner in these pilots."
+        },
+        {
+          id: "momo-t2",
+          trigger: "Consumer behavior shift to mobile payments",
+          category: "competitive",
+          urgency_level: "critical",
+          description: "Vietnamese consumers under 35 increasingly expect QR/mobile payment options — merchants without mobile payment acceptance are losing 15–25% of potential transactions, especially from Gen Z customers.",
+          vietnam_context: "University campuses and office districts in HCMC and Hanoi are approaching 60%+ cashless transaction rates. Merchants in these areas report losing customers to competitors who accept MoMo/ZaloPay."
+        },
+        {
+          id: "momo-t3",
+          trigger: "Cash handling security concerns",
+          category: "operational",
+          urgency_level: "medium",
+          description: "Rising petty theft, counterfeit notes, and the operational cost of daily bank deposits are pushing merchants to reduce cash dependency — every 1% shift from cash to digital saves approximately 0.5% of revenue in handling costs.",
+          vietnam_context: "Vietnamese 500K VND notes (worth ~$20) are the most counterfeited denomination. Small merchants lose an estimated 1–2% of cash revenue annually to counterfeits and employee theft — digital payments eliminate both risks."
+        },
+        {
+          id: "momo-t4",
+          trigger: "Working capital crunch for seasonal businesses",
+          category: "growth",
+          urgency_level: "high",
+          description: "Vietnamese SMEs face chronic working capital shortages, especially before peak seasons (Tết, back-to-school) — MoMo's transaction-data-based lending provides 48-hour approval vs. 2–4 weeks at traditional banks.",
+          vietnam_context: "Only 30% of Vietnamese SMEs have access to formal bank credit. MoMo's micro-lending (up to 50M VND / ~$2,000) based on MoMo transaction history fills a critical gap that banks refuse to serve."
+        }
+      ],
+      pain_points: [
+        {
+          id: "momo-pp1",
+          title: "Cash-heavy operations with no digital trail",
+          severity: "critical",
+          description: "70%+ of transactions at Vietnamese SMEs are still in cash, creating reconciliation nightmares, theft risk, tax reporting gaps, and inability to understand customer purchasing patterns.",
+          current_workaround: "Manual cash counting twice daily, paper receipt books, and monthly manual entry into accounting software — consuming 2–3 hours per day of staff time.",
+          cost_of_inaction: "2–4% of revenue lost to cash shrinkage (theft + counterfeits + counting errors) plus 60+ hours/month of manual administrative work.",
+          vietnam_specific: true
+        },
+        {
+          id: "momo-pp2",
+          title: "No customer data or retention capability",
+          severity: "high",
+          description: "Cash-based merchants have zero customer data — they cannot identify repeat customers, send targeted promotions, or measure the effectiveness of any marketing spend.",
+          current_workaround: "Physical loyalty stamp cards that customers lose, or Facebook Page posts that reach only 3–5% of followers due to algorithm changes.",
+          cost_of_inaction: "Missing 20–30% potential revenue from lapsed customers who could be re-engaged with targeted offers — competitors with digital loyalty programs capture these customers.",
+          vietnam_specific: false
+        },
+        {
+          id: "momo-pp3",
+          title: "Inaccessible working capital from banks",
+          severity: "high",
+          description: "Vietnamese SMEs need 10–50M VND ($400–$2,000) in short-term working capital for inventory restocking, but banks require 2–4 weeks of paperwork, collateral, and audited financials that micro-businesses cannot provide.",
+          current_workaround: "Borrowing from informal money lenders at 3–5% monthly interest rates, or using personal credit cards and family loans to fund business operations.",
+          cost_of_inaction: "Paying 36–60% annual interest to informal lenders, or missing seasonal revenue opportunities due to insufficient inventory.",
+          vietnam_specific: true
+        },
+        {
+          id: "momo-pp4",
+          title: "Multi-payment-channel reconciliation chaos",
+          severity: "medium",
+          description: "Merchants accepting cash, bank transfers, MoMo, ZaloPay, and VNPay-QR have 5 separate transaction streams with no unified dashboard — making daily reconciliation and tax reporting extremely painful.",
+          current_workaround: "Maintaining separate Excel sheets for each payment channel and manually merging at month-end — a process that takes 2+ days and is error-prone.",
+          cost_of_inaction: "Tax reporting errors (risk of audit penalties), inability to identify most profitable payment channels, and 20+ hours/month wasted on manual reconciliation.",
+          vietnam_specific: true
+        }
+      ],
+      positioning_statement: "MoMo Business is the all-in-one payment, marketing, and lending platform for Vietnamese merchants — accept 31M+ MoMo wallet users via simple QR code, run targeted loyalty campaigns to bring back lapsed customers, and access instant working capital based on your transaction data. No POS hardware needed, no bank paperwork, setup in 10 minutes.",
+      recommended_channels: ["Field sales agent network covering all 63 provinces — in-person merchant onboarding", "Merchant success story videos on TikTok and Facebook targeting SME owner communities", "Zalo groups for local business owner associations (Hội Doanh nghiệp)", "Partnership co-marketing with MISA accounting software (integrated e-invoice workflow)", "Government cashless district pilot programs as anchor merchant acquisition channel", "MoMo Merchant Academy — free online training series for digital business skills"],
+      vietnam_market_notes: ["65% of Vietnamese adults remain underbanked — MoMo's merchant network serves as de facto financial infrastructure in Tier-2/3 cities where bank branches are scarce.", "The 'Lắc MoMo' (Shake MoMo) Tết campaign generates 50M+ daily interactions — merchants participating in these campaigns see 3–5x transaction spikes.", "Vietnamese consumer trust in MoMo is exceptionally high (91% CSAT) — merchant adoption follows because consumers increasingly ask 'do you accept MoMo?' before purchasing.", "MoMo's micro-lending book ($200M+ disbursed) has <3% NPL ratio — demonstrating that transaction-data underwriting is more effective than traditional credit scoring for Vietnamese SMEs."]
+    },
+    market_share_percentage: 32,
+    yoy_growth: "+35%",
+    csat_score: 91,
+    quadrant_position: "Leader"
+  },
+  {
+    name: "VNPay",
+    intro: "Vietnam's largest payment infrastructure provider, powering QR-code payments at 40+ partner banks and millions of merchants nationwide.",
+    address: "Cầu Giấy, Hà Nội, Việt Nam",
+    year: 2007,
+    size: "> 2.000 người",
+    headcount: 2500,
+    total_funding: "$300M+ (GIC, SoftBank via VNLIFE parent)",
+    products: "VNPay-QR, Banking Gateway, Bill Payment, E-commerce Payment, VnShop, VnTopUp",
+    customers: "40+ ngân hàng đối tác, Hàng triệu cửa hàng, Người dùng cuối.",
+    industry: "Technology",
+    sub_industry: "Fintech",
+    website: "vnpay.vn",
+    revenue: "$200M",
+    revenue_range: "$150M - $300M",
+    employee_range: "2000-3000",
+    growth: 65.5,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/vnpay.vn",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from SBV reports and DealStreetAsia coverage; VNLIFE parent",
+    dataTier: "premium",
+    dataScore: 98,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "dealstreetasia"],
+    tech_stack: ["Java", "Spring Cloud", "PostgreSQL", "Redis", "Kafka", "Docker", "Prometheus"],
+    description: "VNPay is Vietnam's backbone payment technology company, operating the ubiquitous VNPay-QR network integrated with 40+ banks and accepted at millions of retail touchpoints. As a subsidiary of VNLIFE, it also powers e-commerce checkout and bill payment — processing over $50B in annual transaction value.",
+    key_pain_points: [
+      "Interchange fee compression as SBV pushes for lower payment costs",
+      "Competition from bank-owned QR solutions and international players (Visa/MC tap)",
+      "Need to diversify revenue beyond transaction processing fees",
+      "Data privacy compliance as PDPD enforcement strengthens",
+      "Building merchant loyalty programs to prevent churn to rival payment rails"
+    ],
+    target_audience: [
+      "Vietnamese commercial banks integrating mobile payment APIs",
+      "Retail merchants adopting QR-based cashless checkout",
+      "E-commerce platforms needing reliable payment gateway",
+      "Utility & telco companies using bill payment rails",
+      "Government agencies collecting fees and fines digitally"
+    ],
+    recent_events: [
+      "VNPay-QR passed 300,000 active POS merchant locations (Q4 2025)",
+      "Launched tokenized card-on-file solution for recurring e-commerce payments",
+      "Parent VNLIFE raised $250M Series B at $1.5B valuation from GIC & SoftBank",
+      "Expanded into Cambodia and Laos via cross-border QR interoperability",
+      "Integrated with Apple Pay and Google Pay for Vietnamese bank cards"
+    ],
+    customer_insights: {
+      firmographics: {
+        industry_vertical: "Fintech — Payment Infrastructure & Gateway",
+        employee_count: "2,000 – 3,000",
+        estimated_revenue: "$200M (FY2025 est.)",
+        geographic_focus: ["Vietnam (primary)", "Cambodia", "Laos"],
+        ownership: "Private — Subsidiary of VNLIFE; backed by GIC (Singapore), SoftBank Vision Fund",
+        tech_maturity: "Very High — ISO 27001, PCI-DSS Level 1, real-time payment switching"
+      },
+      technographics: ["Java", "Spring Cloud", "PostgreSQL", "Redis", "Kafka", "Docker", "Prometheus", "Grafana", "Oracle DB", "HSM (Hardware Security Module)", "ISO 8583", "EMVCo QR"],
+      buyer_personas: [
+        {
+          title: "Head of Digital Banking / EVP Technology",
+          department: "Technology / Digital",
+          seniority: "EVP / C-Level",
+          decision_role: "Decision Maker",
+          kpis: ["Mobile banking transaction volume", "QR payment adoption rate", "System uptime (99.99%)", "Cost per transaction"],
+          pain_points: ["Legacy core banking systems slow to integrate new payment methods", "Pressure from SBV to support NAPAS QR interoperability", "Competition from e-wallets capturing deposits away from banks"],
+          preferred_channels: ["SBV-organized banking forums", "Direct enterprise sales meetings", "Banking technology conferences (Vietnam)", "NAPAS partner events"],
+          vietnam_behavior: "Vietnamese bank technology heads are conservative — they need 2-3 reference bank deployments before committing to a new payment gateway vendor.",
+          quote_snippet: "We need a payment switch that connects all wallets, cards, and QR codes through one API — and it must be SBV-approved."
+        },
+        {
+          title: "Head of Business Development (E-commerce)",
+          department: "Business Development",
+          seniority: "Director",
+          decision_role: "Influencer",
+          kpis: ["Checkout conversion rate", "Payment success rate", "Merchant onboarding velocity", "Revenue from payment gateway fees"],
+          pain_points: ["Cart abandonment due to limited payment options", "Reconciliation pain with multiple payment providers", "Fraud management across different payment methods"],
+          preferred_channels: ["E-commerce industry events", "VNPay partner portal & documentation", "Integration hackathons"],
+          vietnam_behavior: "Vietnamese e-commerce platforms need to support 15+ payment methods (bank transfer, e-wallets, BNPL, COD) — VNPay's unified gateway simplifies this."
+        },
+        {
+          title: "CFO / Finance Director (SME Merchant)",
+          department: "Finance",
+          seniority: "C-Level / Director",
+          decision_role: "Gatekeeper",
+          kpis: ["Cash flow predictability (T+0 settlement)", "Payment processing cost", "Fraud & chargeback rate"],
+          pain_points: ["Slow settlement from card acquirers (T+2 to T+5)", "No unified dashboard for all payment channels", "High cost of POS terminal hardware"],
+          preferred_channels: ["Bank relationship managers", "VNPay merchant sales team", "Industry peer referrals"],
+          vietnam_behavior: "Vietnamese SME owners value T+0 settlement above all — cash flow is king for businesses operating on thin margins."
+        }
+      ],
+      buying_triggers: [
+        { event: "Bank launching or upgrading mobile banking QR feature", category: "technological", urgency: "critical", description: "40+ banks rely on VNPay's QR switching infrastructure — any bank modernizing mobile banking triggers a VNPay integration.", vietnam_context: "SBV mandated all Vietnamese banks to support NAPAS QR by 2025 — VNPay is the #1 integration partner." },
+        { event: "E-commerce platform expanding payment options", category: "growth", urgency: "high", description: "Online marketplaces adding bank transfer, wallet, and BNPL need VNPay's unified payment gateway API.", vietnam_context: "Vietnam e-commerce GMV hit $25B in 2025 — platforms like Tiki, Sendo, and Tiki need 15+ payment methods." },
+        { event: "SME merchant upgrading from cash-only to digital payments", category: "operational", urgency: "medium", description: "Mom-and-pop shops adopting QR payments for the first time via bank partnership programs.", vietnam_context: "VNPay-QR is accepted at 300K+ merchant locations — the largest QR acceptance network in Vietnam." },
+        { event: "Cross-border payment corridor opening (ASEAN QR)", category: "regulatory", urgency: "medium", description: "ASEAN central banks enabling cross-border QR interoperability creates new revenue streams for VNPay.", vietnam_context: "VNPay already interoperates with Thai PromptPay and Cambodian KHQR — Laos and Myanmar are next." }
+      ],
+      pain_points_detailed: [
+        { title: "Interchange fee compression from SBV regulation", severity: "critical", description: "SBV is pushing to lower payment interchange fees to promote cashless adoption, squeezing VNPay's margin.", current_workaround: "Diversifying into value-added services (VnShop, VnTopup, merchant analytics)", cost_of_inaction: "30-40% margin erosion over 3 years" },
+        { title: "Competition from bank-owned QR solutions", severity: "high", description: "Large banks (Vietcombank, BIDV) are building proprietary QR solutions to reduce VNPay dependency.", current_workaround: "Deepening integration with smaller banks and creating switching lock-in", cost_of_inaction: "Loss of 20-30% of bank partner revenue" },
+        { title: "Merchant data monetization limited by privacy regulation", severity: "medium", description: "VNPay sits on massive transaction data but PDPD (Personal Data Protection Decree) limits monetization.", current_workaround: "Anonymized aggregate analytics for merchants", cost_of_inaction: "Missed $50M+ analytics revenue opportunity" }
+      ],
+      executive_summary: "VNPay operates as Vietnam's payment 'plumbing' — its customers are banks (40+), e-commerce platforms, and millions of merchants who use VNPay-QR infrastructure. Unlike consumer-facing MoMo, VNPay is primarily a B2B payment technology provider. Key buyers are bank technology heads and e-commerce platform leaders who need reliable, SBV-compliant payment switching.",
+      positioning_statement: "For Vietnamese banks and merchants who need a single, SBV-compliant payment infrastructure connecting all QR codes, cards, and e-wallets, VNPay is the backbone switch processing $50B+ in annual transaction value — unlike e-wallet competitors, VNPay is bank-neutral and operates the largest merchant acceptance network in Vietnam.",
+      recommended_channels: ["SBV and NAPAS partner events", "Direct bank enterprise sales (top 40 banks)", "VNPay merchant sales force (field team)", "Banking technology webinars", "E-commerce platform BD partnerships"],
+      vietnam_market_notes: [
+        "VNPay-QR is the de facto QR standard in Vietnam — even competing e-wallets route through VNPay's switch",
+        "VNLIFE (parent) is valued at $1.5B — one of Vietnam's most valuable private fintech companies",
+        "VNPay's bank-neutral positioning is its moat — neither MoMo nor ZaloPay can replicate the 40-bank network",
+        "Cross-border QR with Thailand, Cambodia, and Laos positions VNPay as ASEAN payment infrastructure leader"
+      ]
+    },
+    gtm_playbook: {
+      executive_summary: "VNPay's GTM strategy leverages its position as Vietnam's payment 'plumbing' to evolve from a pure-play payment switch into a full-stack financial infrastructure platform. The 18-month playbook has three strategic vectors: (1) Deepen bank partnerships — expand from QR switching to full digital banking infrastructure-as-a-service, (2) Merchant value-added services — convert the 300K+ VNPay-QR merchant base into a data-driven commerce platform, and (3) ASEAN expansion — replicate the QR interoperability model across Cambodia, Laos, Thailand, and Philippines. Revenue target: $350M by FY2027.",
+      target_audience: "Vietnamese bank technology heads (40+ partner banks) seeking SBV-compliant payment infrastructure, e-commerce platforms needing unified payment gateway APIs, SME merchants upgrading from cash to digital QR payments, and ASEAN central banks seeking cross-border QR interoperability partners.",
+      phases: [
+        { phase_number: 1, title: "Digital Banking Infrastructure-as-a-Service", duration: "Weeks 1–6", key_actions: ["Launch 'VNPay BaaS' — white-label mobile banking SDK that banks can deploy in <90 days", "Build real-time fraud detection engine using ML on transaction data (target: <0.01% fraud rate)", "Sign 5 new bank partnerships for core payment switching (targeting: Bac A Bank, Nam A Bank, SHB, LienVietPostBank, OCB)", "Develop open API marketplace for third-party fintech integrations (BNPL, insurance, lending)"] },
+        { phase_number: 2, title: "Merchant Commerce Platform", duration: "Weeks 7–14", key_actions: ["Launch 'VNPay Merchant Intelligence' — transaction analytics dashboard for top 50K merchants", "Deploy VNPay Smart POS with NFC, QR, and contactless card acceptance in single terminal", "Build merchant loyalty platform — cross-merchant reward points redeemable at any VNPay-QR location", "Launch VnShop 2.0 — social commerce platform integrated directly with VNPay-QR merchant network"] },
+        { phase_number: 3, title: "ASEAN Cross-Border Expansion", duration: "Weeks 15–22", key_actions: ["Complete bilateral QR interoperability agreements with Philippines (InstaPay) and Myanmar (MPU)", "Establish VNPay Singapore entity as ASEAN regional HQ for cross-border operations", "Launch 'ASEAN QR Alliance' marketing campaign — Vietnamese tourists can pay in 6 countries via VNPay", "Partner with 10 ASEAN e-commerce platforms for cross-border payment acceptance"] },
+        { phase_number: 4, title: "Platform Consolidation & Valuation Growth", duration: "Weeks 23–36", key_actions: ["Achieve $50B+ annual transaction processing volume across all rails", "Launch VNPay Capital — working capital loans for merchants based on transaction data underwriting", "Prepare VNLIFE for potential HOSE IPO or strategic investment round at $3B+ valuation", "Build 'VNPay for Government' — e-government payment infrastructure for tax, utilities, and public services"] }
+      ],
+      growth_channels: ["Bank partnership enterprise sales (direct BD to CTO/EVP offices of 40+ banks)", "NAPAS and SBV regulatory forum participation and co-development", "VNPay merchant field sales force (500+ agents nationwide)", "ASEAN central bank bilateral engagement via Ministry of Finance", "E-commerce platform integration partnerships", "Developer community via VNPay Open API documentation and hackathons"],
+      kpis: ["Annual transaction processing volume: $50B+", "Bank partners: 50+ (from 40+)", "Merchant locations: 500K (from 300K)", "Cross-border QR countries: 6+ ASEAN markets", "BaaS platform banks: 10+ white-label deployments", "Revenue: $350M by FY2027"],
+      vietnam_context: "VNPay benefits from SBV's mandate that all Vietnamese banks support NAPAS QR interoperability by 2025 — as the dominant QR switching infrastructure, every new bank compliance project drives VNPay integration revenue. Vietnam's position as ASEAN's fastest-growing digital economy ($25B e-commerce GMV) creates massive demand for unified payment infrastructure that VNPay is uniquely positioned to provide."
+    },
+    icp_profile: {
+      executive_summary: "VNPay's ideal customer is a Vietnamese commercial bank or large financial institution (500–50,000 employees) that needs to deploy QR payment infrastructure, digital banking capabilities, or payment gateway services to comply with SBV mandates and compete with fintech disruptors. Secondary ICP includes large retail chains and e-commerce platforms needing unified payment acceptance across online and offline channels.",
+      firmographics: {
+        company_size_range: "500 – 50,000 employees",
+        revenue_range: "$100M – $10B",
+        industries: ["Banking & Financial Services", "Insurance", "Securities / Investment", "Large Retail Chains", "E-commerce Platforms"],
+        geographic_focus: ["Vietnam", "ASEAN (expansion)"],
+        company_maturity: "Established / Mature",
+        ownership_structure: "Public / State-owned / Joint-stock bank",
+        typical_tech_stack: ["Core Banking (T24 / Flexcube / Silverlake)", "Legacy middleware", "On-premise data centers", "NAPAS switch integration", "Oracle / IBM mainframe"],
+        regulatory_pressure: "Very High — SBV circulars, NAPAS QR standards, anti-money laundering, PCI-DSS"
+      },
+      buyer_personas: [
+        {
+          id: "vnpay-p1",
+          title: "Chief Information Officer — Commercial Bank",
+          department: "Technology / IT Division",
+          seniority: "C-Suite",
+          age_range: "42–58",
+          key_kpis: ["Digital channel transaction volume", "System availability (99.99% SLA)", "Time-to-market for new digital products", "IT cost-to-income ratio"],
+          goals: ["Deploy NAPAS-compliant QR payment system before SBV deadline", "Launch mobile banking super-app to compete with Timo, TNEX, and cake by VPBank", "Migrate 40% of branch transactions to digital channels within 18 months"],
+          frustrations: ["Core banking vendor (T24/Flexcube) charges $2M+ for every major integration", "Internal IT team lacks API-first development skills for modern payments", "Every SBV circular creates a 6-month compliance engineering sprint"],
+          preferred_channels: ["SBV regulatory forums and banking conferences", "Direct enterprise sales meetings (CIO-to-CEO level)", "Banking technology conferences (Vietnam Banking Forum, Finastra Universe)", "Referrals from other bank CIOs in the Vietnamese banking community"],
+          vietnam_behavior: "Vietnamese bank CIOs operate within a strict hierarchical decision structure — the CIO recommends, but the CEO/Chairman approves. Political relationships between VNPay leadership and bank chairmen often determine vendor selection as much as technical evaluation.",
+          decision_role: "Decision Maker",
+          quote_snippet: "VNPay is already integrated with our core banking system. Adding their QR module took 6 weeks instead of the 6 months we spent evaluating alternatives. When SBV sets a deadline, speed is everything."
+        },
+        {
+          id: "vnpay-p2",
+          title: "Head of Digital Banking Division",
+          department: "Digital Banking / E-Banking",
+          seniority: "EVP / SVP",
+          age_range: "35–50",
+          key_kpis: ["Digital transaction volume growth (%)", "Mobile app MAU and daily transactions", "Digital product revenue contribution", "Customer digital adoption rate"],
+          goals: ["Launch 5 new digital payment products in the next 12 months", "Increase mobile app MAU from 2M to 5M through better payment UX", "Enable merchant QR acceptance at 50K+ locations under the bank's brand"],
+          frustrations: ["Fintech wallets (MoMo, ZaloPay) are stealing customer payment volume from bank channels", "Building payment features in-house takes 9–12 months vs. 2–3 months with VNPay white-label", "Merchant acquisition for bank-branded QR is expensive and slow without existing network"],
+          preferred_channels: ["Fintech and banking innovation conferences", "LinkedIn thought leadership on digital banking", "Case studies from peer banks already using VNPay", "Product demo sessions at VNPay headquarters"],
+          vietnam_behavior: "Vietnamese digital banking heads are under intense pressure from board members who compare their bank's app to MoMo/ZaloPay daily. The 'why can't our app do what MoMo does?' question from the chairman is VNPay's strongest sales trigger.",
+          decision_role: "Champion",
+          quote_snippet: "Our chairman downloaded MoMo and asked me why our banking app can't split bills. I called VNPay and had the feature live in 8 weeks using their white-label SDK."
+        },
+        {
+          id: "vnpay-p3",
+          title: "Head of Compliance & Risk",
+          department: "Risk Management / Compliance",
+          seniority: "SVP / Director",
+          age_range: "40–55",
+          key_kpis: ["SBV audit findings (target: 0 critical)", "AML/KYC compliance rate", "Fraud detection rate", "Regulatory reporting timeliness"],
+          goals: ["Ensure 100% compliance with SBV Circular 16 on electronic payment security", "Implement real-time fraud monitoring for QR payment transactions", "Pass annual NAPAS certification audit without findings"],
+          frustrations: ["New SBV circulars arrive with 3–6 month implementation deadlines", "Legacy systems lack real-time transaction monitoring capabilities", "International payment vendors don't understand Vietnamese regulatory nuances"],
+          preferred_channels: ["SBV regulatory briefings and compliance workshops", "Vietnam Banking Association events", "Big 4 advisory publications on Vietnamese banking regulations", "Direct compliance team-to-team meetings with VNPay"],
+          vietnam_behavior: "Vietnamese bank compliance heads have zero risk tolerance — they will veto any payment vendor that cannot demonstrate NAPAS certification, SBV approval letters, and a track record with other Vietnamese banks. References from 3+ existing bank clients are non-negotiable.",
+          decision_role: "Gatekeeper",
+          quote_snippet: "I need three things from a payment vendor: NAPAS certification, SBV approval letter, and references from at least 3 other Vietnamese banks. VNPay has all three — that's why they passed our compliance gate in 2 weeks."
+        }
+      ],
+      buying_triggers: [
+        {
+          id: "vnpay-t1",
+          trigger: "SBV QR interoperability mandate deadline",
+          category: "regulatory",
+          urgency_level: "critical",
+          description: "SBV mandates that all Vietnamese banks must support NAPAS QR interoperability standards — banks without compliant QR infrastructure face regulatory penalties and lose competitive positioning to digital-first banks.",
+          vietnam_context: "As of 2025, 40+ banks have integrated VNPay-QR. The remaining 15+ banks face increasing SBV pressure. VNPay's position as the dominant NAPAS-certified QR switch means most banks have no practical alternative."
+        },
+        {
+          id: "vnpay-t2",
+          trigger: "Fintech wallet competitive pressure",
+          category: "competitive",
+          urgency_level: "critical",
+          description: "MoMo (31M users), ZaloPay (20M users), and other wallets are capturing payment volume that traditionally flowed through bank channels — forcing banks to urgently upgrade their digital payment capabilities.",
+          vietnam_context: "Vietnamese consumers aged 18–35 now use MoMo/ZaloPay for 60%+ of daily transactions. Banks see their debit card usage declining 10% YoY as wallets capture point-of-sale volume."
+        },
+        {
+          id: "vnpay-t3",
+          trigger: "E-commerce GMV explosion requiring payment infrastructure",
+          category: "growth",
+          urgency_level: "high",
+          description: "Vietnam's e-commerce market ($25B+ GMV, growing 25% annually) creates massive demand for online payment gateway integration — every e-commerce platform needs bank connectivity that VNPay provides.",
+          vietnam_context: "Shopee, Lazada, TikTok Shop, and emerging Vietnamese platforms all require multi-bank payment acceptance. VNPay's gateway processes 40%+ of Vietnam's online payment transactions."
+        },
+        {
+          id: "vnpay-t4",
+          trigger: "Core banking modernization initiatives",
+          category: "technological",
+          urgency_level: "high",
+          description: "Vietnamese banks with 15–20 year old core banking systems are undergoing digital transformation — requiring API-first payment modules that integrate with modern mobile banking architectures.",
+          vietnam_context: "State-owned commercial banks (Vietcombank, BIDV, Agribank) are investing $50–100M each in core banking upgrades. VNPay's modular payment APIs are designed to overlay on both legacy and modern cores."
+        }
+      ],
+      pain_points: [
+        {
+          id: "vnpay-pp1",
+          title: "Legacy banking infrastructure cannot support modern payments",
+          severity: "critical",
+          description: "Vietnamese banks running T24 or Flexcube cores from 2005–2010 vintage lack real-time payment APIs, QR generation capabilities, and mobile-first transaction processing — requiring expensive middleware or full core replacement.",
+          current_workaround: "Building custom middleware adapters between legacy core and modern payment channels — creating 'spaghetti architecture' that is fragile, slow, and expensive to maintain.",
+          cost_of_inaction: "$5–10M/year in maintenance costs for legacy payment middleware, plus 9–12 month delays for every new digital payment product launch.",
+          vietnam_specific: false
+        },
+        {
+          id: "vnpay-pp2",
+          title: "Merchant network gap vs. fintech wallets",
+          severity: "high",
+          description: "Banks want to offer merchant QR payment acceptance under their own brand but lack the field sales force and merchant onboarding infrastructure to compete with MoMo's 500K+ merchant network.",
+          current_workaround: "Relying on branch staff to onboard merchants — resulting in 50–100 new merchants per branch per year vs. MoMo's 1,000+ per agent per year.",
+          cost_of_inaction: "Losing merchant transaction fees to wallet providers and further eroding bank payment volume share.",
+          vietnam_specific: true
+        },
+        {
+          id: "vnpay-pp3",
+          title: "SBV circular compliance engineering burden",
+          severity: "high",
+          description: "Vietnamese banks receive 15–20 new SBV circulars annually affecting payment operations — each requiring 3–6 months of engineering work to implement, test, and certify.",
+          current_workaround: "Maintaining a dedicated 'regulatory engineering' team of 20–50 developers that does nothing but implement SBV compliance changes.",
+          cost_of_inaction: "SBV audit findings, potential fines, and in extreme cases temporary suspension of digital banking services.",
+          vietnam_specific: true
+        },
+        {
+          id: "vnpay-pp4",
+          title: "Cross-border payment complexity",
+          severity: "medium",
+          description: "Vietnamese banks struggle to offer cross-border QR payment acceptance for ASEAN tourists visiting Vietnam and Vietnamese tourists paying abroad — requiring bilateral agreements and FX settlement capabilities.",
+          current_workaround: "Directing customers to use Visa/Mastercard for cross-border payments, losing the QR transaction fee revenue and customer data insights.",
+          cost_of_inaction: "Missing the growing ASEAN cross-border payment market ($5B+ annually) and ceding ground to international payment networks.",
+          vietnam_specific: true
+        }
+      ],
+      positioning_statement: "VNPay is Vietnam's payment rails — the only provider integrated with 40+ banks across core banking, QR acceptance, and digital gateway, with NAPAS certification, SBV regulatory approval, and a 300K+ merchant network deployable under any bank's brand. When SBV issues a new circular, VNPay delivers compliant infrastructure in weeks, not months.",
+      recommended_channels: ["Direct enterprise sales to bank CIO/CEO offices — relationship-driven, top-down", "SBV and NAPAS regulatory forums as thought leadership and standard-setting platform", "Vietnam Banking Forum and banking technology conferences", "Bank CIO peer referral network — the 55 Vietnamese bank CIOs all know each other", "VNPay Open API developer portal and hackathons for bank engineering teams", "Joint marketing with NAPAS for QR interoperability awareness campaigns"],
+      vietnam_market_notes: ["Vietnam has 55+ licensed banks, but the top 15 control 85% of deposits — VNPay's strategy is to lock in these 15, then use their network to make VNPay-QR the default payment standard.", "SBV's regulatory power is absolute — when they mandate QR interoperability, banks comply within 6 months. VNPay's close relationship with SBV makes them the de facto implementation partner.", "Vietnamese bank technology decisions are heavily influenced by personal relationships between vendor CEOs and bank chairmen — VNPay's leadership has cultivated these relationships for 17+ years.", "The VNPay-QR standard is now accepted at 300K+ merchant locations — this network effect makes it nearly impossible for a new payment infrastructure competitor to emerge."]
+    },
+    market_share_percentage: 28,
+    yoy_growth: "+30%",
+    csat_score: 86,
+    quadrant_position: "Leader"
+  },
+  {
+    name: "Base.vn",
+    intro: "Vietnam's leading all-in-one enterprise management SaaS platform — HRM, CRM, project management, and workflow automation for 8,000+ businesses.",
+    address: "Hà Nội, Việt Nam",
+    year: 2016,
+    size: "300 - 500 người",
+    headcount: 400,
+    total_funding: "$10M+ (Jungle Ventures — Series B 2025)",
+    products: "Base HRM, Base CRM, Base Workflow, Base Project, Base Communication, Base E-Hiring",
+    customers: "8.000+ doanh nghiệp Việt Nam, SME, Mid-market, VNG, Sun Group, FLC.",
+    industry: "Technology",
+    sub_industry: "SaaS / Enterprise Software",
+    website: "base.vn",
+    revenue: "$15M",
+    revenue_range: "$10M - $20M",
+    employee_range: "300-500",
+    growth: 120.5,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/base.vn",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from TechinAsia startup profiles and Crunchbase",
+    dataTier: "premium",
+    dataScore: 98,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "crunchbase"],
+    tech_stack: ["React", "Node.js", "MongoDB", "AWS", "Redis", "Elasticsearch", "GraphQL"],
+    description: "Base.vn is Vietnam's fastest-growing enterprise SaaS platform offering 40+ integrated workplace apps spanning HRM, project management, CRM, and internal communication. Trusted by 8,000+ organizations including VNG and Sun Group, Base.vn is often called the 'Vietnamese Notion meets BambooHR'.",
+    key_pain_points: [
+      "Competing against free/low-cost tools (Google Workspace, Lark) in SME market",
+      "Enterprise sales cycle lengthening as CFOs cut SaaS budgets",
+      "Feature bloat risk from building 40+ apps versus going deep on core modules",
+      "International expansion to SEA hindered by localization costs",
+      "Churn management for SMEs that outgrow or downsize"
+    ],
+    target_audience: [
+      "Vietnamese SME owners and operations managers",
+      "HR directors in mid-market companies (200-2000 employees)",
+      "IT managers seeking unified workplace platform",
+      "Startup founders needing affordable all-in-one tools",
+      "Enterprise COOs replacing legacy on-premise ERP"
+    ],
+    recent_events: [
+      "Closed $10M Series B led by Jungle Ventures (Q3 2025)",
+      "Launched Base AI — GPT-powered assistant integrated across all modules",
+      "Surpassed 8,000 paying organizations milestone",
+      "Opened first international office in Bangkok, Thailand",
+      "Released Base Workflow 3.0 with visual process builder and RPA triggers"
+    ],
+    customer_insights: {
+      firmographics: {
+        industry_vertical: "SaaS — Enterprise Workplace Platform",
+        employee_count: "300 – 500",
+        estimated_revenue: "$15M (FY2025 est.)",
+        geographic_focus: ["Vietnam (primary)", "Thailand (first international market)"],
+        ownership: "Private — Backed by Jungle Ventures (Series B, 2025)",
+        tech_maturity: "High — Cloud-native, API-first architecture, GraphQL"
+      },
+      technographics: ["React", "Node.js", "MongoDB", "AWS", "Redis", "Elasticsearch", "GraphQL", "Docker", "GitHub Actions", "Segment", "Mixpanel"],
+      buyer_personas: [
+        {
+          title: "CEO / COO (SME Owner)",
+          department: "Executive",
+          seniority: "C-Level",
+          decision_role: "Decision Maker",
+          kpis: ["Operational efficiency (tasks/employee)", "Employee satisfaction (eNPS)", "Process automation rate", "SaaS cost per employee"],
+          pain_points: ["Using 8-10 disconnected tools (Slack, Google Sheets, Trello, BambooHR)", "No single source of truth for company operations", "Employees waste 2+ hours/day switching between tools", "Cannot enforce consistent processes across departments"],
+          preferred_channels: ["LinkedIn thought leadership (Vietnamese CEO groups)", "Startup ecosystem events (Echelon, VIISA)", "Peer CEO referrals", "Free trial / freemium self-serve"],
+          vietnam_behavior: "Vietnamese SME owners are extremely cost-conscious — they compare Base.vn against free tools (Lark, Google Workspace) and need ROI proof within 30 days.",
+          quote_snippet: "I was using 8 different apps to run my 200-person company. Base.vn replaced all of them in one platform."
+        },
+        {
+          title: "HR Director / People Operations Lead",
+          department: "Human Resources",
+          seniority: "Director",
+          decision_role: "Champion",
+          kpis: ["Time-to-hire", "Employee onboarding completion rate", "Leave/attendance accuracy", "HR cost per employee"],
+          pain_points: ["Paper-based leave requests and timesheets in Vietnamese SMEs", "No integrated recruitment → onboarding → performance pipeline", "Compliance with Vietnam's complex labor code (Luật Lao động)"],
+          preferred_channels: ["HR community groups (Vietnam HR Forum on Facebook)", "Base.vn HR webinars", "SHRM Vietnam chapter events"],
+          vietnam_behavior: "Vietnamese HR directors need labor law-compliant templates (Hợp đồng lao động, Social Insurance reporting) built natively into HRM — foreign tools lack these."
+        },
+        {
+          title: "IT Manager / System Admin",
+          department: "IT",
+          seniority: "Manager",
+          decision_role: "Gatekeeper",
+          kpis: ["System uptime", "Number of tool integrations supported", "Data migration success rate", "Support ticket resolution time"],
+          pain_points: ["Migrating data from legacy systems (Excel, on-prem HR)", "SSO integration with existing identity providers", "Ensuring data security and backup for customer data"],
+          preferred_channels: ["Base.vn developer documentation & API docs", "IT admin community groups", "Technical demo sessions"],
+          vietnam_behavior: "Vietnamese IT managers in mid-market companies are resource-constrained — they need a platform that's easy to deploy without dedicated DevOps."
+        }
+      ],
+      buying_triggers: [
+        { event: "Company growing past 50 employees and outgrowing manual processes", category: "growth", urgency: "critical", description: "The 50-200 employee range is where Vietnamese SMEs hit process chaos — manual leave tracking, email-based approvals, and spreadsheet project management break down.", vietnam_context: "Vietnam has 900,000+ registered enterprises — the vast majority are SMEs crossing this threshold for the first time." },
+        { event: "New CEO / COO joining and mandating digital transformation", category: "operational", urgency: "high", description: "Leadership change often triggers tool consolidation projects.", vietnam_context: "Vietnamese companies undergoing professionalization (pre-IPO or post-PE investment) commonly bring in new ops leadership who demand modern tools." },
+        { event: "Lark / Bytedance pushing free workplace tools aggressively", category: "competitive", urgency: "high", description: "Lark's free tier forces Base.vn to differentiate on Vietnamese localization and deeper workflow automation.", vietnam_context: "Lark has been aggressively targeting Vietnamese SMEs since 2024 with free unlimited plans — Base.vn must prove value beyond 'free'." },
+        { event: "Vietnam labor law update requiring digital compliance", category: "regulatory", urgency: "medium", description: "Periodic updates to Vietnam's Labor Code and Social Insurance rules create demand for compliant HR software.", vietnam_context: "Base.vn auto-updates Labor Code calculation templates — a feature no foreign SaaS tool provides." }
+      ],
+      pain_points_detailed: [
+        { title: "Competing against free tools (Lark, Google Workspace)", severity: "critical", description: "Vietnamese SMEs default to free tools — Base.vn must prove that the productivity gain justifies $3-8/user/month.", current_workaround: "Offering extended free trials (60 days) and freemium tier for <10 users", cost_of_inaction: "80% of pipeline stalls at pricing objection stage" },
+        { title: "Enterprise sales cycle lengthening (60-120 days)", severity: "high", description: "Mid-market Vietnamese companies involve 3-5 stakeholders in SaaS buying decisions, extending sales cycles.", current_workaround: "Executive champion programs and top-down selling via CEO networks", cost_of_inaction: "High CAC ($300+/customer) eroding unit economics" },
+        { title: "Feature breadth vs. depth tradeoff", severity: "medium", description: "Maintaining 40+ apps risks 'jack of all trades, master of none' perception vs. vertical-specific tools.", current_workaround: "Identifying and doubling-down on 5 core modules (HRM, Workflow, CRM, Project, Communication)", cost_of_inaction: "Power users churn to specialized tools (Jira, HubSpot, BambooHR)" }
+      ],
+      executive_summary: "Base.vn's ideal customer is a Vietnamese SME (50-2,000 employees) that has outgrown manual processes and fragmented free tools, and needs a single unified platform for HRM, project management, CRM, and internal communication. The primary buyer is the CEO/COO making a company-wide tooling decision, championed by the HR Director who needs labor law-compliant automation.",
+      positioning_statement: "For Vietnamese businesses that are tired of juggling 8+ disconnected tools, Base.vn is the only all-in-one Vietnamese-built workplace platform that combines HRM, CRM, project management, and workflow automation — unlike Lark or Google Workspace, Base.vn is deeply localized for Vietnamese labor law, tax compliance, and business culture.",
+      recommended_channels: ["LinkedIn CEO/COO ABM campaigns", "Vietnam startup ecosystem events (VIISA, Echelon Vietnam)", "HR community groups on Facebook", "Free trial → PLG (product-led growth) conversion funnel", "Partner channel with accounting firms and business consultants"],
+      vietnam_market_notes: [
+        "Base.vn is often called the 'Vietnamese Notion + BambooHR' — but its strength is the integrated suite, not any single module",
+        "Vietnamese labor law compliance (BHXH, BHYT, BHTN reports) is a critical differentiator vs. foreign SaaS platforms",
+        "The CEO-led buying pattern means top-down sales is more effective than bottom-up PLG for mid-market deals",
+        "Base.vn's 8,000+ customer base creates a network effect — Vietnamese companies trust tools their peers use"
+      ]
+    },
+    gtm_playbook: {
+      executive_summary: "Base.vn's GTM strategy is a classic PLG-to-enterprise expansion play — acquire SMEs through freemium self-serve, then upsell to mid-market and enterprise through top-down sales. The 18-month playbook addresses three critical challenges: (1) Defending against Lark's aggressive free-tier push by doubling down on Vietnamese localization and labor law compliance, (2) Reducing CAC through product-led growth and viral referral loops, and (3) International expansion starting with Thailand. Revenue target: $30M ARR by 2027 (2x current).",
+      target_audience: "Vietnamese SME owners and COOs (50–2,000 employees) seeking to consolidate 8+ disconnected tools into one platform, HR Directors needing Vietnam labor law-compliant HRM automation, and IT managers at mid-market companies seeking easy-to-deploy workplace platforms without dedicated DevOps.",
+      phases: [
+        { phase_number: 1, title: "PLG Engine & Freemium Optimization", duration: "Weeks 1–6", key_actions: ["Launch Base.vn Free tier — up to 10 users with core HRM + Project + Communication modules", "Build viral referral loop: existing users invite colleagues → company hits 10-user limit → conversion to paid", "Implement product-qualified lead (PQL) scoring — auto-flag accounts with >5 active users for sales outreach", "Launch 'Base Academy' — free Vietnamese-language training content and certifications for HR professionals"] },
+        { phase_number: 2, title: "Mid-Market Sales Machine", duration: "Weeks 7–14", key_actions: ["Build outbound SDR team (10 reps) targeting companies with 200–2,000 employees via LinkedIn and CafeF data", "Launch 'Base Enterprise' tier — SSO, advanced analytics, API access, dedicated CSM at $8/user/month", "Create industry-specific templates: Manufacturing (shift scheduling), F&B (multi-location), Retail (inventory + CRM)", "Run CEO roundtable events in Hanoi and HCMC — 'Digital Operations for Vietnamese Business Leaders'"] },
+        { phase_number: 3, title: "Lark Defense & Differentiation", duration: "Weeks 15–22", key_actions: ["Launch 'Why Base.vn > Lark' competitive battle card for sales team with feature-by-feature comparison", "Release Base Compliance Module — auto-generate BHXH/BHYT/BHTN reports, labor contract templates per Vietnamese law", "Build deep integrations with Vietnam-specific tools: MISA accounting, e-invoicing (meInvoice), VNPay payments", "Commission independent analyst report: 'Vietnamese Workplace Platform Market 2026' by IDC or Forrester"] },
+        { phase_number: 4, title: "International Expansion & Scale", duration: "Weeks 23–36", key_actions: ["Launch Base.vn Thailand with localized Thai-language UI and Thai labor law templates", "Achieve $30M ARR milestone — prepare Series C fundraise at $150M+ valuation", "Build Base.vn Marketplace — third-party app integrations (accounting, payroll, e-signature)", "Explore strategic partnerships with Salesforce or Microsoft for co-selling in SEA mid-market"] }
+      ],
+      growth_channels: ["Product-led growth (PLG) via freemium self-serve and viral referral loops", "LinkedIn ABM campaigns targeting CEO/COO titles at Vietnamese SMEs (200-2K employees)", "HR community groups on Facebook and HR professional events", "CEO/COO roundtable events in Hanoi and HCMC", "Partner channel via accounting firms, business consultants, and payroll providers", "Content marketing: Vietnamese-language blog, SEO for 'phần mềm quản lý doanh nghiệp'"],
+      kpis: ["Annual Recurring Revenue (ARR): $30M by 2027", "Freemium-to-paid conversion rate: >8%", "Net Revenue Retention (NRR): >120%", "Customer Acquisition Cost (CAC): <$200 for SME, <$1,500 for mid-market", "Monthly active companies: 15K+ (from 8K)", "Thailand market: 500 paying customers in Year 1"],
+      vietnam_context: "Vietnam has 900,000+ registered enterprises, with the vast majority being SMEs that are crossing the digitalization threshold for the first time. Base.vn's key defensibility is deep Vietnamese labor law compliance (Bộ luật Lao động 2019, Social Insurance reporting) that no foreign tool — including Lark, Notion, or Google Workspace — provides. The CEO-led buying pattern in Vietnamese SMEs means top-down sales via business leader networks is more effective than bottom-up PLG for deals >$500/month."
+    },
+    icp_profile: {
+      executive_summary: "Base.vn's ideal customer is a Vietnamese SME or mid-market company (50–2,000 employees) that has outgrown Excel and basic tools for managing HR, projects, and internal communication, and needs a single Vietnamese-language platform that handles everything from employee onboarding to social insurance reporting — with native compliance for Vietnamese labor law that Lark, Notion, and Google Workspace cannot provide.",
+      firmographics: {
+        company_size_range: "50 – 2,000 employees",
+        revenue_range: "$500K – $20M",
+        industries: ["Professional Services", "Retail / F&B Chains", "Manufacturing", "Real Estate / Construction", "Education / Training", "Healthcare / Clinics"],
+        geographic_focus: ["Vietnam — Hanoi, HCMC, Da Nang, and emerging Tier-2 cities"],
+        company_maturity: "Growth-stage to Mid-stage",
+        ownership_structure: "Private Vietnamese-owned",
+        typical_tech_stack: ["Google Workspace / Microsoft 365", "Excel for HR tracking", "Zalo for internal communication", "MISA for accounting", "Paper-based processes"],
+        regulatory_pressure: "Medium — Vietnamese Labor Code (Bộ luật Lao động 2019), Social Insurance (BHXH), Health Insurance (BHYT), Unemployment Insurance (BHTN) reporting"
+      },
+      buyer_personas: [
+        {
+          id: "base-p1",
+          title: "CEO / Founder — Vietnamese SME",
+          department: "Executive / General Management",
+          seniority: "C-Suite / Founder",
+          age_range: "32–55",
+          key_kpis: ["Revenue per employee", "Employee retention rate", "Operational efficiency (overhead cost ratio)", "Company growth rate (%)"],
+          goals: ["Get real-time visibility into all operations without asking 5 different managers for reports", "Reduce operational chaos as company scales from 50 to 200 employees", "Ensure Vietnamese labor law compliance without hiring a dedicated HR compliance team"],
+          frustrations: ["Company information is scattered across 8 different tools and 50 Excel files", "Cannot see real-time headcount, leave balances, or project status without manual reports", "Lark and Notion look great but don't handle Vietnamese social insurance reporting"],
+          preferred_channels: ["CEO/Founder peer networking events in Hanoi and HCMC", "LinkedIn thought leadership from Vietnamese SaaS founders", "Referrals from other CEOs in the same industry vertical", "Vietnamese business media (CafeBiz, TheLeader, Forbes Vietnam)"],
+          vietnam_behavior: "Vietnamese SME CEOs make 90% of software purchasing decisions personally — they don't delegate to IT. The decision is made in 1–2 meetings. A demo that shows their specific company's pain (leave tracking chaos, BHXH reporting errors) closes faster than any feature comparison.",
+          decision_role: "Decision Maker",
+          quote_snippet: "I was running a 150-person company with Zalo groups and Excel files. I couldn't tell you how many sick days we had last quarter. Base.vn gave me a dashboard for everything in my company — I saw the ROI in the first week."
+        },
+        {
+          id: "base-p2",
+          title: "HR Director / Trưởng phòng Nhân sự",
+          department: "Human Resources",
+          seniority: "Director / Manager",
+          age_range: "28–45",
+          key_kpis: ["Time-to-hire", "Employee turnover rate", "BHXH/BHYT/BHTN reporting accuracy", "Training completion rate"],
+          goals: ["Automate BHXH/BHYT/BHTN monthly reporting instead of manual Excel calculations", "Digitize employee onboarding from 3-day paper process to same-day digital flow", "Build a structured recruitment pipeline instead of tracking candidates in email threads"],
+          frustrations: ["BHXH reporting requires manually calculating social insurance contributions for every employee — one error means a government audit", "Employee records are in a mix of paper files and Excel — finding someone's contract takes 20 minutes", "Lark has great project management but zero understanding of Vietnamese HR requirements"],
+          preferred_channels: ["HR community groups on Facebook (Cộng đồng HR Việt Nam — 100K+ members)", "Vietnamese HR professional conferences and workshops", "Referrals from HR peers at similar-sized companies", "Base.vn webinars on Vietnamese labor law compliance"],
+          vietnam_behavior: "Vietnamese HR Directors are the strongest internal champions for Base.vn because BHXH compliance is their biggest personal risk — errors can result in government penalties that the HR Director is personally accountable for. They will push the CEO to buy Base.vn to protect themselves.",
+          decision_role: "Champion",
+          quote_snippet: "Every month I spent 2 days manually calculating BHXH for 200 employees in Excel. One formula error and we'd get audited. Base HRM auto-generates the reports — I haven't had a single error in 12 months."
+        },
+        {
+          id: "base-p3",
+          title: "COO / Operations Manager",
+          department: "Operations",
+          seniority: "Director / VP",
+          age_range: "30–50",
+          key_kpis: ["Project on-time delivery rate", "Employee productivity metrics", "Process automation rate", "Internal communication efficiency"],
+          goals: ["Replace Zalo groups with structured project and task management", "Build repeatable business processes instead of ad-hoc Zalo messages", "Get cross-department visibility into project status and bottlenecks"],
+          frustrations: ["Important decisions get buried in Zalo group chats with 200+ unread messages", "No way to track project progress — learning about delays only when deadlines pass", "New employees take 2–3 months to understand company processes because nothing is documented"],
+          preferred_channels: ["COO/Operations peer networks and roundtables", "Business process optimization workshops", "Vietnamese management and operations blogs", "LinkedIn content on scaling Vietnamese companies"],
+          vietnam_behavior: "Vietnamese COOs at growing companies are overwhelmed by the transition from 'everyone knows everyone' (50 people) to 'we need systems' (100+ people). The pain of Zalo-based project management becomes acute at 80–100 employees — this is Base.vn's optimal insertion point.",
+          decision_role: "Influencer",
+          quote_snippet: "We had 47 Zalo groups and I was in all of them. I was spending 3 hours a day just reading messages to understand what's happening in my own company. Base.vn Workflow and Base Project replaced all of that."
+        }
+      ],
+      buying_triggers: [
+        {
+          id: "base-t1",
+          trigger: "Company crosses 50-employee threshold",
+          category: "growth",
+          urgency_level: "critical",
+          description: "Vietnamese companies growing past 50 employees hit a 'complexity wall' where Excel-based HR, Zalo-based communication, and paper-based processes break down — creating urgent demand for systematized enterprise management.",
+          vietnam_context: "Vietnamese Labor Code mandates that companies with 50+ employees must establish internal labor regulations (Nội quy lao động) registered with district labor authorities — triggering formal HR documentation requirements that Excel cannot handle."
+        },
+        {
+          id: "base-t2",
+          trigger: "BHXH compliance audit notification",
+          category: "regulatory",
+          urgency_level: "critical",
+          description: "Vietnamese Social Insurance Agency (VSS) conducts random audits of employer BHXH contributions — companies with manual calculations face high error rates that result in penalties, back-payments, and reputational damage.",
+          vietnam_context: "VSS penalties for BHXH under-reporting can reach 18% annual interest on arrears plus administrative fines. Vietnamese HR Directors live in fear of these audits — Base HRM's auto-calculation is their insurance policy."
+        },
+        {
+          id: "base-t3",
+          trigger: "Lark/Notion adoption failure",
+          category: "competitive",
+          urgency_level: "high",
+          description: "Vietnamese SMEs that tried Lark or Notion discover these tools lack Vietnamese HR compliance features, Vietnamese-language customer support, and Vietnam-specific workflow templates — leading to frustrated abandonment and search for local alternatives.",
+          vietnam_context: "Lark (ByteDance) is aggressively expanding in Vietnam with free plans, but Vietnamese companies consistently report that Lark's HR module doesn't support BHXH calculations, Vietnamese labor contract templates, or local payroll structures."
+        },
+        {
+          id: "base-t4",
+          trigger: "CEO experiences operational chaos during rapid growth",
+          category: "operational",
+          urgency_level: "high",
+          description: "Vietnamese CEOs scaling from startup (20–50 people) to SME (100–500 people) experience a 'management visibility crisis' — they can no longer personally oversee everything and need systems to maintain control and quality.",
+          vietnam_context: "Vietnamese business culture is highly centralized — the CEO/Founder makes most decisions personally. At 100+ employees, this becomes impossible without digital tools that give CEOs a real-time dashboard of their entire organization."
+        }
+      ],
+      pain_points: [
+        {
+          id: "base-pp1",
+          title: "Vietnamese labor law compliance nightmare",
+          severity: "critical",
+          description: "Calculating BHXH (social insurance), BHYT (health insurance), and BHTN (unemployment insurance) contributions for every employee involves complex formulas based on salary grades, regional minimum wages, and government-mandated contribution rates that change annually.",
+          current_workaround: "HR staff manually calculates contributions in Excel using formulas they built themselves — one cell reference error causes systemic under/over-reporting across all employees.",
+          cost_of_inaction: "BHXH penalties averaging 50–200M VND ($2,000–$8,000) per audit finding, plus 2–3 months of staff time to resolve disputes with VSS authorities.",
+          vietnam_specific: true
+        },
+        {
+          id: "base-pp2",
+          title: "Information scattered across 10+ disconnected tools",
+          severity: "high",
+          description: "Typical Vietnamese SME uses Zalo for communication, Excel for HR, Google Drive for documents, Email for external, MISA for accounting — with no single source of truth for any business process.",
+          current_workaround: "Employees maintain their own personal filing systems and rely on Zalo message search to find critical business information — organizational knowledge lives in individuals' heads.",
+          cost_of_inaction: "15–20% productivity loss from context-switching between tools, information search time, and knowledge loss when employees leave the company.",
+          vietnam_specific: true
+        },
+        {
+          id: "base-pp3",
+          title: "No foreign tool supports Vietnamese business processes",
+          severity: "high",
+          description: "International tools like Lark, Notion, Monday.com, and BambooHR do not support Vietnamese labor contracts, BHXH reporting, Vietnamese calendar holidays, or Vietnamese-language tax document generation.",
+          current_workaround: "Using international tools for collaboration but maintaining parallel Excel-based systems for all Vietnam-specific compliance requirements — doubling administrative workload.",
+          cost_of_inaction: "2x administrative overhead from maintaining dual systems, plus ongoing compliance risk from manual Vietnamese-specific processes.",
+          vietnam_specific: true
+        },
+        {
+          id: "base-pp4",
+          title: "Employee onboarding and offboarding chaos",
+          severity: "medium",
+          description: "Vietnamese SMEs with 50–500 employees hire monthly but lack structured onboarding processes — new employees wait 1–3 days for email accounts, equipment, and system access while paperwork is processed manually.",
+          current_workaround: "HR sends a Zalo message to IT, Admin, and the hiring manager with a checklist of setup tasks — items get missed and new employees have a poor first-day experience.",
+          cost_of_inaction: "3–5 day productivity loss per new hire during onboarding, plus increased early turnover (within 90 days) due to poor onboarding experience.",
+          vietnam_specific: false
+        }
+      ],
+      positioning_statement: "Base.vn is the only all-in-one Vietnamese enterprise platform that combines HRM, CRM, project management, and workflow automation — with native Vietnamese labor law compliance (BHXH/BHYT/BHTN auto-calculation, Vietnamese labor contract templates, government reporting) that Lark, Notion, and Google Workspace cannot match. Built for Vietnamese companies, in Vietnamese, with Vietnamese support.",
+      recommended_channels: ["CEO/Founder peer networking events and roundtables in Hanoi and HCMC", "HR community groups on Facebook (Cộng đồng HR Việt Nam — 100K+ members)", "Product-led growth via freemium plan with viral team invitation loops", "Content marketing: Vietnamese-language SEO for 'phần mềm quản lý nhân sự' and 'phần mềm quản lý doanh nghiệp'", "Partner channel via MISA accounting firms and Vietnamese business consultants", "Base.vn Academy — free online courses on Vietnamese HR compliance and digital transformation"],
+      vietnam_market_notes: ["Vietnam has 900,000+ registered enterprises — 97% are SMEs with <200 employees. Only 15% have adopted any enterprise management software beyond Excel and Zalo.", "Vietnamese Labor Code 2019 (Bộ luật Lao động) introduced new requirements for internal labor regulations, mandatory training hours, and employee data privacy — creating compliance complexity that drives Base.vn adoption.", "Lark's aggressive free-plan strategy in Vietnam has raised awareness of workspace tools but consistently fails on Vietnamese HR compliance — creating educated prospects who eventually switch to Base.vn.", "The CEO-led buying pattern means Base.vn's most effective sales motion is CEO-to-CEO referrals through Vietnamese business leader networks like YPO Vietnam, Vietnam Young Entrepreneurs Association, and local Chambers of Commerce."]
+    },
+    market_share_percentage: 5,
+    yoy_growth: "+60%",
+    csat_score: 90,
+    quadrant_position: "Visionary"
+  },
+  {
+    name: "MISA JSC",
+    intro: "Vietnam's largest accounting and ERP software company, serving 250,000+ businesses and thousands of government entities with MISA AMIS platform.",
+    address: "Phạm Hùng, Hà Nội, Việt Nam",
+    year: 1994,
+    size: "> 3.000 người",
+    headcount: 3200,
+    total_funding: "Bootstrapped / Undisclosed",
+    products: "MISA AMIS (ERP/CRM), Accounting Software, e-Invoice (meInvoice), HR Management, MISA CukCuk (F&B POS)",
+    customers: "250.000+ doanh nghiệp, Cơ quan nhà nước, Trường học, Bệnh viện.",
+    industry: "Technology",
+    sub_industry: "SaaS / Enterprise Software",
+    website: "misa.vn",
+    revenue: "$80M",
+    revenue_range: "$60M - $100M",
+    employee_range: "3000-4000",
+    growth: 28.5,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/misa.vn",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from IDC Vietnam software market report and company disclosures",
+    dataTier: "premium",
+    dataScore: 98,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "idc_report"],
+    tech_stack: [".NET", "C#", "SQL Server", "Azure", "React", "Flutter", "Power BI"],
+    description: "MISA JSC is Vietnam's dominant accounting and enterprise resource planning software maker, with a 30-year track record serving 250,000+ businesses and government agencies. Its cloud-first AMIS platform bundles ERP, CRM, e-invoicing, and HR into a deeply localized suite that is the de facto standard for Vietnamese SMEs.",
+    key_pain_points: [
+      "Transition from perpetual licenses to cloud subscriptions impacting near-term revenue",
+      "Competition from global players (SAP, Oracle) in enterprise segment",
+      "Legacy on-premise customers resistant to cloud migration",
+      "Need to build modern API ecosystem for third-party integrations",
+      "Expanding beyond accounting into full ERP against Base.vn and Lark"
+    ],
+    target_audience: [
+      "Vietnamese SME CFOs and accountants",
+      "Government finance departments and public-sector entities",
+      "F&B chains adopting CukCuk POS system",
+      "Mid-market companies upgrading from Excel to cloud ERP",
+      "Schools and hospitals managing budgets and compliance"
+    ],
+    recent_events: [
+      "MISA AMIS surpassed 250,000 enterprise customers (Q4 2025)",
+      "Launched MISA AI Accountant — auto-categorization of bank transactions",
+      "Strategic partnership with Vietnam Tax Authority for mandatory e-invoice compliance",
+      "Opened development center in Da Nang with 500-person capacity",
+      "Released AMIS Platform 4.0 with open API marketplace"
+    ]
+  },
+  {
+    name: "Sky Mavis",
+    intro: "Vietnamese gaming studio behind Axie Infinity — the world's most iconic NFT game — and the Ronin blockchain, a dedicated EVM sidechain for gaming.",
+    address: "Q3, TP.HCM, Việt Nam",
+    year: 2018,
+    size: "200 - 400 người",
+    headcount: 300,
+    total_funding: "$311M (Series C — a16z, Accel, Paradigm, Samsung)",
+    products: "Axie Infinity (NFT Game), Ronin Blockchain, Mavis Hub, Katana DEX, Axie Homeland, Ronin Wallet",
+    customers: "Millions of global gamers, NFT collectors, DeFi users, Indie game studios building on Ronin.",
+    industry: "Technology",
+    sub_industry: "Gaming & Blockchain",
+    website: "skymavis.com",
+    revenue: "$120M",
+    revenue_range: "$80M - $150M",
+    employee_range: "200-400",
+    growth: 45.2,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/skymavis.com",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from on-chain Ronin treasury data and TechinAsia reporting",
+    dataTier: "premium",
+    dataScore: 98,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "dappradar", "crunchbase"],
+    tech_stack: ["Solidity", "Rust", "Go", "React", "Unity", "AWS", "The Graph"],
+    description: "Sky Mavis is the Vietnamese studio that created Axie Infinity — the play-to-earn game that peaked at 2.7M daily users and pioneered the Web3 gaming model. Now focused on the Ronin blockchain ecosystem, Sky Mavis is building an on-chain gaming platform hosting 20+ third-party titles.",
+    key_pain_points: [
+      "Recovering player trust after $625M Ronin bridge hack (2022) — rebuilding security",
+      "Declining Axie Infinity revenue as play-to-earn hype normalizes",
+      "Regulatory uncertainty around crypto gaming in key markets (US, SEA)",
+      "Attracting quality third-party game studios to build on Ronin chain",
+      "Balancing token economics to prevent inflation and sustain player engagement"
+    ],
+    target_audience: [
+      "Mobile gamers in Philippines, Brazil, and SEA play-to-earn markets",
+      "Indie game studios seeking blockchain-native distribution",
+      "Crypto-native users and NFT traders",
+      "Institutional investors in Web3 gaming infrastructure",
+      "Content creators and esports organizations"
+    ],
+    recent_events: [
+      "Ronin chain surpassed 2M daily active addresses (Jan 2026)",
+      "Launched Axie Infinity: Homeland — land-based strategy game reimagining the franchise",
+      "Ronin DEX (Katana V3) integrated concentrated liquidity pools",
+      "Raised $150M Series C at $3B valuation led by a16z and Accel",
+      "Partnered with Samsung Galaxy Store for pre-installed Ronin Wallet"
+    ]
+  },
+  {
+    name: "KiotViet",
+    intro: "Vietnam's #1 cloud-based POS and retail management platform, serving 150,000+ stores across F&B, pharmacy, fashion, and grocery.",
+    address: "Cầu Giấy, Hà Nội, Việt Nam",
+    year: 2014,
+    size: "> 800 người",
+    headcount: 1000,
+    total_funding: "$60M+ (KKR — Series C)",
+    products: "POS System, Inventory Management, E-commerce Integration, KiotViet Analytics, Loyalty Program, KiotViet Delivery",
+    customers: "150.000+ cửa hàng, Nhà thuốc, F&B, Thời trang, Tạp hóa.",
+    industry: "Technology",
+    sub_industry: "SaaS / Retail Tech",
+    website: "kiotviet.vn",
+    revenue: "$25M",
+    revenue_range: "$20M - $35M",
+    employee_range: "800-1200",
+    growth: 55.8,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/kiotviet.vn",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from KKR investment round disclosures and TechinAsia",
+    dataTier: "premium",
+    dataScore: 99,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "crunchbase"],
+    tech_stack: ["React", ".NET Core", "SQL Server", "Azure", "Redis", "RabbitMQ", "Flutter"],
+    description: "KiotViet is Vietnam's market-leading cloud POS and retail operations platform used by 150,000+ SME stores, making it the largest vertical SaaS company in the country by merchant count. Backed by KKR, it integrates inventory, sales, e-commerce, and delivery into one seamless interface for shopkeepers.",
+    key_pain_points: [
+      "Expanding ARPU beyond basic POS subscription in price-sensitive SME segment",
+      "Competition from Sapo, Haravan, and global players like Shopify POS",
+      "High churn among micro-merchants with seasonal businesses",
+      "Building reliable last-mile delivery network (KiotViet Delivery)",
+      "Data quality challenges with SME merchants inputting inconsistent product data"
+    ],
+    target_audience: [
+      "Vietnamese small retail store owners (1-10 outlets)",
+      "Pharmacy chains requiring compliance-grade inventory tracking",
+      "F&B outlets needing integrated POS + kitchen management",
+      "Fashion retailers managing multi-channel (offline + Shopee/Lazada)",
+      "Grocery and convenience store chains"
+    ],
+    recent_events: [
+      "Surpassed 150,000 active merchant locations (Q1 2026)",
+      "Launched KiotViet Analytics Pro — AI-powered demand forecasting for retailers",
+      "KKR invested additional $25M in Series C follow-on",
+      "Integrated with TikTok Shop for unified multi-channel selling",
+      "Released hardware bundle — KiotViet SmartPOS terminal with built-in printer"
+    ],
+    market_share_percentage: 12,
+    yoy_growth: "+56%",
+    csat_score: 87,
+    quadrant_position: "Challenger"
+  },
+  {
+    name: "Tiki",
+    intro: "Vietnam's premium e-commerce platform known for TikiNow 2-hour delivery, authentic products, and a growing fintech ecosystem.",
+    address: "Q1, TP.HCM, Việt Nam",
+    year: 2010,
+    size: "> 3.000 người",
+    headcount: 4000,
+    total_funding: "$400M+ (AIA, JD.com, STIC, Northstar)",
+    products: "E-commerce Platform, TikiNow (Logistics), TikiLive, Tiki Astra (NFT), Tiki Financial Services",
+    customers: "Người tiêu dùng Việt Nam, Brand partners (Apple, Samsung, Unilever), SME sellers.",
+    industry: "Technology",
+    sub_industry: "E-commerce & Platform",
+    website: "tiki.vn",
+    revenue: "$500M",
+    revenue_range: "$400M - $600M",
+    employee_range: "3000-5000",
+    growth: 45.8,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/tiki.vn",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from e-Conomy SEA 2025 report and company press releases",
+    dataTier: "premium",
+    dataScore: 99,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "dealstreetasia"],
+    tech_stack: ["Java", "Python", "React", "Kubernetes", "AWS", "Elasticsearch", "Apache Spark"],
+    description: "Tiki is one of Vietnam's top 3 e-commerce platforms, differentiated by its premium positioning, authenticated-goods guarantee, and industry-leading TikiNow same-day/2-hour delivery network. Backed by AIA and JD.com, it is pivoting toward a technology-first model with its own logistics and fintech stack.",
+    key_pain_points: [
+      "Profitability pressure — cash burn from logistics and promotions",
+      "Market share squeeze between Shopee (dominant) and Lazada (Alibaba-backed)",
+      "Seller acquisition cost rising as merchants list on multiple platforms",
+      "Need to scale TikiNow fulfillment beyond HCM/Hanoi to Tier-2 cities",
+      "Transition from marketplace GMV to high-margin advertising & fintech revenue"
+    ],
+    target_audience: [
+      "Vietnamese urban consumers (25-45) valuing authentic products",
+      "Brand partners seeking premium e-commerce channel",
+      "SME sellers wanting lower commission rates vs. Shopee",
+      "Tech-savvy shoppers expecting same-day delivery",
+      "Enterprise procurement teams for B2B supplies"
+    ],
+    recent_events: [
+      "Launched Tiki Business — B2B procurement platform for enterprises",
+      "TikiNow expanded to 15 provinces with 8-hour guaranteed delivery",
+      "Secured $200M strategic investment from Tiki's existing investors (Q2 2025)",
+      "Tiki AI Shopping Assistant launched — conversational product discovery",
+      "Partnered with Apple for Tiki as authorized online reseller in Vietnam"
+    ],
+    market_share_percentage: 15,
+    yoy_growth: "+46%",
+    csat_score: 83,
+    quadrant_position: "Challenger"
+  },
+  {
+    name: "Amanotes",
+    intro: "Vietnam's largest mobile game studio and the world's #1 music games publisher, with 2.5B+ cumulative downloads across 30+ titles.",
+    address: "Q3, TP.HCM, Việt Nam",
+    year: 2014,
+    size: "200 - 400 người",
+    headcount: 300,
+    total_funding: "Bootstrapped (profitable since founding)",
+    products: "Magic Tiles 3, Tiles Hop, JEEP, Beat Maker Go, Music Games Publishing, Amalink (Ad Mediation)",
+    customers: "2.5 tỷ+ downloads globally, Hyper-casual gamers, Music fans, Ad networks (AdMob, IronSource).",
+    industry: "Technology",
+    sub_industry: "Gaming & Entertainment Tech",
+    website: "amanotes.com",
+    revenue: "$100M",
+    revenue_range: "$80M - $120M",
+    employee_range: "200-400",
+    growth: 45.5,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/amanotes.com",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from App Annie / Data.ai top publisher rankings and SensorTower data",
+    dataTier: "premium",
+    dataScore: 98,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "data_ai", "sensortower"],
+    tech_stack: ["Unity", "C#", "Python", "Firebase", "BigQuery", "Appsflyer", "Docker"],
+    description: "Amanotes is a Vietnamese mobile game powerhouse and the undisputed global leader in music-based casual games, with 2.5 billion cumulative downloads making titles like Magic Tiles 3 and Tiles Hop household names. The company has built a proprietary ad-mediation engine (Amalink) that maximizes LTV across its 30+ title portfolio.",
+    key_pain_points: [
+      "Sustaining user growth as hyper-casual gaming market matures and CPIs rise",
+      "Apple ATT / privacy changes reducing ad targeting effectiveness and eCPMs",
+      "Music licensing costs increasing as label partnerships scale globally",
+      "Diversifying beyond ad-revenue model into IAP and subscriptions",
+      "Expanding into mid-core and narrative games beyond casual portfolio"
+    ],
+    target_audience: [
+      "Global mobile gamers aged 13-35 in music/casual segment",
+      "Ad networks and demand-side platforms buying premium inventory",
+      "Indie game developers using Amanotes' publishing pipeline",
+      "Music labels and artists seeking interactive music promotion",
+      "Brand advertisers targeting youth demographics via playable ads"
+    ],
+    recent_events: [
+      "Surpassed 2.5 billion cumulative downloads across portfolio",
+      "Launched Amalink 2.0 — AI-driven ad mediation platform offered to third-party publishers",
+      "Magic Tiles 3 crossed 500M lifetime downloads (Jan 2026)",
+      "Opened publishing office in São Paulo, Brazil targeting LATAM developers",
+      "Partnered with Universal Music Group for licensed interactive music experiences"
+    ],
+    market_share_percentage: 40,
+    yoy_growth: "+28%",
+    csat_score: 92,
+    quadrant_position: "Leader"
+  },
+  {
+    name: "CMC Corporation",
+    intro: "Vietnam's #2 IT conglomerate after FPT, specializing in cloud infrastructure, data centers, cybersecurity, and system integration for enterprise and government.",
+    address: "Cầu Giấy, Hà Nội, Việt Nam",
+    year: 1993,
+    size: "> 4.500 người",
+    headcount: 4500,
+    total_funding: "Public (HOSE: CMG) — Samsung SDS strategic investor",
+    products: "CMC Cloud, CMC Data Center, System Integration, Cybersecurity (CMC SOC), IT Outsourcing, CMC Telecom",
+    customers: "Ngân hàng, Chính phủ, Doanh nghiệp lớn, Telco, Samsung Vietnam.",
+    industry: "Technology",
+    sub_industry: "IT Services & Cloud Infrastructure",
+    website: "cmc.com.vn",
+    revenue: "$350M",
+    revenue_range: "$300M - $400M",
+    employee_range: "4000-5000",
+    growth: 18.5,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/cmc.com.vn",
+    ticker: "CMG",
+    exchange: "HOSE",
+    revenueVerified: true,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue from CMG 2025 audited financials via CafeF; HOSE-listed",
+    dataTier: "premium",
+    dataScore: 99,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "cafef", "hose_filings"],
+    tech_stack: ["VMware", "Kubernetes", "OpenStack", "Palo Alto", "AWS Partnership", "Oracle DB", "Ansible"],
+    description: "CMC Corporation is Vietnam's second-largest IT group, operating a diversified portfolio spanning CMC Cloud (sovereign cloud), Tier-III data centers, system integration, and IT outsourcing. Listed on HOSE as CMG, it holds strategic partnerships with Samsung SDS and AWS to deliver enterprise digital transformation.",
+    key_pain_points: [
+      "Competing with hyperscalers (AWS, Azure, GCP) for cloud market share",
+      "Capital-intensive data center expansion in a rising interest rate environment",
+      "Attracting top cybersecurity talent away from Viettel and FPT",
+      "Government procurement cycles creating lumpy quarterly revenue",
+      "Need to increase software/recurring revenue vs. hardware-heavy SI deals"
+    ],
+    target_audience: [
+      "Vietnamese enterprises requiring sovereign cloud solutions",
+      "Banks and financial institutions needing managed security (SOC)",
+      "Government agencies undergoing digital transformation",
+      "Samsung Vietnam and other FDI manufacturers needing IT infrastructure",
+      "Telecommunications operators modernizing OSS/BSS systems"
+    ],
+    recent_events: [
+      "CMC Cloud achieved Vietnamese sovereign cloud certification from MIC",
+      "Opened third Tier-III data center in Da Nang (Q3 2025)",
+      "Won $40M system integration contract for Vietnam Social Insurance digitization",
+      "Strategic partnership with AWS for joint managed cloud services",
+      "CMG share price hit all-time high after reporting 22% YoY profit growth"
+    ],
+    market_share_percentage: 10,
+    yoy_growth: "+22%",
+    csat_score: 84,
+    quadrant_position: "Challenger"
+  },
+  {
+    name: "Viettel Solutions",
+    intro: "The digital solutions arm of Viettel Group — Vietnam's state-owned telco giant — delivering Smart City, eGovernment, digital health, and AI/IoT platforms to 63 provinces.",
+    address: "Hà Nội, Việt Nam",
+    year: 2015,
+    size: "> 2.000 người",
+    headcount: 2500,
+    total_funding: "State-owned (Viettel Group — $15B+ parent revenue)",
+    products: "Smart City Platform, eGovernment, Digital Health (telehealth), Education Platform, AI/IoT, Viettel AI (NLP/Vision)",
+    customers: "63 tỉnh thành, Bộ ngành, Bệnh viện, Trường học, Công an.",
+    industry: "Technology",
+    sub_industry: "IT Services & GovTech",
+    website: "viettelsolutions.com.vn",
+    revenue: "$150M",
+    revenue_range: "$120M - $200M",
+    employee_range: "2000-3000",
+    growth: 45.5,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/viettelsolutions.com.vn",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from Viettel Group annual report segment data and MIC publications",
+    dataTier: "premium",
+    dataScore: 99,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "viettel_annual_report"],
+    tech_stack: ["Java", "Python", "TensorFlow", "Kubernetes", "PostgreSQL", "Apache Kafka", "Flutter"],
+    description: "Viettel Solutions is the technology solutions subsidiary of Viettel Group, Vietnam's largest corporation by revenue. It operates the nation's most extensive Smart City and eGovernment platform deployed across all 63 provinces, and is pioneering Vietnamese-language AI through Viettel AI's NLP and computer vision labs.",
+    key_pain_points: [
+      "Government contract dependency creating unpredictable cash flow cycles",
+      "Bureaucratic procurement processes limiting agility vs. private-sector competitors",
+      "Need to commercialize solutions for non-government enterprise market",
+      "Retaining top AI/ML talent who prefer private-sector or overseas opportunities",
+      "Scaling solutions for export to Viettel's 11 international telco markets"
+    ],
+    target_audience: [
+      "Provincial and municipal governments (63 provinces)",
+      "Ministry of Health — national telehealth infrastructure",
+      "Ministry of Education — digital learning platforms",
+      "Public security agencies requiring AI surveillance and analytics",
+      "International governments in Viettel's telco operating markets (Myanmar, Laos, Cambodia)"
+    ],
+    recent_events: [
+      "Deployed AI-powered traffic management in Hanoi reducing congestion 18%",
+      "Viettel AI released Vietnamese LLM (ViGPT) ranking #1 on VLUE benchmark",
+      "Won national eGovernment platform renewal contract (2026-2030 cycle)",
+      "Launched Viettel Health — AI diagnostic assistant across 200 district hospitals",
+      "Expanded Smart City platform to Vientiane, Laos and Phnom Penh, Cambodia"
+    ],
+    market_share_percentage: 22,
+    yoy_growth: "+18%",
+    csat_score: 80,
+    quadrant_position: "Leader"
+  },
+  {
+    name: "VNP Group",
+    intro: "Vietnam's leading digital media and entertainment group, operating VieON (streaming), digital publishing, event tech, and media buying across Vietnam's creative economy.",
+    address: "Q1, TP.HCM, Việt Nam",
+    year: 2003,
+    size: "> 1.500 người",
+    headcount: 1500,
+    total_funding: "Private — estimated $50M+ raised cumulatively",
+    products: "VieON (OTT streaming), Digital Advertising, Event Technology, Content Publishing, Media Buying Platform",
+    customers: "Vietnamese consumers (5M+ MAU on VieON), Brands & advertisers, Broadcast networks, Entertainment companies.",
+    industry: "Technology",
+    sub_industry: "Media & Entertainment Tech",
+    website: "vnpgroup.com",
+    revenue: "$60M",
+    revenue_range: "$50M - $80M",
+    employee_range: "1200-1800",
+    growth: 35.0,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/vnpgroup.com",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from industry reports and VieON subscriber metrics",
+    dataTier: "premium",
+    dataScore: 88,
+    lastEnriched: "2026-03-01T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai"],
+    tech_stack: ["React Native", "AWS", "Node.js", "Python", "Kafka", "CDN (Akamai)", "DRM (Widevine)"],
+    description: "VNP Group is one of Vietnam's top digital media conglomerates, best known for VieON — the country's fastest-growing OTT streaming platform competing with Netflix and FPT Play. The group also operates digital advertising, event technology, and content production arms.",
+    key_pain_points: [
+      "Competing for exclusive content rights against Netflix, FPT Play, and Galaxy Play",
+      "Subscriber monetization — low willingness to pay for premium content in Vietnam",
+      "Content piracy reducing the value of licensed Vietnamese drama and film",
+      "Ad-revenue pressure from Google/Facebook duopoly in Vietnam digital ads",
+      "Building original content studio capabilities at competitive cost"
+    ],
+    target_audience: [
+      "Vietnamese consumers aged 18-45 seeking local-language streaming content",
+      "Brand advertisers targeting connected TV and OTT inventory",
+      "Vietnamese production studios and filmmakers seeking distribution",
+      "Telco partners (VinaPhone, MobiFone) bundling OTT with data plans",
+      "Event organizers needing digital ticketing and live-streaming technology"
+    ],
+    recent_events: [
+      "VieON surpassed 5 million monthly active users (Q4 2025)",
+      "Secured exclusive streaming rights for V-League football matches (2026 season)",
+      "Launched VieON Originals — 10 original Vietnamese drama series in production",
+      "Partnership with VinaPhone for bundled 4G+VieON Premium plans",
+      "Expanded ad-tech platform with programmatic Connected TV (CTV) advertising"
+    ],
+    market_share_percentage: 10,
+    yoy_growth: "+35%",
+    csat_score: 78,
+    quadrant_position: "Niche Player"
+  },
+  {
+    name: "KMS Technology",
+    intro: "Top-tier Vietnamese software engineering firm specializing in product development for US SaaS companies, with deep healthcare and QA automation expertise.",
+    address: "Q1, TP.HCM, Việt Nam",
+    year: 2009,
+    size: "> 2.000 người",
+    headcount: 2200,
+    total_funding: "Undisclosed (private, profitable)",
+    products: "Product Engineering, QA/Testing (KMS Solutions), Healthcare IT (KMS Healthcare), Cloud Migration, AI/ML Development",
+    customers: "US SaaS startups, Healthcare companies, Fortune 500 tech firms, Private equity portfolio companies.",
+    industry: "Technology",
+    sub_industry: "IT Services & Product Engineering",
+    website: "kms-technology.com",
+    revenue: "$80M",
+    revenue_range: "$60M - $100M",
+    employee_range: "2000-2500",
+    growth: 32.5,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/kms-technology.com",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from LinkedIn headcount data and TechinAsia profiles",
+    dataTier: "premium",
+    dataScore: 98,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "linkedin"],
+    tech_stack: ["Java", "Python", "React", "AWS", "Azure", "Selenium", "Terraform"],
+    description: "KMS Technology is a leading Vietnamese software engineering firm with strong US market focus, providing end-to-end product engineering, QA automation, and cloud services to SaaS companies. Its specialized divisions — KMS Healthcare and KMS Solutions — serve high-compliance verticals with 2,000+ engineers across HCM, Hanoi, and Atlanta.",
+    key_pain_points: [
+      "US client budget cuts during tech downturn reducing project starts",
+      "Competition from Indian IT firms offering lower per-engineer rates",
+      "Talent retention as FPT Software and global firms poach senior engineers",
+      "Transitioning from time & materials billing to outcome-based pricing",
+      "Scaling healthcare compliance (HIPAA, SOC2) expertise across more teams"
+    ],
+    target_audience: [
+      "US SaaS startups needing offshore product engineering teams",
+      "Healthcare software companies requiring HIPAA-compliant development",
+      "Private equity firms optimizing portfolio company tech costs",
+      "Enterprise QA teams adopting AI-driven test automation",
+      "CIOs seeking cloud migration partners for AWS/Azure workloads"
+    ],
+    recent_events: [
+      "Opened third delivery center in Da Nang (Q4 2025)",
+      "KMS Healthcare won contract with a top-10 US hospital network",
+      "Launched KMS AI Lab — internal R&D for LLM-assisted code review",
+      "Achieved AWS Advanced Consulting Partner status",
+      "Named in Clutch Top 100 Global Software Engineering Companies 2025"
+    ]
+  },
+  {
+    name: "Got It",
+    intro: "Vietnamese-founded AI startup (HQ in Silicon Valley) building enterprise AI assistants and knowledge management platforms powered by LLMs.",
+    address: "Q1, TP.HCM & San Francisco, USA",
+    year: 2012,
+    size: "200 - 400 người",
+    headcount: 300,
+    total_funding: "$30M+ (Citadel Ventures — Series B 2025)",
+    products: "Got It AI (Enterprise AI Assistants), TruthChecker (Hallucination Detection), Knowledge Management, Conversational AI",
+    customers: "US enterprise clients, Customer support teams, EdTech platforms, SaaS companies.",
+    industry: "Technology",
+    sub_industry: "AI & Enterprise SaaS",
+    website: "got-it.ai",
+    revenue: "$15M",
+    revenue_range: "$10M - $25M",
+    employee_range: "200-400",
+    growth: 85.0,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/got-it.ai",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from Crunchbase funding data and company interviews in TechinAsia",
+    dataTier: "premium",
+    dataScore: 98,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "crunchbase"],
+    tech_stack: ["Python", "PyTorch", "LangChain", "React", "GCP", "Kubernetes", "Pinecone"],
+    description: "Got It is a Vietnamese-founded AI company headquartered in Silicon Valley, building enterprise AI assistants and the pioneering TruthChecker hallucination-detection platform for LLM outputs. With $30M+ in funding and 200+ engineers between SF and HCM City, it bridges Vietnam's deep engineering talent with US enterprise AI demand.",
+    key_pain_points: [
+      "Competing against well-funded US AI startups (Glean, Cohere) for enterprise deals",
+      "Proving ROI of AI assistants to skeptical enterprise procurement teams",
+      "Managing dual-HQ complexity between Silicon Valley and Ho Chi Minh City",
+      "Keeping pace with rapid LLM model evolution (GPT-5, Claude, Gemini)",
+      "Scaling enterprise sales team in the US from engineering-heavy org"
+    ],
+    target_audience: [
+      "Enterprise CIOs / Chief AI Officers evaluating AI copilot solutions",
+      "Customer support leaders seeking AI deflection and self-service",
+      "SaaS product teams integrating AI-powered search and Q&A",
+      "Compliance and legal teams needing hallucination-free AI outputs",
+      "EdTech platforms augmenting tutoring with AI assistants"
+    ],
+    recent_events: [
+      "Launched TruthChecker 2.0 — real-time hallucination scoring for enterprise LLM apps",
+      "Raised $20M Series B led by Citadel Ventures (Q3 2025)",
+      "Partnership with Salesforce AppExchange for CRM-integrated AI assistant",
+      "Reached 100+ enterprise customers for AI assistant platform",
+      "Named in CB Insights AI 100 list (2025)"
+    ]
+  },
+  {
+    name: "Teko Ventures",
+    intro: "Technology backbone of Vietnam's leading retailer Thế Giới Di Động (MWG), building e-commerce, logistics, and data platforms at massive scale.",
+    address: "Q7, TP.HCM, Việt Nam",
+    year: 2019,
+    size: "500 - 1.000 người",
+    headcount: 800,
+    total_funding: "Subsidiary of MWG (HOSE-listed, ~$3B market cap)",
+    products: "E-commerce Platform (Teko Commerce), Fulfillment Tech, Data Platform, Marketplace Engine, Price Engine",
+    customers: "Thế Giới Di Động, Điện Máy Xanh, Bách Hóa Xanh, An Khang Pharmacy, MWG ecosystem.",
+    industry: "Technology",
+    sub_industry: "E-commerce & Retail Tech",
+    website: "teko.vn",
+    revenue: "$30M",
+    revenue_range: "$20M - $40M",
+    employee_range: "500-1000",
+    growth: 75.0,
+    sentiment: "Positive",
+    logoUrl: "https://logo.clearbit.com/teko.vn",
+    exchange: "private",
+    revenueVerified: false,
+    revenueYear: 2025,
+    dataProvenanceNote: "Revenue estimated from MWG annual report tech-segment breakout and TechinAsia",
+    dataTier: "premium",
+    dataScore: 98,
+    lastEnriched: "2026-02-28T08:00:00Z",
+    enrichmentSources: ["website", "google_news", "gemini_ai", "crunchbase"],
+    tech_stack: ["Go", "Python", "React", "Kubernetes", "GCP", "Apache Kafka", "ClickHouse"],
+    description: "Teko Ventures is the engineering powerhouse behind Vietnam's largest omnichannel retailer Thế Giới Di Động (MWG), building the e-commerce, fulfillment, and real-time data platforms that power $5B+ in annual retail GMV. Spun out as an independent venture, Teko is now licensing its retail-tech stack to other enterprises in Vietnam.",
+    key_pain_points: [
+      "Dependency on MWG Group as primary revenue source and customer",
+      "Attracting non-MWG enterprise customers for platform-as-a-service model",
+      "Competing with Shopify, Haravan, and Tiki for e-commerce tech contracts",
+      "Engineering talent war in Ho Chi Minh City's competitive tech market",
+      "Scaling logistics tech beyond MWG's own fulfillment network"
+    ],
+    target_audience: [
+      "Large Vietnamese retailers seeking custom e-commerce technology",
+      "FMCG brands needing direct-to-consumer platform capabilities",
+      "Omnichannel retail chains modernizing order management systems",
+      "Logistics companies requiring warehouse management and routing tech",
+      "MWG ecosystem brands (Điện Máy Xanh, Bách Hóa Xanh, An Khang)"
+    ],
+    recent_events: [
+      "Teko Commerce platform processed 120M+ orders for MWG ecosystem in 2025",
+      "Launched Teko Fulfillment-as-a-Service for external enterprise clients",
+      "Real-time pricing engine deployed across 5,000+ Bách Hóa Xanh stores",
+      "Secured first non-MWG enterprise contract with a top-3 Vietnamese conglomerate",
+      "Expanded engineering team by 40% — now 800+ engineers"
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LEGACY DATA — Original company profiles below
+  // ═══════════════════════════════════════════════════════════════════════════
+
   // ===== E-COMMERCE / RETAIL =====
   {
     "name": "Tiki",
@@ -93,7 +2151,12 @@ export const COMPANIES: CompanyProfile[] = [
     "revenue": "$4.8B",
     "growth": 18.5,
     "sentiment": "Positive",
-    "logoUrl": "https://logo.clearbit.com/thegioididong.com"
+    "logoUrl": "https://logo.clearbit.com/thegioididong.com",
+    "ticker": "MWG",
+    "exchange": "HOSE",
+    "revenueVerified": true,
+    "revenueYear": 2023,
+    "dataProvenanceNote": "Revenue from MWG 2023 audited annual report via CafeF"
   },
   {
     "name": "Vinhomes",
@@ -108,7 +2171,12 @@ export const COMPANIES: CompanyProfile[] = [
     "revenue": "$3.5B",
     "growth": 25.2,
     "sentiment": "Positive",
-    "logoUrl": "https://logo.clearbit.com/vinhomes.com.vn"
+    "logoUrl": "https://logo.clearbit.com/vinhomes.com.vn",
+    "ticker": "VHM",
+    "exchange": "HOSE",
+    "revenueVerified": true,
+    "revenueYear": 2023,
+    "dataProvenanceNote": "Revenue from VHM 2023 audited annual report"
   },
   {
     "name": "Masan Group",
@@ -123,7 +2191,12 @@ export const COMPANIES: CompanyProfile[] = [
     "revenue": "$1.2B",
     "growth": 15.8,
     "sentiment": "Positive",
-    "logoUrl": "https://logo.clearbit.com/masangroup.com"
+    "logoUrl": "https://logo.clearbit.com/masangroup.com",
+    "ticker": "MSN",
+    "exchange": "HOSE",
+    "revenueVerified": true,
+    "revenueYear": 2023,
+    "dataProvenanceNote": "Revenue from MSN 2023 consolidated financial statements"
   },
   {
     "name": "Vinamilk",
@@ -138,7 +2211,12 @@ export const COMPANIES: CompanyProfile[] = [
     "revenue": "$2.1B",
     "growth": 12.3,
     "sentiment": "Positive",
-    "logoUrl": "https://logo.clearbit.com/vinamilk.com.vn"
+    "logoUrl": "https://logo.clearbit.com/vinamilk.com.vn",
+    "ticker": "VNM",
+    "exchange": "HOSE",
+    "revenueVerified": true,
+    "revenueYear": 2023,
+    "dataProvenanceNote": "Revenue from VNM 2023 audited annual report"
   },
   {
     "name": "CentralRetail Vietnam",
@@ -168,7 +2246,12 @@ export const COMPANIES: CompanyProfile[] = [
     "revenue": "$1.1B",
     "growth": 16.8,
     "sentiment": "Positive",
-    "logoUrl": "https://logo.clearbit.com/pnj.com.vn"
+    "logoUrl": "https://logo.clearbit.com/pnj.com.vn",
+    "ticker": "PNJ",
+    "exchange": "HOSE",
+    "revenueVerified": true,
+    "revenueYear": 2023,
+    "dataProvenanceNote": "Revenue from PNJ 2023 audited annual report"
   },
 
   // ===== CÔNG NGHỆ VIỆT NAM =====
@@ -200,7 +2283,11 @@ export const COMPANIES: CompanyProfile[] = [
     "revenue": "$500M",
     "growth": 28.5,
     "sentiment": "Positive",
-    "logoUrl": "https://logo.clearbit.com/vng.com.vn"
+    "logoUrl": "https://logo.clearbit.com/vng.com.vn",
+    "ticker": "VNZ",
+    "exchange": "UPCoM",
+    "revenueVerified": true,
+    "revenueYear": 2023
   },
   {
     "name": "FPT Corporation",
@@ -215,7 +2302,12 @@ export const COMPANIES: CompanyProfile[] = [
     "revenue": "$2.2B",
     "growth": 22.8,
     "sentiment": "Positive",
-    "logoUrl": "https://logo.clearbit.com/fpt.com.vn"
+    "logoUrl": "https://logo.clearbit.com/fpt.com.vn",
+    "ticker": "FPT",
+    "exchange": "HOSE",
+    "revenueVerified": true,
+    "revenueYear": 2023,
+    "dataProvenanceNote": "Revenue from FPT 2023 audited annual report via CafeF"
   },
   {
     "name": "FPT Software",
@@ -406,11 +2498,21 @@ export const COMPANIES: CompanyProfile[] = [
     "products": "E-commerce Platform, POS, Omnichannel, HaraFunnel, Social Commerce",
     "customers": "50.000+ doanh nghiệp, SME bán hàng online, Thương hiệu lớn.",
     "industry": "Technology",
+    "sub_industry": "E-commerce SaaS",
     "website": "haravan.com",
     "revenue": "$20M",
     "growth": 65.2,
     "sentiment": "Positive",
-    "logoUrl": "https://logo.clearbit.com/haravan.com"
+    "logoUrl": "https://logo.clearbit.com/haravan.com",
+    "dataTier": "premium",
+    "dataScore": 92,
+    "headcount": 600,
+    "total_funding": "$10M+ (Series A — Beenext, 500 Startups)",
+    "description": "Haravan is Vietnam's leading Shopify-alternative e-commerce and omnichannel SaaS platform, powering 50,000+ online stores with integrated POS, social commerce, and logistics.",
+    market_share_percentage: 8,
+    yoy_growth: "+65%",
+    csat_score: 86,
+    quadrant_position: "Visionary"
   },
   {
     "name": "Sapo (DKT Technology)",
@@ -436,11 +2538,21 @@ export const COMPANIES: CompanyProfile[] = [
     "products": "Ride-hailing, Food delivery, beFinancial, beExpress",
     "customers": "Hàng triệu người dùng Việt Nam, Tài xế, Nhà hàng.",
     "industry": "Technology",
+    "sub_industry": "Ride-hailing & Super App",
     "website": "be.com.vn",
     "revenue": "$80M",
     "growth": 75.5,
     "sentiment": "Positive",
-    "logoUrl": "https://logo.clearbit.com/be.com.vn"
+    "logoUrl": "https://logo.clearbit.com/be.com.vn",
+    "dataTier": "premium",
+    "dataScore": 90,
+    "headcount": 600,
+    "total_funding": "$110M+ (VPBank, EximBank)",
+    "description": "Be Group is Vietnam's homegrown ride-hailing super-app, integrating mobility, food delivery, and fintech (beFinancial) to challenge Grab's dominance with a patriotic Vietnamese brand identity.",
+    market_share_percentage: 12,
+    yoy_growth: "+76%",
+    csat_score: 82,
+    quadrant_position: "Challenger"
   },
   {
     "name": "AhaMove",
@@ -466,11 +2578,21 @@ export const COMPANIES: CompanyProfile[] = [
     "products": "Logistics platform, Same-day delivery, Fulfillment services",
     "customers": "E-commerce, TMĐT, KOLs, Cửa hàng bán lẻ.",
     "industry": "Logistics",
+    "sub_industry": "Last-mile Logistics",
     "website": "ghn.vn",
     "revenue": "$250M",
     "growth": 85.5,
     "sentiment": "Positive",
-    "logoUrl": "https://logo.clearbit.com/ghn.vn"
+    "logoUrl": "https://logo.clearbit.com/ghn.vn",
+    "dataTier": "premium",
+    "dataScore": 91,
+    "headcount": 5000,
+    "total_funding": "$100M+",
+    "description": "GHN is Vietnam's largest last-mile logistics platform, powering same-day and next-day delivery for e-commerce sellers, with an automated sorting hub network across 63 provinces.",
+    market_share_percentage: 20,
+    yoy_growth: "+86%",
+    csat_score: 79,
+    quadrant_position: "Leader"
   },
   {
     "name": "Ninjavan Vietnam",
@@ -1366,19 +3488,29 @@ export const COMPANIES: CompanyProfile[] = [
     "logoUrl": "https://logo.clearbit.com/viettel.com.vn"
   },
   {
-    "name": "VNPT",
-    "intro": "Tập đoàn Bưu chính Viễn thông Việt Nam, sở hữu VinaPhone, VNPT-IT.",
+    "name": "VNPT IT",
+    "intro": "Tập đoàn Bưu chính Viễn thông Việt Nam, sở hữu VinaPhone, VNPT-IT — Vietnam's national telco and IT infrastructure provider.",
     "address": "Hà Nội, Việt Nam",
     "year": 1945,
     "size": "> 35.000 người",
     "products": "VinaPhone, Internet/FTTH, VNPT Cloud, Smart City Solutions, IoT",
     "customers": "30 triệu thuê bao, Chính phủ, Doanh nghiệp, Hộ gia đình.",
     "industry": "Telecommunications",
+    "sub_industry": "Telco & IT Infrastructure",
     "website": "vnpt.com.vn",
     "revenue": "$2.8B",
     "growth": 8.5,
     "sentiment": "Neutral",
-    "logoUrl": "https://logo.clearbit.com/vnpt.com.vn"
+    "logoUrl": "https://logo.clearbit.com/vnpt.com.vn",
+    "dataTier": "premium",
+    "dataScore": 88,
+    "headcount": 35000,
+    "total_funding": "State-owned (VNPT Group)",
+    "description": "VNPT is Vietnam's state-owned national telecoms group, operating VinaPhone (2nd largest mobile carrier), VNPT-IT (enterprise solutions), and VNPT Cloud. It serves 30M+ subscribers and is a primary digital infrastructure partner for government agencies.",
+    market_share_percentage: 18,
+    yoy_growth: "+9%",
+    csat_score: 75,
+    quadrant_position: "Challenger"
   },
   {
     "name": "MobiFone",

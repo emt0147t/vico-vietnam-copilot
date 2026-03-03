@@ -1,19 +1,41 @@
 
-import { GoogleGenAI, Type, FunctionDeclaration } from '@google/genai';
+import { Type, FunctionDeclaration } from '@google/genai';
 import { RagService } from './ragLayer';
 import { getCompanyNews } from './newsService';
 
-const MODEL_NAME = 'gemini-2.0-flash';
+// Proxy Gemini requests through the backend to keep API key secure.
+// Includes exponential backoff on 429 (rate-limit) to prevent cascading failures.
+async function proxyGenerateContent(config: {
+    contents: any[];
+    systemInstruction?: string;
+    tools?: any[];
+    temperature?: number;
+    maxOutputTokens?: number;
+}): Promise<{ text: string; functionCalls: any[] }> {
+    const MAX_RETRIES = 2;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(config),
+        });
 
-// Initialize the AI client with the API key injected by Vite
-function getAI(): GoogleGenAI | null {
-    try {
-        const apiKey = (process.env as any).API_KEY;
-        if (!apiKey) return null;
-        return new GoogleGenAI({ apiKey });
-    } catch {
-        return null;
+        // Retry on 429 with exponential backoff (3 s, 6 s)
+        if (res.status === 429 && attempt < MAX_RETRIES) {
+            const delay = (attempt + 1) * 3000;
+            console.warn(`⏳ Chat rate-limited (429), retry ${attempt + 1}/${MAX_RETRIES} in ${delay / 1000}s…`);
+            await new Promise(r => setTimeout(r, delay));
+            continue;
+        }
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.text || data.error || `HTTP ${res.status}`);
+        }
+        return res.json();
     }
+    // All retries exhausted — surface a user-friendly message
+    throw new Error('⚠️ Quá nhiều yêu cầu. Vui lòng đợi vài giây và thử lại.');
 }
 
 const SYSTEM_PROMPT = `Bạn là **VICO AI** — trợ lý trí tuệ nhân tạo của nền tảng VICO (Vietnam Copilot), chuyên về phân tích thị trường Việt Nam.
@@ -24,9 +46,19 @@ VICO là nền tảng Market Intelligence hàng đầu cho thị trường Việ
 - Phân tích đối thủ cạnh tranh đa chiều (similarity scoring, SWOT, battlecards)
 - Tin tức thị trường thời gian thực từ Google News RSS
 - Market Intelligence: TAM/SAM/SOM, Porter's 5 Forces, xu hướng ngành
+- **PESTEL Analysis**: 22 yếu tố vĩ mô Việt Nam (Chính trị, Kinh tế, Xã hội, Công nghệ, Môi trường, Pháp lý)
+- **Structured Event Extraction**: Tự động phát hiện sự kiện kinh doanh (gọi vốn, M&A, IPO, bổ nhiệm, ra mắt sản phẩm...)
 - Chiến lược Go-To-Market & Living Playbook
 - Customer Insights: ICP, personas, pain points, VOC
 - RAG Engine với vector search trên toàn bộ dữ liệu
+
+**Dữ liệu vĩ mô Việt Nam bạn nắm rõ:**
+- GDP tăng trưởng 7.09% (2024), lạm phát 3.63%, FDI $23.8B
+- 16 hiệp định thương mại tự do (EVFTA, CPTPP, RCEP...)
+- Dân số 100.3M, tuổi trung vị 32.5, smartphone 73.5%
+- 5G triển khai thương mại 2024, GII rank 44 toàn cầu
+- Net Zero 2050, carbon market pilot 2025
+- Nghị định 13/2023 về bảo vệ dữ liệu cá nhân
 
 **Khả năng của bạn:**
 1. 🔍 Tra cứu thông tin bất kỳ công ty Việt Nam (tên, ngành, sản phẩm, quy mô, trụ sở...)
@@ -34,6 +66,8 @@ VICO là nền tảng Market Intelligence hàng đầu cho thị trường Việ
 3. ⚔️ Phân tích đối thủ cạnh tranh cho một công ty
 4. 🧠 Tìm kiếm deep trong kho tri thức VICO (vector search)
 5. 💡 Cung cấp tư vấn chiến lược, insight thị trường Việt Nam
+6. 🏛️ Phân tích PESTEL cho bất kỳ ngành nghề nào tại Việt Nam
+7. 📊 Tra cứu dữ liệu vĩ mô Việt Nam (GDP, lạm phát, FDI, dân số, công nghệ...)
 
 **Quy tắc trả lời:**
 - Ưu tiên tiếng Việt. Nếu user viết tiếng Anh, trả lời tiếng Anh.
@@ -41,7 +75,7 @@ VICO là nền tảng Market Intelligence hàng đầu cho thị trường Việ
 - Dùng markdown: **bold**, bullet list, heading khi phù hợp.
 - Đưa ra số liệu cụ thể khi có dữ liệu từ tools.
 - Gợi ý hành động tiếp theo cho user khi phù hợp.
-- Khi dùng dữ liệu từ tool, hãy trích dẫn nguồn (ví dụ: "Theo dữ liệu VICO...").
+- Khi dùng dữ liệu từ tool, hãy trích dẫn nguồn (ví dụ: "Theo dữ liệu VICO...", "Theo GSO...").
 - Không bịa thông tin. Nếu không có dữ liệu, nói rõ.`;
 
 export interface ChatMessage {
@@ -98,6 +132,63 @@ const TOOL_DECLARATIONS: FunctionDeclaration[] = [
                 query: { type: Type.STRING, description: 'Câu hỏi hoặc chủ đề cần tìm kiếm' }
             },
             required: ['query']
+        }
+    },
+    {
+        name: 'get_pestel_analysis',
+        description: 'Phân tích PESTEL (Chính trị, Kinh tế, Xã hội, Công nghệ, Môi trường, Pháp lý) cho một ngành nghề tại Việt Nam. Dùng khi user hỏi về môi trường vĩ mô, yếu tố ảnh hưởng ngành, rủi ro chính sách, hoặc phân tích PESTEL.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                industry: { type: Type.STRING, description: 'Ngành nghề cần phân tích (ví dụ: "Technology", "Finance", "Manufacturing")' },
+                company: { type: Type.STRING, description: 'Tên công ty cụ thể (tùy chọn, để phân tích sâu hơn)' },
+            },
+            required: ['industry']
+        }
+    },
+    {
+        name: 'get_vietnam_macro',
+        description: 'Lấy dữ liệu vĩ mô Việt Nam: GDP, lạm phát, FDI, dân số, công nghệ, FTA, và các chỉ số kinh tế khác. Dùng khi user hỏi về kinh tế Việt Nam, số liệu quốc gia, hoặc so sánh quốc tế.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                topic: { type: Type.STRING, description: 'Chủ đề vĩ mô (ví dụ: "GDP", "FDI", "demographics", "trade", "technology", "all")' }
+            },
+            required: ['topic']
+        }
+    },
+    {
+        name: 'generate_customer_insights',
+        description: 'Phân tích khách hàng mục tiêu của một công ty: ICP (Ideal Customer Profile), personas, pain points, buying journey. Sử dụng AI để tạo báo cáo chi tiết.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                company_name: { type: Type.STRING, description: 'Tên công ty cần phân tích (ví dụ: "FPT", "Vingroup")' },
+                industry: { type: Type.STRING, description: 'Ngành nghề của công ty (để tối ưu kết quả)' }
+            },
+            required: ['company_name']
+        }
+    },
+    {
+        name: 'get_trade_data',
+        description: 'Tra cứu dữ liệu thương mại Việt Nam: xuất nhập khẩu theo mặt hàng hoặc ngành nghề, cán cân thương mại, đối tác chính. Nguồn: Tổng cục Hải quan, GSO.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                query: { type: Type.STRING, description: 'Mặt hàng hoặc ngành (ví dụ: "cà phê", "gạo", "Technology", "phone")' }
+            },
+            required: ['query']
+        }
+    },
+    {
+        name: 'get_industry_analytics',
+        description: 'Phân tích chi số ngành (VICO Market Index): mật độ tập trung, top công ty, sức khỏe ngành, xu hướng tuyển dụng. Dữ liệu từ VICO database.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                industry: { type: Type.STRING, description: 'Ngành cần phân tích (ví dụ: "Technology", "Finance", "Healthcare")' }
+            },
+            required: ['industry']
         }
     }
 ];
@@ -169,6 +260,199 @@ async function executeTool(name: string, args: any): Promise<any> {
                 };
             }
 
+            case 'get_pestel_analysis': {
+                const res = await fetch(`/api/pestel?industry=${encodeURIComponent(args.industry)}${args.company ? `&company=${encodeURIComponent(args.company)}` : ''}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                // Trim to essential data for Gemini context
+                const report = data.data;
+                return {
+                    industry: report.industry || args.industry,
+                    overallScore: report.overallScore,
+                    assessment: report.overallAssessment,
+                    dimensions: report.dimensions?.map((d: any) => ({
+                        name: d.label,
+                        score: d.overallScore,
+                        trend: d.overallTrend,
+                        summary: d.summary,
+                        topFactors: d.factors?.slice(0, 2).map((f: any) => ({
+                            title: f.title,
+                            score: f.score,
+                            trend: f.trend,
+                            evidence: f.evidence?.slice(0, 2),
+                        })),
+                    })),
+                };
+            }
+
+            case 'get_vietnam_macro': {
+                // Import macro data from Phase 1-2 data files
+                const { getVietnamMacroSummary } = await import('../data/vietnamMarketData');
+                const { getOverallPESTELScore, VIETNAM_PESTEL_FACTORS } = await import('../data/pestelData');
+
+                const macro = getVietnamMacroSummary();
+                const topic = (args.topic || 'all').toLowerCase();
+
+                const result: any = { topic, country: 'Vietnam' };
+
+                if (topic === 'all' || topic === 'gdp' || topic === 'economic') {
+                    result.economy = {
+                        gdpUsdBillion: macro.gdpUsd,
+                        gdpGrowthPct: macro.gdpGrowthPct,
+                        inflationPct: macro.inflationPct,
+                        year: macro.year,
+                    };
+                }
+
+                if (topic === 'all' || topic === 'demographics' || topic === 'population') {
+                    result.demographics = {
+                        populationMillion: macro.populationMillion,
+                        medianAge: macro.medianAge,
+                        urbanizationPct: macro.urbanizationPct,
+                        laborForceMillion: macro.laborForceMillion,
+                    };
+                }
+
+                if (topic === 'all' || topic === 'fdi' || topic === 'investment') {
+                    result.fdi = {
+                        fdiUsdBillion: macro.fdiUsdBillion,
+                    };
+                }
+
+                if (topic === 'all' || topic === 'trade' || topic === 'fta') {
+                    result.trade = {
+                        majorFTAs: ['EVFTA', 'CPTPP', 'RCEP', 'AKFTA', 'AJCEP', 'VKFTA'],
+                    };
+                }
+
+                if (topic === 'all' || topic === 'technology' || topic === 'digital') {
+                    result.technology = {
+                        internetPenetrationPct: macro.internetPenetrationPct,
+                        smartphonePenetrationPct: macro.smartphonePenetrationPct,
+                    };
+                }
+
+                result.pestelOverallScore = getOverallPESTELScore();
+                result.totalPestelFactors = VIETNAM_PESTEL_FACTORS.length;
+                result.dataSources = ['GSO', 'World Bank', 'IMF', 'MIC', 'SBV', 'MPI'];
+
+                return result;
+            }
+
+            case 'generate_customer_insights': {
+                const res = await fetch('/api/customer-insights', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        companyName: args.company_name,
+                        industry: args.industry || 'Technology',
+                    }),
+                });
+                if (!res.ok) {
+                    return { error: `Customer insights API returned ${res.status}` };
+                }
+                const report = await res.json();
+                // Return a summary (not full report) to keep Gemini context small
+                return {
+                    companyName: report.companyName || args.company_name,
+                    industry: report.industry || args.industry,
+                    dataSource: report.dataSource || 'estimated',
+                    icpSummary: report.idealCustomerProfile?.firmographics || null,
+                    topPersonas: (report.personas || []).slice(0, 2).map((p: any) => ({
+                        name: p.name,
+                        title: p.title,
+                        goals: p.goals?.slice(0, 3),
+                        frustrations: p.frustrations?.slice(0, 3),
+                    })),
+                    topPainPoints: (report.painPoints || []).slice(0, 3).map((pp: any) => ({
+                        pain: pp.pain,
+                        severity: pp.severity,
+                        category: pp.category,
+                    })),
+                    npsScore: report.npsScore,
+                    executiveSummary: report.executiveSummary?.overview || null,
+                };
+            }
+
+            case 'get_trade_data': {
+                const query = args.query || '';
+                // Try commodity first
+                let res = await fetch(`/api/trade?commodity=${encodeURIComponent(query)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        return {
+                            type: 'commodity',
+                            commodity: data.commodity,
+                            commodityVi: data.commodityVi,
+                            exportValue2024: data.exportValue2024,
+                            importValue2024: data.importValue2024,
+                            tradeBalance: data.computed?.tradeBalance2024,
+                            exportGrowthPct: data.computed?.exportGrowthPct,
+                            topExportDestinations: data.topExportDestinations?.slice(0, 3),
+                            topImportSources: data.topImportSources?.slice(0, 3),
+                            dataSource: data.dataSource,
+                        };
+                    }
+                }
+                // Try industry
+                res = await fetch(`/api/trade?industry=${encodeURIComponent(query)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        return {
+                            type: 'industry',
+                            industry: data.industry,
+                            totalExport2024: data.totalExport2024,
+                            totalImport2024: data.totalImport2024,
+                            tradeBalance2024: data.tradeBalance2024,
+                            yoyExportGrowth: data.yoyExportGrowth,
+                            majorTradingPartners: data.majorTradingPartners,
+                            keyExportCommodities: data.keyExportCommodities,
+                            dataSource: data.dataSource,
+                        };
+                    }
+                }
+                // Fallback: return summary
+                const summaryRes = await fetch('/api/trade?summary=true');
+                const summaryData = summaryRes.ok ? await summaryRes.json() : null;
+                return {
+                    type: 'summary',
+                    message: `Không tìm thấy dữ liệu cụ thể cho "${query}". Đây là tổng quan thương mại Việt Nam 2024:`,
+                    ...(summaryData || {}),
+                };
+            }
+
+            case 'get_industry_analytics': {
+                const industry = args.industry || 'Technology';
+                const res = await fetch(`/api/analytics?industry=${encodeURIComponent(industry)}`);
+                if (!res.ok) {
+                    return { error: `Analytics API returned ${res.status} for "${industry}"` };
+                }
+                const data = await res.json();
+                if (!data.success) {
+                    return { error: data.error || `No analytics for "${industry}"` };
+                }
+                return {
+                    industry: data.industry,
+                    totalCompanies: data.totalCompanies,
+                    totalEmployees: data.totalEmployees,
+                    estimatedMarketSize: data.estimatedMarketSize,
+                    concentration: {
+                        level: data.concentrationRatio?.marketConcentration,
+                        top5Share: data.concentrationRatio?.top5EmployeeShare,
+                        top5: data.concentrationRatio?.top5Companies?.map((c: any) => c.name),
+                    },
+                    health: {
+                        dynamicScore: data.industryHealth?.dynamicScore,
+                        sentimentScore: data.industryHealth?.sentimentScore,
+                        trend: data.hiringTrend?.trend,
+                        growthPct: data.hiringTrend?.growthPercentage,
+                    },
+                };
+            }
+
             default:
                 return { error: `Unknown tool: ${name}` };
         }
@@ -195,13 +479,6 @@ class VicoChatService {
         };
         this.history.push(userMsg);
 
-        const ai = getAI();
-        if (!ai) {
-            return this.addAssistantMessage(
-                '⚠️ **AI Engine chưa sẵn sàng.** Vui lòng kiểm tra kết nối mạng và đảm bảo API key đã được cấu hình trong file `.env`.',
-            );
-        }
-
         try {
             // Build conversation contents for Gemini multi-turn
             const contents = this.history
@@ -211,16 +488,13 @@ class VicoChatService {
                     parts: [{ text: m.content }],
                 }));
 
-            // Call Gemini with function calling tools
-            let response = await ai.models.generateContent({
-                model: MODEL_NAME,
+            // Call Gemini via server proxy with function calling tools
+            let response = await proxyGenerateContent({
                 contents,
-                config: {
-                    systemInstruction: SYSTEM_PROMPT,
-                    tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
-                    temperature: 0.7,
-                    maxOutputTokens: 2048,
-                },
+                systemInstruction: SYSTEM_PROMPT,
+                tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
+                temperature: 0.7,
+                maxOutputTokens: 2048,
             });
 
             // Function calling loop (max 3 rounds)
@@ -242,15 +516,12 @@ class VicoChatService {
                     { role: 'function' as const, parts: [{ functionResponse: { name: fc.name, response: toolResult } }] },
                 ];
 
-                response = await ai.models.generateContent({
-                    model: MODEL_NAME,
+                response = await proxyGenerateContent({
                     contents: updatedContents,
-                    config: {
-                        systemInstruction: SYSTEM_PROMPT,
-                        tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
-                        temperature: 0.7,
-                        maxOutputTokens: 2048,
-                    },
+                    systemInstruction: SYSTEM_PROMPT,
+                    tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
+                    temperature: 0.7,
+                    maxOutputTokens: 2048,
                 });
             }
 
@@ -261,28 +532,22 @@ class VicoChatService {
 
             // Graceful fallback: try without function calling
             try {
-                const ai2 = getAI();
-                if (ai2) {
-                    const simpleContents = this.history
-                        .filter(m => !m.isLoading)
-                        .map(m => ({
-                            role: m.role === 'assistant' ? 'model' : 'user',
-                            parts: [{ text: m.content }],
-                        }));
+                const simpleContents = this.history
+                    .filter(m => !m.isLoading)
+                    .map(m => ({
+                        role: m.role === 'assistant' ? 'model' : 'user',
+                        parts: [{ text: m.content }],
+                    }));
 
-                    const fallbackResponse = await ai2.models.generateContent({
-                        model: MODEL_NAME,
-                        contents: simpleContents,
-                        config: {
-                            systemInstruction: SYSTEM_PROMPT,
-                            temperature: 0.7,
-                            maxOutputTokens: 2048,
-                        },
-                    });
+                const fallbackResponse = await proxyGenerateContent({
+                    contents: simpleContents,
+                    systemInstruction: SYSTEM_PROMPT,
+                    temperature: 0.7,
+                    maxOutputTokens: 2048,
+                });
 
-                    if (fallbackResponse.text) {
-                        return this.addAssistantMessage(fallbackResponse.text);
-                    }
+                if (fallbackResponse.text) {
+                    return this.addAssistantMessage(fallbackResponse.text);
                 }
             } catch {
                 // Both approaches failed

@@ -12,10 +12,10 @@ interface CompetitorAnalysisPageProps {
  * Competitor Analysis Dashboard
  * 
  * Shows comprehensive 4-pillar comparison:
- * 1. Legal & Scale (Pháp lý & Quy mô)
- * 2. Recruitment & HR (Tuyển dụng & Nhân sự)
- * 3. Digital Health (Sức khỏe kỹ thuật số)
- * 4. Media & Reputation (Truyền thông & Tin tức)
+ * 1. Legal & Scale
+ * 2. Recruitment & HR
+ * 3. Digital Health
+ * 4. Media & Reputation
  * 
  * All data from real sources (0% generated)
  */
@@ -83,7 +83,7 @@ export default function CompetitorAnalysisDashboard({
             />
           </svg>
         </div>
-        <span className="ml-4 text-gray-600">Analyzing competitors...</span>
+        <span className="ml-4 text-[#71717A]">Analyzing competitors...</span>
       </div>
     );
   }
@@ -106,31 +106,31 @@ export default function CompetitorAnalysisDashboard({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FAFAFA] py-8 px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Competitor Analysis</h1>
-        <p className="text-gray-600 mb-8">Comprehensive 4-pillar intelligence (0% AI-generated data)</p>
+        <h1 className="text-3xl font-bold text-[#18181B] mb-2">Competitor Analysis</h1>
+        <p className="text-[#71717A] mb-8">Comprehensive 4-pillar intelligence (0% AI-generated data)</p>
 
         {/* Comparison Selector */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8 border border-gray-200">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-8 border border-[#E4E4E7]">
           <div className="grid grid-cols-2 gap-6 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+              <label className="block text-sm font-medium text-[#18181B] mb-2">Company</label>
               <input
                 type="text"
                 value={selectedCompany}
                 onChange={(e) => setSelectedCompany(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[#E4E4E7] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Competitor</label>
+              <label className="block text-sm font-medium text-[#18181B] mb-2">Competitor</label>
               <input
                 type="text"
                 value={selectedCompetitor}
                 onChange={(e) => setSelectedCompetitor(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[#E4E4E7] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -175,13 +175,13 @@ function OverallScorecard({ data }: { data: CompetitorComparison }) {
   const isCompanyAhead = winner === data.company.companyName;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Overall Scorecard</h2>
+    <div className="bg-white rounded-lg shadow-sm border border-[#E4E4E7] p-8 mb-8">
+      <h2 className="text-2xl font-bold text-[#18181B] mb-6">Overall Scorecard</h2>
 
       <div className="grid grid-cols-2 gap-8 mb-8">
         {/* Company Score */}
         <div className="text-center">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">{data.company.companyName}</h3>
+          <h3 className="text-xl font-semibold text-[#18181B] mb-4">{data.company.companyName}</h3>
           <div className="relative w-40 h-40 mx-auto mb-4">
             <svg className="w-full h-full" viewBox="0 0 100 100">
               <circle
@@ -219,7 +219,7 @@ function OverallScorecard({ data }: { data: CompetitorComparison }) {
 
         {/* Competitor Score */}
         <div className="text-center">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">{data.competitor.companyName}</h3>
+          <h3 className="text-xl font-semibold text-[#18181B] mb-4">{data.competitor.companyName}</h3>
           <div className="relative w-40 h-40 mx-auto mb-4">
             <svg className="w-full h-full" viewBox="0 0 100 100">
               <circle
@@ -257,25 +257,25 @@ function OverallScorecard({ data }: { data: CompetitorComparison }) {
       </div>
 
       {/* Category Breakdown */}
-      <div className="border-t border-gray-200 pt-6">
-        <h4 className="font-semibold text-gray-900 mb-4">Category Breakdown</h4>
+      <div className="border-t border-[#E4E4E7] pt-6">
+        <h4 className="font-semibold text-[#18181B] mb-4">Category Breakdown</h4>
         <div className="space-y-3">
           {Object.entries(data.analysis.overall.categories).map(([category, scores]) => (
             <div key={category}>
               <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-medium text-gray-700">{category}</span>
-                <span className="text-xs text-gray-500">
+                <span className="text-sm font-medium text-[#18181B]">{category}</span>
+                <span className="text-xs text-[#71717A]">
                   {scores.company} vs {scores.competitor}
                 </span>
               </div>
               <div className="flex gap-2">
-                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-[#E4E4E7] rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-600"
                     style={{ width: `${(scores.company / Math.max(scores.company, scores.competitor)) * 100}%` }}
                   />
                 </div>
-                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-[#E4E4E7] rounded-full overflow-hidden">
                   <div
                     className="h-full bg-purple-600"
                     style={{ width: `${(scores.competitor / Math.max(scores.company, scores.competitor)) * 100}%` }}
@@ -345,15 +345,15 @@ function GrowthSection({ data }: { data: CompetitorComparison }) {
         />
 
         {/* Hiring Signals */}
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <h5 className="font-medium text-sm text-gray-900 mb-3">Hiring Signals</h5>
+        <div className="mt-4 pt-4 border-t border-[#E4E4E7]">
+          <h5 className="font-medium text-sm text-[#18181B] mb-3">Hiring Signals</h5>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs font-semibold text-blue-600 mb-2">{data.company.companyName}</p>
               {growth.hiringSignals.company.length > 0 ? (
                 <div className="space-y-1">
                   {growth.hiringSignals.company.slice(0, 3).map((signal, i) => (
-                    <div key={i} className="text-xs text-gray-700">
+                    <div key={i} className="text-xs text-[#18181B]">
                       <span className={signal.strength === 'Strong' ? 'font-bold' : ''}>
                         {signal.category}
                       </span>
@@ -361,7 +361,7 @@ function GrowthSection({ data }: { data: CompetitorComparison }) {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-gray-500">No clear signals</p>
+                <p className="text-xs text-[#71717A]">No clear signals</p>
               )}
             </div>
             <div>
@@ -369,7 +369,7 @@ function GrowthSection({ data }: { data: CompetitorComparison }) {
               {growth.hiringSignals.competitor.length > 0 ? (
                 <div className="space-y-1">
                   {growth.hiringSignals.competitor.slice(0, 3).map((signal, i) => (
-                    <div key={i} className="text-xs text-gray-700">
+                    <div key={i} className="text-xs text-[#18181B]">
                       <span className={signal.strength === 'Strong' ? 'font-bold' : ''}>
                         {signal.category}
                       </span>
@@ -377,7 +377,7 @@ function GrowthSection({ data }: { data: CompetitorComparison }) {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-gray-500">No clear signals</p>
+                <p className="text-xs text-[#71717A]">No clear signals</p>
               )}
             </div>
           </div>
@@ -424,8 +424,8 @@ function TechnologySection({ data }: { data: CompetitorComparison }) {
         />
 
         {/* Tech Stack */}
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <h5 className="font-medium text-sm text-gray-900 mb-3">Tech Stack</h5>
+        <div className="mt-4 pt-4 border-t border-[#E4E4E7]">
+          <h5 className="font-medium text-sm text-[#18181B] mb-3">Tech Stack</h5>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs font-semibold text-blue-600 mb-2">{data.company.companyName}</p>
@@ -505,8 +505,8 @@ function CompetitivePositionSection({ data }: { data: CompetitorComparison }) {
   const { competitivePosition } = data.analysis;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">⚔️ Competitive Position</h2>
+    <div className="bg-white rounded-lg shadow-sm border border-[#E4E4E7] p-6 mb-8">
+      <h2 className="text-xl font-bold text-[#18181B] mb-4">⚔️ Competitive Position</h2>
 
       <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <p className="text-lg font-semibold text-blue-900">
@@ -518,43 +518,43 @@ function CompetitivePositionSection({ data }: { data: CompetitorComparison }) {
 
       <div className="grid grid-cols-2 gap-6">
         <div>
-          <h4 className="font-semibold text-gray-900 mb-3">Strengths</h4>
+          <h4 className="font-semibold text-[#18181B] mb-3">Strengths</h4>
           <div>
             <p className="text-xs font-semibold text-blue-600 mb-2">{data.company.companyName}</p>
             <ul className="space-y-1">
               {competitivePosition.strengths.company.map((s, i) => (
-                <li key={i} className="text-sm text-gray-700">✓ {s}</li>
+                <li key={i} className="text-sm text-[#18181B]">✓ {s}</li>
               ))}
             </ul>
             <p className="text-xs font-semibold text-purple-600 mt-3 mb-2">{data.competitor.companyName}</p>
             <ul className="space-y-1">
               {competitivePosition.strengths.competitor.map((s, i) => (
-                <li key={i} className="text-sm text-gray-700">✓ {s}</li>
+                <li key={i} className="text-sm text-[#18181B]">✓ {s}</li>
               ))}
             </ul>
           </div>
         </div>
         <div>
-          <h4 className="font-semibold text-gray-900 mb-3">Weaknesses</h4>
+          <h4 className="font-semibold text-[#18181B] mb-3">Weaknesses</h4>
           <div>
             <p className="text-xs font-semibold text-blue-600 mb-2">{data.company.companyName}</p>
             <ul className="space-y-1">
               {competitivePosition.weaknesses.company.length > 0 ? (
                 competitivePosition.weaknesses.company.map((s, i) => (
-                  <li key={i} className="text-sm text-gray-700">✗ {s}</li>
+                  <li key={i} className="text-sm text-[#18181B]">✗ {s}</li>
                 ))
               ) : (
-                <li className="text-sm text-gray-500">None identified</li>
+                <li className="text-sm text-[#71717A]">None identified</li>
               )}
             </ul>
             <p className="text-xs font-semibold text-purple-600 mt-3 mb-2">{data.competitor.companyName}</p>
             <ul className="space-y-1">
               {competitivePosition.weaknesses.competitor.length > 0 ? (
                 competitivePosition.weaknesses.competitor.map((s, i) => (
-                  <li key={i} className="text-sm text-gray-700">✗ {s}</li>
+                  <li key={i} className="text-sm text-[#18181B]">✗ {s}</li>
                 ))
               ) : (
-                <li className="text-sm text-gray-500">None identified</li>
+                <li className="text-sm text-[#71717A]">None identified</li>
               )}
             </ul>
           </div>
@@ -571,8 +571,8 @@ function RiskAssessmentSection({ data }: { data: CompetitorComparison }) {
   const { riskAssessment } = data.analysis;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">⚠️ Risk Assessment</h2>
+    <div className="bg-white rounded-lg shadow-sm border border-[#E4E4E7] p-6 mb-8">
+      <h2 className="text-xl font-bold text-[#18181B] mb-4">⚠️ Risk Assessment</h2>
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <RiskBox
@@ -670,8 +670,8 @@ function OpportunitiesSection({ data }: { data: CompetitorComparison }) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">💡 Opportunities</h2>
+    <div className="bg-white rounded-lg shadow-sm border border-[#E4E4E7] p-6 mb-8">
+      <h2 className="text-xl font-bold text-[#18181B] mb-4">💡 Opportunities</h2>
       <div className="space-y-3">
         {opportunities.map((opp, i) => (
           <div key={i} className="p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -709,18 +709,18 @@ function RecommendationsSection({ data }: { data: CompetitorComparison }) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">📋 Recommendations</h2>
+    <div className="bg-white rounded-lg shadow-sm border border-[#E4E4E7] p-6 mb-8">
+      <h2 className="text-xl font-bold text-[#18181B] mb-4">📋 Recommendations</h2>
       <div className="space-y-4">
         {recommendations.map((rec, i) => (
-          <div key={i} className="p-4 border border-gray-200 rounded-lg">
-            <h4 className="font-semibold text-gray-900 mb-2">{rec.title}</h4>
-            <p className="text-sm text-gray-700 mb-3">{rec.description}</p>
+          <div key={i} className="p-4 border border-[#E4E4E7] rounded-lg">
+            <h4 className="font-semibold text-[#18181B] mb-2">{rec.title}</h4>
+            <p className="text-sm text-[#18181B] mb-3">{rec.description}</p>
             <div className="mb-3">
-              <p className="text-xs font-medium text-gray-600 mb-2">Action Items:</p>
+              <p className="text-xs font-medium text-[#71717A] mb-2">Action Items:</p>
               <ul className="space-y-1">
                 {rec.actionItems.map((item, j) => (
-                  <li key={j} className="text-sm text-gray-700">→ {item}</li>
+                  <li key={j} className="text-sm text-[#18181B]">→ {item}</li>
                 ))}
               </ul>
             </div>
@@ -739,15 +739,15 @@ function DataQualitySection({ data }: { data: CompetitorComparison }) {
   const { dataQuality } = data;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">📊 Data Quality</h2>
+    <div className="bg-white rounded-lg shadow-sm border border-[#E4E4E7] p-6">
+      <h2 className="text-xl font-bold text-[#18181B] mb-4">📊 Data Quality</h2>
 
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="font-semibold text-gray-700">Data Completeness</span>
+          <span className="font-semibold text-[#18181B]">Data Completeness</span>
           <span className="text-sm font-bold text-blue-600">{dataQuality.completeness}%</span>
         </div>
-        <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div className="w-full h-3 bg-[#E4E4E7] rounded-full overflow-hidden">
           <div
             className="h-full bg-blue-600"
             style={{ width: `${dataQuality.completeness}%` }}
@@ -756,12 +756,12 @@ function DataQualitySection({ data }: { data: CompetitorComparison }) {
       </div>
 
       <div className="mb-4">
-        <p className="font-semibold text-gray-700 mb-2">Sources:</p>
+        <p className="font-semibold text-[#18181B] mb-2">Sources:</p>
         <div className="flex flex-wrap gap-2">
           {dataQuality.sources.map((source, i) => (
             <span
               key={i}
-              className="inline-block bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full"
+              className="inline-block bg-[#F4F4F5] text-[#18181B] text-xs px-3 py-1 rounded-full"
             >
               {source}
             </span>
@@ -769,7 +769,7 @@ function DataQualitySection({ data }: { data: CompetitorComparison }) {
         </div>
       </div>
 
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-[#71717A]">
         Last updated: {new Date(dataQuality.lastUpdated).toLocaleString()}
       </p>
     </div>
@@ -791,9 +791,9 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-bold text-gray-900 mb-1">{title}</h3>
-      <p className="text-sm text-gray-500 mb-4">{subtitle}</p>
+    <div className="bg-white rounded-lg shadow-sm border border-[#E4E4E7] p-6">
+      <h3 className="text-lg font-bold text-[#18181B] mb-1">{title}</h3>
+      <p className="text-sm text-[#71717A] mb-4">{subtitle}</p>
       {children}
     </div>
   );
@@ -816,17 +816,17 @@ function DetailRow({
   return (
     <div>
       <div className="flex justify-between items-start mb-2">
-        <span className="font-medium text-gray-900">{label}</span>
+        <span className="font-medium text-[#18181B]">{label}</span>
         {verdict && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">{verdict}</span>}
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="p-2 bg-blue-50 rounded">
           <p className="text-xs text-blue-600 font-semibold mb-1">Company</p>
-          <p className="text-sm text-gray-900">{company}</p>
+          <p className="text-sm text-[#18181B]">{company}</p>
         </div>
         <div className="p-2 bg-purple-50 rounded">
           <p className="text-xs text-purple-600 font-semibold mb-1">Competitor</p>
-          <p className="text-sm text-gray-900">{competitor}</p>
+          <p className="text-sm text-[#18181B]">{competitor}</p>
         </div>
       </div>
     </div>

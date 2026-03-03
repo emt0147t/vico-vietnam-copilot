@@ -1,8 +1,69 @@
 import React, { useState } from 'react';
-import { Play, Activity, Database, MessageSquare, X, CheckCircle2, ChevronDown, BarChart3, Sparkles, Loader2 } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
-import { EnterpriseInput, Logo } from './VicoUI';
+import { motion } from 'framer-motion';
+import {
+  Funnel,
+  Brain,
+  RocketLaunch,
+  ShieldCheck,
+  ArrowRight,
+  Play,
+  ChartLineUp,
+  Buildings,
+  Sparkle,
+  Lightning,
+  Globe,
+  Lock,
+} from '@phosphor-icons/react';
+import { Logo, EnterpriseInput } from './VicoUI';
+import { X, CheckCircle2, ChevronDown, Loader2 } from 'lucide-react';
 
+/* ═══════════════════════════════════════════════════════════════════
+   ANIMATION PRESETS
+   Matches config/designSystem.ts motion tokens — professional ease
+   ═══════════════════════════════════════════════════════════════════ */
+const fadeUp = {
+  hidden:  { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+} as const;
+
+const stagger = {
+  hidden:  {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATIC DATA
+   ═══════════════════════════════════════════════════════════════════ */
+const heroCompanies = [
+  'FPT Software', 'VNG Corporation', 'MoMo', 'Base.vn', 'VNPay',
+  'Tiki', 'BE Group', 'KiotViet', 'Haravan', 'TopCV',
+];
+
+const industries = [
+  { label: 'Technology',  pct: 92 },
+  { label: 'Fintech',     pct: 78 },
+  { label: 'E-Commerce',  pct: 65 },
+  { label: 'Healthcare',  pct: 51 },
+  { label: 'Logistics',   pct: 43 },
+];
+
+const gtmPhases = [
+  { phase: '01', title: 'Market Discovery',  done: true  },
+  { phase: '02', title: 'ICP Validation',    active: true },
+  { phase: '03', title: 'Channel Strategy',  done: false },
+];
+
+const icpTags = ['Cloud-native', 'AI / ML', 'Vietnam HQ', 'B2B SaaS'];
+
+const statItems = [
+  { value: '10,289', label: 'Companies Tracked',  Icon: Buildings },
+  { value: '9',      label: 'Industry Verticals',  Icon: Globe },
+  { value: 'Real-time', label: 'Data Updates',       Icon: Lightning },
+];
+
+/* ═══════════════════════════════════════════════════════════════════
+   COMPONENT
+   ═══════════════════════════════════════════════════════════════════ */
 interface LandingPageProps {
   onStart: () => void;
   onLoginClick?: () => void;
@@ -14,23 +75,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLoginClick 
   const [demoLoading, setDemoLoading] = useState(false);
   const [demoError, setDemoError] = useState('');
 
+  /* ── Demo form handler ──────────────────────────────────────── */
   const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setDemoError('');
     setDemoLoading(true);
 
     const form = e.currentTarget;
-    const formData = new FormData(form);
+    const fd   = new FormData(form);
     const payload = {
-      lastName: (formData.get('lastName') as string || '').trim(),
-      firstName: (formData.get('firstName') as string || '').trim(),
-      email: (formData.get('email') as string || '').trim(),
-      jobTitle: (formData.get('jobTitle') as string || '').trim(),
-      phone: (formData.get('phone') as string || '').trim(),
+      lastName:  (fd.get('lastName')  as string || '').trim(),
+      firstName: (fd.get('firstName') as string || '').trim(),
+      email:     (fd.get('email')     as string || '').trim(),
+      jobTitle:  (fd.get('jobTitle')  as string || '').trim(),
+      phone:     (fd.get('phone')     as string || '').trim(),
     };
 
     try {
-      const res = await fetch('/api/demo-request', {
+      const res  = await fetch('/api/demo-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -38,277 +100,545 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLoginClick 
       const data = await res.json();
 
       if (!res.ok) {
-        setDemoError(data.error || 'Gửi thất bại. Vui lòng thử lại.');
+        setDemoError(data.error || 'Submission failed. Please try again.');
         setDemoLoading(false);
         return;
       }
 
       setDemoSubmitted(true);
       setDemoLoading(false);
-      setTimeout(() => {
-        setShowDemoModal(false);
-        setDemoSubmitted(false);
-      }, 2500);
+      setTimeout(() => { setShowDemoModal(false); setDemoSubmitted(false); }, 2500);
     } catch {
-      setDemoError('Không thể kết nối server. Vui lòng thử lại sau.');
+      setDemoError('Cannot connect to server. Please try again later.');
       setDemoLoading(false);
     }
   };
 
+  /* ══════════════════════════════════════════════════════════════
+     RENDER
+     ══════════════════════════════════════════════════════════════ */
   return (
-    <div className="min-h-screen bg-[#FDFCFB] dark:bg-[#0B101B] text-[#1A1F2B] dark:text-white font-sans overflow-hidden flex flex-col transition-colors duration-300">
-      
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 md:px-12 md:py-6 max-w-7xl mx-auto w-full z-20 relative">
-        <button onClick={() => window.location.reload()} aria-label="Về trang chủ VICO" className="bg-transparent border-none cursor-pointer">
-           <Logo />
-        </button>
-        <div className="flex items-center gap-3 md:gap-6">
-          <ThemeToggle />
-          <button 
-            onClick={onLoginClick}
-            className="text-gray-600 dark:text-gray-300 hover:text-[#1A1F2B] dark:hover:text-white text-sm font-semibold transition-colors hidden sm:block"
-            aria-label="Đăng nhập vào VICO"
+    <div className="min-h-screen bg-[#FAFAFA] text-[#18181B] antialiased overflow-x-hidden">
+
+      {/* Inline marquee keyframes */}
+      <style>{`
+        @keyframes vico-marquee {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .vico-marquee { animation: vico-marquee 45s linear infinite; }
+        .vico-marquee:hover { animation-play-state: paused; }
+      `}</style>
+
+      {/* ─────────────── NAVIGATION ─────────────── */}
+      <header className="sticky top-0 z-50 bg-[#FAFAFA]/80 backdrop-blur-xl border-b border-[#E4E4E7]/60">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3 lg:px-10">
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-transparent border-none cursor-pointer"
+            aria-label="Home"
           >
-            Đăng nhập
+            <Logo />
           </button>
-          <button 
-            onClick={onStart}
-            className="bg-[#B91C1C] hover:bg-[#991B1B] text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-[0_4px_12px_rgba(185,28,28,0.2)] hover:shadow-[0_6px_16px_rgba(185,28,28,0.3)]"
-          >
-            Bắt đầu
-          </button>
+
+          <div className="flex items-center gap-3 lg:gap-5">
+            <button
+              onClick={onLoginClick}
+              className="text-[#71717A] hover:text-[#18181B] text-sm font-semibold transition-colors hidden sm:block"
+            >
+              Sign In
+            </button>
+            <button
+              onClick={onStart}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[10px] bg-[#E11D48] text-white text-sm font-semibold hover:bg-[#BE123C] active:scale-[0.98] transition-all duration-150 shadow-sm"
+            >
+              Enter Workspace
+              <ArrowRight weight="bold" size={14} />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Hero Content */}
-      <main className="flex-1 flex flex-col items-center pt-16 md:pt-28 px-4 md:px-0 text-center w-full max-w-6xl mx-auto relative z-10">
-        
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-red-500/[0.03] dark:bg-red-900/[0.07] blur-[120px] rounded-full pointer-events-none -z-10" aria-hidden="true"></div>
+      {/* ─────────────── HERO SECTION ─────────────── */}
+      <section className="relative pt-20 pb-16 lg:pt-32 lg:pb-24 px-6 text-center overflow-hidden">
+        {/* Ambient glow */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-br from-[#E11D48]/[0.04] to-[#F97316]/[0.04] rounded-full blur-[120px] pointer-events-none"
+          aria-hidden="true"
+        />
 
-        <h1 className="text-5xl md:text-[5.5rem] font-extrabold tracking-tighter mb-8 leading-[1] max-w-5xl text-[#1A1F2B] dark:text-white">
-          VICO <span className="text-[#F15048]">Vietnam Copilot</span> <br className="hidden md:block" />
-          <span className="text-4xl md:text-[4rem]">Market Intelligence</span>
-        </h1>
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={stagger}
+          className="relative z-10 max-w-4xl mx-auto"
+        >
+          {/* Badge */}
+          <motion.div
+            variants={fadeUp}
+            className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#E4E4E7] shadow-sm text-xs font-semibold text-[#71717A]"
+          >
+            <Sparkle weight="duotone" size={14} className="text-[#E11D48]" />
+            Vietnam Market Intelligence Platform
+          </motion.div>
 
-        <p className="text-[#555E6D] dark:text-gray-400 text-lg md:text-xl max-w-3xl mb-12 leading-relaxed font-medium">
-          Nền tảng trí tuệ thị trường Việt Nam. Thu thập, phân tích và trực quan hóa dữ liệu thị trường phân mảnh trong tích tắc.
+          {/* Headline */}
+          <motion.h1
+            variants={fadeUp}
+            className="font-display text-4xl sm:text-5xl lg:text-[3.75rem] font-extrabold leading-[1.1] tracking-tight mb-6"
+          >
+            Strategic Market Intelligence{' '}
+            <br className="hidden sm:block" />
+            for{' '}
+            <span className="bg-gradient-to-r from-[#E11D48] to-[#F97316] bg-clip-text text-transparent">
+              Vietnam&apos;s Tech Ecosystem
+            </span>
+          </motion.h1>
+
+          {/* Subheadline */}
+          <motion.p
+            variants={fadeUp}
+            className="text-base lg:text-lg text-[#71717A] max-w-2xl mx-auto mb-10 leading-relaxed"
+          >
+            Empowering executives with real-time data, auto&#8209;generated ICP profiles,
+            and actionable GTM playbooks&nbsp;&mdash; all in one premium workspace.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={onStart}
+              className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-[#E11D48] text-white text-base font-bold hover:bg-[#BE123C] active:scale-[0.97] transition-all duration-150 shadow-[0_8px_24px_rgba(225,29,72,0.25)] hover:shadow-[0_12px_32px_rgba(225,29,72,0.35)] w-full sm:w-auto"
+            >
+              Enter Workspace
+              <ArrowRight weight="bold" size={18} />
+            </button>
+            <button
+              onClick={() => setShowDemoModal(true)}
+              className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-white border border-[#E4E4E7] text-[#18181B] text-base font-bold hover:border-[#E11D48]/30 hover:bg-white active:scale-[0.97] transition-all duration-150 shadow-sm w-full sm:w-auto"
+            >
+              <Play weight="fill" size={16} className="text-[#E11D48]" />
+              Watch Demo
+            </button>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ─────────────── SOCIAL PROOF MARQUEE ─────────────── */}
+      <section className="py-10 border-y border-[#E4E4E7]/60 bg-white/50">
+        <p className="text-center text-[10px] font-semibold uppercase tracking-[0.25em] text-[#A1A1AA] mb-6">
+          Analyzing data from Vietnam&apos;s leading tech ecosystems
         </p>
-
-        <div className="flex flex-col sm:flex-row items-center gap-4 mb-16 w-full sm:w-auto">
-          <button 
-            onClick={onStart}
-            className="bg-[#B91C1C] hover:bg-[#991B1B] text-white px-10 py-5 rounded-3xl text-xl font-extrabold transition-all shadow-[0_12px_24px_rgba(185,28,28,0.3)] hover:shadow-[0_16px_32px_rgba(185,28,28,0.4)] w-full sm:w-auto transform active:scale-95"
-          >
-            Khởi động VICO
-          </button>
-          <button 
-            onClick={() => setShowDemoModal(true)}
-            className="bg-white dark:bg-transparent border border-[#E5E7EB] dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 text-[#1A1F2B] dark:text-white px-10 py-5 rounded-3xl text-xl font-bold transition-all w-full sm:w-auto transform active:scale-95 shadow-sm"
-          >
-            Đặt lịch Demo
-          </button>
-        </div>
-        
-        <div className="flex flex-wrap gap-x-8 md:gap-x-12 gap-y-4 text-[#555E6D] dark:text-gray-400 text-sm md:text-base font-bold mb-16 md:mb-20 justify-center">
-            <div className="flex items-center gap-2.5"><Database size={18} className="text-[#9CA3AF]"/> Thu thập dữ liệu</div>
-            <div className="flex items-center gap-2.5"><Activity size={18} className="text-[#9CA3AF]"/> Phân tích thị trường</div>
-            <div className="flex items-center gap-2.5"><MessageSquare size={18} className="text-[#9CA3AF]"/> AI Chat (RAG)</div>
-            <div className="flex items-center gap-2.5"><BarChart3 size={18} className="text-[#9CA3AF]"/> Báo cáo chiến lược</div>
-        </div>
-
-        <div className="w-full max-w-5xl mx-auto perspective-2000 px-4 pb-20">
-            <div className="bg-white dark:bg-gray-900 rounded-[2rem] md:rounded-[2.5rem] p-4 md:p-10 shadow-[0_40px_100px_rgba(0,0,0,0.08)] transform rotate-x-12 origin-top border border-[#F3F4F6] dark:border-gray-800 relative overflow-hidden transition-colors duration-300">
-                <div className="flex flex-col md:flex-row gap-4 mb-8 md:mb-10">
-                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-                        <div className="bg-[#F9FAFB] dark:bg-gray-800 border border-[#F3F4F6] dark:border-gray-700 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-left flex justify-between items-center cursor-pointer hover:border-[#E5E7EB] dark:hover:border-gray-600 transition-all">
-                             <div className="flex flex-col">
-                                 <span className="text-[10px] md:text-[11px] text-[#9CA3AF] font-bold uppercase tracking-widest">Xu hướng</span>
-                                 <span className="text-sm md:text-base font-bold text-[#1A1F2B] dark:text-gray-200">"AI & Blockchain"</span>
-                             </div>
-                             <ChevronDown size={18} className="text-[#9CA3AF]" />
-                        </div>
-                        <div className="bg-[#F9FAFB] dark:bg-gray-800 border border-[#F3F4F6] dark:border-gray-700 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-left flex justify-between items-center cursor-pointer hover:border-[#E5E7EB] dark:hover:border-gray-600 transition-all">
-                             <div className="flex flex-col">
-                                 <span className="text-[10px] md:text-[11px] text-[#9CA3AF] font-bold uppercase tracking-widest">Nguồn tin</span>
-                                 <span className="text-sm md:text-base font-bold text-[#1A1F2B] dark:text-gray-200">Tin đầu tư mới</span>
-                             </div>
-                             <ChevronDown size={18} className="text-[#9CA3AF]" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="relative h-[250px] md:h-[450px] border-l-2 border-b-2 border-[#F3F4F6] dark:border-gray-800 m-2 md:m-4">
-                    <div className="absolute -left-10 md:-left-12 top-0 text-[10px] md:text-[11px] font-bold text-[#9CA3AF] uppercase">Cao</div>
-                    <div className="absolute -left-10 md:-left-12 top-1/2 text-[10px] md:text-[11px] font-bold text-[#9CA3AF] uppercase">TB</div>
-                    <div className="absolute -left-10 md:-left-12 bottom-0 text-[10px] md:text-[11px] font-bold text-[#9CA3AF] uppercase">Thấp</div>
-
-                    <div className="absolute inset-0 grid grid-cols-2 grid-rows-2" aria-hidden="true">
-                         <div className="border-r-2 border-[#F9FAFB] dark:border-gray-800/50 border-dashed"></div>
-                         <div className="border-[#F9FAFB] dark:border-gray-800/50 border-dashed"></div>
-                         <div className="border-r-2 border-t-2 border-[#F9FAFB] dark:border-gray-800/50 border-dashed"></div>
-                         <div className="border-t-2 border-[#F9FAFB] dark:border-gray-800/50 border-dashed"></div>
-                    </div>
-
-                    <div className="absolute top-[30%] left-[25%] flex flex-col items-center transform transition-all hover:scale-110 cursor-pointer group">
-                        <div className="w-12 md:w-16 h-12 md:h-16 rounded-full border-2 border-[#F15048] bg-white dark:bg-gray-800 shadow-[0_12px_24px_rgba(241,80,72,0.2)] flex items-center justify-center p-2 md:p-3 relative z-10 group-hover:border-red-600 transition-all">
-                           <span className="text-[#F15048] font-black text-xs md:text-sm">VNG</span>
-                        </div>
-                        <span className="mt-2 md:mt-4 text-[9px] md:text-[11px] font-bold text-[#F15048] uppercase tracking-widest bg-[#FEF2F2] dark:bg-red-900/30 px-2 md:px-3 py-0.5 md:py-1 rounded-full border border-[#FEE2E2] dark:border-red-800/50">AI Lab</span>
-                    </div>
-
-                    <div className="absolute bottom-[40%] right-[35%] flex flex-col items-center transform transition-all hover:scale-110 cursor-pointer group">
-                        <div className="w-12 md:w-16 h-12 md:h-16 rounded-full border-2 border-orange-500 bg-white dark:bg-gray-800 shadow-[0_12px_24px_rgba(249,115,22,0.2)] flex items-center justify-center p-2 md:p-3 relative z-10 group-hover:border-orange-600 transition-all">
-                           <div className="text-orange-500 font-black text-xs md:text-sm">FPT</div>
-                        </div>
-                        <span className="mt-2 md:mt-4 text-[9px] md:text-[11px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest bg-[#FFF7ED] dark:bg-orange-900/30 px-2 md:px-3 py-0.5 md:py-1 rounded-full border border-[#FFEDD5] dark:border-orange-800/50">Chips</span>
-                    </div>
-                    
-                    <div className="absolute top-[20%] right-[10%] md:right-[15%] flex flex-col items-center transform transition-all hover:scale-110 cursor-pointer group">
-                        <div className="w-14 md:w-20 h-14 md:h-20 rounded-full border-2 border-blue-500 bg-white dark:bg-gray-800 shadow-[0_12px_24px_rgba(59,130,246,0.2)] flex items-center justify-center p-2 md:p-4 relative z-10 group-hover:border-blue-600 transition-all">
-                           <div className="text-blue-500 font-black text-[10px] md:text-xs text-center leading-tight uppercase">VinFast</div>
-                        </div>
-                        <span className="mt-2 md:mt-4 text-[9px] md:text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest bg-[#EFF6FF] dark:bg-blue-900/30 px-2 md:px-3 py-0.5 md:py-1 rounded-full border border-[#DBEAFE] dark:border-blue-800/50">EV Market</span>
-                    </div>
-
-                    <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2">
-                        <button 
-                          onClick={onStart}
-                          className="w-14 md:w-16 h-14 md:h-16 bg-[#B91C1C] hover:bg-[#991B1B] rounded-full flex items-center justify-center shadow-[0_12px_32px_rgba(185,28,28,0.4)] transition-transform hover:scale-110 active:scale-95"
-                          aria-label="Xem demo trực quan"
-                        >
-                            <Play fill="white" className="text-white ml-1" size={24} />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {/* Trust indicators */}
-        <div className="pb-16 flex flex-col items-center gap-6">
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Dữ liệu thực từ database VICO</p>
-          <div className="flex items-center gap-8 text-gray-300 dark:text-gray-600">
-            <Sparkles size={16} />
-            <span className="text-xs font-bold text-gray-400">10,289 công ty</span>
-            <span className="text-gray-300 dark:text-gray-700">•</span>
-            <span className="text-xs font-bold text-gray-400">9 ngành công nghiệp</span>
-            <span className="text-gray-300 dark:text-gray-700">•</span>
-            <span className="text-xs font-bold text-gray-400">Gemini AI + RSS</span>
+        <div className="overflow-hidden relative max-w-5xl mx-auto">
+          {/* Fade edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#FAFAFA] to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#FAFAFA] to-transparent z-10 pointer-events-none" />
+          <div className="flex vico-marquee whitespace-nowrap">
+            {[...heroCompanies, ...heroCompanies].map((name, i) => (
+              <span
+                key={i}
+                className="mx-8 lg:mx-12 text-lg lg:text-xl font-bold text-[#D4D4D8] select-none"
+              >
+                {name}
+              </span>
+            ))}
           </div>
         </div>
-      </main>
+      </section>
 
-      {/* Book a Demo Modal */}
+      {/* ─────────────── FEATURES BENTO GRID ─────────────── */}
+      <section className="py-20 lg:py-28 px-6">
+        <div className="max-w-6xl mx-auto">
+
+          {/* Section header */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={stagger}
+            className="text-center mb-14"
+          >
+            <motion.p variants={fadeUp} className="text-[11px] font-semibold uppercase tracking-widest text-[#E11D48] mb-3">
+              Platform Capabilities
+            </motion.p>
+            <motion.h2 variants={fadeUp} className="font-display text-3xl lg:text-4xl font-extrabold tracking-tight mb-4">
+              Everything you need to win in Vietnam
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-[#71717A] text-base max-w-xl mx-auto">
+              From market screening to GTM execution&nbsp;&mdash; one intelligent platform.
+            </motion.p>
+          </motion.div>
+
+          {/* Bento Grid */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={stagger}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5"
+          >
+            {/* ── CARD 1: Cross-Industry Screener (Large — spans 2 rows) ── */}
+            <motion.div
+              variants={fadeUp}
+              className="bg-white border border-[#E4E4E7] rounded-3xl p-7 lg:p-8 lg:row-span-2 flex flex-col justify-between hover:shadow-lg hover:border-[#E11D48]/20 transition-all duration-300"
+            >
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-[#FFF1F2] flex items-center justify-center mb-5">
+                  <Funnel weight="duotone" size={24} className="text-[#E11D48]" />
+                </div>
+                <h3 className="font-display text-xl font-bold tracking-tight mb-2">Cross-Industry Screener</h3>
+                <p className="text-sm text-[#71717A] leading-relaxed mb-6">
+                  Filter 10,000+ Vietnamese companies across 9 verticals by revenue,
+                  headcount, funding stage, and AI&#8209;readiness score.
+                </p>
+              </div>
+
+              {/* Mini chart visualization */}
+              <div className="space-y-3 bg-[#FAFAFA] rounded-2xl p-5 border border-[#E4E4E7]/60">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-[#A1A1AA]">Industry match</span>
+                  <span className="text-[10px] font-bold text-[#E11D48]">47 companies</span>
+                </div>
+                {industries.map((bar) => (
+                  <div key={bar.label} className="flex items-center gap-3">
+                    <span className="text-[10px] font-medium text-[#71717A] w-20 text-right shrink-0">{bar.label}</span>
+                    <div className="flex-1 h-2 bg-[#E4E4E7]/40 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#E11D48] to-[#F97316]"
+                        style={{ width: `${bar.pct}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-bold text-[#18181B] w-8 text-right">{bar.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* ── CARD 2: Smart ICP Builder ── */}
+            <motion.div
+              variants={fadeUp}
+              className="bg-white border border-[#E4E4E7] rounded-3xl p-7 lg:p-8 hover:shadow-lg hover:border-[#E11D48]/20 transition-all duration-300"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#E11D48] to-[#F97316] flex items-center justify-center mb-5">
+                <Brain weight="duotone" size={24} className="text-white" />
+              </div>
+              <h3 className="font-display text-xl font-bold tracking-tight mb-2">Smart ICP Builder</h3>
+              <p className="text-sm text-[#71717A] leading-relaxed mb-5">
+                Automatically generates Ideal Customer Profiles with firmographics,
+                technographics, and buying signals.
+              </p>
+
+              {/* Mock persona card */}
+              <div className="bg-[#FAFAFA] rounded-2xl p-4 border border-[#E4E4E7]/60 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#E11D48] to-[#F97316] flex items-center justify-center shrink-0">
+                    <span className="text-white text-[10px] font-extrabold">AI</span>
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-[#18181B]">VP of Engineering</div>
+                    <div className="text-[10px] text-[#A1A1AA]">Series B+ &bull; 50–200 employees</div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {icpTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2.5 py-0.5 text-[9px] font-semibold rounded-full bg-[#FFF1F2] text-[#E11D48] border border-[#E11D48]/10"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ── CARD 3: GTM Playbooks ── */}
+            <motion.div
+              variants={fadeUp}
+              className="bg-white border border-[#E4E4E7] rounded-3xl p-7 lg:p-8 hover:shadow-lg hover:border-[#E11D48]/20 transition-all duration-300"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-[#FFF7ED] flex items-center justify-center mb-5">
+                <RocketLaunch weight="duotone" size={24} className="text-[#F97316]" />
+              </div>
+              <h3 className="font-display text-xl font-bold tracking-tight mb-2">GTM Playbooks</h3>
+              <p className="text-sm text-[#71717A] leading-relaxed mb-5">
+                AI-generated go-to-market strategies with phased execution plans
+                tailored to the Vietnamese market.
+              </p>
+
+              {/* Phase indicators */}
+              <div className="space-y-3">
+                {gtmPhases.map((step) => (
+                  <div key={step.phase} className="flex items-center gap-3">
+                    <div
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                        step.done
+                          ? 'bg-[#D1FAE5] text-[#059669]'
+                          : step.active
+                            ? 'bg-gradient-to-br from-[#E11D48] to-[#F97316] text-white shadow-sm'
+                            : 'bg-[#FAFAFA] text-[#A1A1AA] border border-[#E4E4E7]'
+                      }`}
+                    >
+                      {step.phase}
+                    </div>
+                    <span
+                      className={`text-sm font-semibold ${
+                        step.done || step.active ? 'text-[#18181B]' : 'text-[#A1A1AA]'
+                      }`}
+                    >
+                      {step.title}
+                    </span>
+                    {step.done && <CheckCircle2 size={14} className="text-[#059669] ml-auto" />}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* ── CARD 4: Executive Workspace (Full-width) ── */}
+            <motion.div
+              variants={fadeUp}
+              className="bg-white border border-[#E4E4E7] rounded-3xl p-7 lg:p-8 lg:col-span-2 hover:shadow-lg hover:border-[#E11D48]/20 transition-all duration-300"
+            >
+              <div className="flex flex-col sm:flex-row gap-6 items-start">
+                <div className="flex-1">
+                  <div className="w-12 h-12 rounded-2xl bg-[#FFF1F2] flex items-center justify-center mb-5">
+                    <ShieldCheck weight="duotone" size={24} className="text-[#E11D48]" />
+                  </div>
+                  <h3 className="font-display text-xl font-bold tracking-tight mb-2">Executive Workspace</h3>
+                  <p className="text-sm text-[#71717A] leading-relaxed">
+                    Save research, GTM plans, and competitive analyses in your private,
+                    encrypted workspace. Access your strategic assets from anywhere.
+                  </p>
+                </div>
+                {/* Mock saved-reports stack */}
+                <div className="flex items-center gap-3 bg-[#FAFAFA] rounded-2xl p-4 border border-[#E4E4E7]/60 shrink-0">
+                  <div className="flex -space-x-2">
+                    {['📊', '📈', '📋', '🎯'].map((emoji, i) => (
+                      <div
+                        key={i}
+                        className="w-10 h-10 rounded-xl bg-white border border-[#E4E4E7] flex items-center justify-center text-base shadow-sm"
+                      >
+                        {emoji}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="ml-2">
+                    <div className="text-xs font-bold text-[#18181B]">4 reports saved</div>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Lock weight="duotone" size={10} className="text-[#059669]" />
+                      <span className="text-[10px] text-[#A1A1AA]">End-to-end encrypted</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─────────────── STATS ROW ─────────────── */}
+      <section className="py-16 border-y border-[#E4E4E7]/60 bg-white/50">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 lg:gap-12 px-6 text-center"
+        >
+          {statItems.map((s) => (
+            <motion.div key={s.label} variants={fadeUp} className="flex flex-col items-center gap-2">
+              <s.Icon weight="duotone" size={28} className="text-[#E11D48] mb-1" />
+              <span className="font-display text-3xl lg:text-4xl font-extrabold tracking-tight text-[#18181B]">
+                {s.value}
+              </span>
+              <span className="text-xs font-semibold text-[#A1A1AA] uppercase tracking-widest">
+                {s.label}
+              </span>
+            </motion.div>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* ─────────────── FINAL CTA ─────────────── */}
+      <section className="py-20 lg:py-28 px-6">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="max-w-3xl mx-auto text-center"
+        >
+          <motion.div
+            variants={fadeUp}
+            className="w-16 h-16 rounded-3xl bg-gradient-to-br from-[#E11D48] to-[#F97316] flex items-center justify-center mx-auto mb-8 shadow-lg shadow-[#E11D48]/20"
+          >
+            <ChartLineUp weight="duotone" size={32} className="text-white" />
+          </motion.div>
+
+          <motion.h2 variants={fadeUp} className="font-display text-3xl lg:text-4xl font-extrabold tracking-tight mb-4">
+            Ready to dominate your market?
+          </motion.h2>
+          <motion.p variants={fadeUp} className="text-[#71717A] text-base mb-10 max-w-lg mx-auto">
+            Join the executives using VICO to make data-driven decisions in
+            Vietnam&apos;s fastest-growing sectors.
+          </motion.p>
+
+          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={onStart}
+              className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-[#E11D48] text-white text-base font-bold hover:bg-[#BE123C] active:scale-[0.97] transition-all duration-150 shadow-[0_8px_24px_rgba(225,29,72,0.25)] w-full sm:w-auto"
+            >
+              Start Free
+              <ArrowRight weight="bold" size={18} />
+            </button>
+            <button
+              onClick={() => setShowDemoModal(true)}
+              className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-white border border-[#E4E4E7] text-[#18181B] text-base font-bold hover:border-[#E11D48]/30 transition-all duration-150 shadow-sm w-full sm:w-auto"
+            >
+              Book a Demo
+            </button>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ─────────────── FOOTER ─────────────── */}
+      <footer className="border-t border-[#E4E4E7] py-8 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-gradient-to-br from-[#E11D48] to-[#F97316] rounded-lg flex items-center justify-center text-white font-extrabold text-xs">
+              V
+            </div>
+            <span className="text-sm font-bold text-[#18181B]">VICO</span>
+            <span className="text-xs text-[#A1A1AA]">&copy; 2026</span>
+          </div>
+          <div className="flex items-center gap-6 text-xs text-[#A1A1AA] font-medium">
+            <span className="hover:text-[#18181B] cursor-pointer transition-colors">Privacy</span>
+            <span className="hover:text-[#18181B] cursor-pointer transition-colors">Terms</span>
+            <span className="hover:text-[#18181B] cursor-pointer transition-colors">Contact</span>
+          </div>
+        </div>
+      </footer>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          DEMO MODAL
+         ═══════════════════════════════════════════════════════════════ */}
       {showDemoModal && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1A1F2B]/80 backdrop-blur-md animate-fade-in"
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#18181B]/60 backdrop-blur-md"
           onClick={() => setShowDemoModal(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="Đặt lịch demo"
+          aria-label="Book a Demo"
         >
-            <div 
-                className="bg-white dark:bg-[#0B101B] w-full max-w-5xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border border-[#F3F4F6] dark:border-gray-800 shadow-[0_50px_100px_rgba(0,0,0,0.25)] flex flex-col md:flex-row relative max-h-[90vh] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="bg-white w-full max-w-5xl rounded-3xl overflow-hidden border border-[#E4E4E7] shadow-2xl flex flex-col md:flex-row relative max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowDemoModal(false)}
+              className="absolute top-5 right-5 text-[#A1A1AA] hover:text-[#18181B] z-10 p-2 hover:bg-[#FAFAFA] rounded-xl transition-all"
+              aria-label="Close"
             >
-                <button 
-                    onClick={() => setShowDemoModal(false)}
-                    className="absolute top-6 right-6 md:top-8 md:right-8 text-[#9CA3AF] hover:text-[#1A1F2B] dark:hover:text-white z-10 p-2 hover:bg-[#F9FAFB] dark:hover:bg-gray-800 rounded-full transition-all"
-                    aria-label="Đóng"
-                >
-                    <X size={24} />
-                </button>
-                
-                <div className="w-full md:w-5/12 p-8 md:p-16 bg-[#FDFCFB] dark:bg-[#0F1623] md:border-r border-[#F3F4F6] dark:border-gray-800 flex flex-col justify-between relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full bg-red-500/[0.02] dark:bg-red-900/[0.05] pointer-events-none" aria-hidden="true"></div>
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-10 md:mb-12">
-                           <Logo />
-                        </div>
-                        
-                        <h2 className="text-3xl md:text-5xl font-black mb-8 md:mb-10 leading-[1.1] text-[#1A1F2B] dark:text-white tracking-tighter">
-                            Đặt lịch demo <span className="text-[#B91C1C]">VICO Copilot</span> 30 phút.
-                        </h2>
-                        
-                        <p className="text-[#9CA3AF] font-bold uppercase tracking-widest text-xs mb-6 md:mb-8">Bạn sẽ nhận được</p>
-                        
-                        <ul className="space-y-6 md:space-y-8 text-[#555E6D] dark:text-gray-300">
-                            <li className="flex items-start gap-4">
-                                <div className="w-6 h-6 bg-[#FEF2F2] dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <CheckCircle2 className="text-[#B91C1C]" size={16} />
-                                </div>
-                                <span className="font-semibold text-base md:text-lg leading-snug">Demo cá nhân hóa theo ngành</span>
-                            </li>
-                            <li className="flex items-start gap-4">
-                                <div className="w-6 h-6 bg-[#FEF2F2] dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <CheckCircle2 className="text-[#B91C1C]" size={16} />
-                                </div>
-                                <span className="font-semibold text-base md:text-lg leading-snug">Case study lĩnh vực đầu tư</span>
-                            </li>
-                            <li className="flex items-start gap-4">
-                                <div className="w-6 h-6 bg-[#FEF2F2] dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <CheckCircle2 className="text-[#B91C1C]" size={16} />
-                                </div>
-                                <span className="font-semibold text-base md:text-lg leading-snug">Khung giá bản quyền doanh nghiệp</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+              <X size={20} />
+            </button>
 
-                <div className="w-full md:w-7/12 p-8 md:p-16 bg-white dark:bg-[#0B101B]">
-                    {demoSubmitted ? (
-                      <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
-                        <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6">
-                          <CheckCircle2 className="text-green-600" size={32} />
-                        </div>
-                        <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">Đã nhận yêu cầu!</h3>
-                        <p className="text-gray-500 text-sm">Chúng tôi sẽ liên hệ bạn trong 24 giờ.</p>
+            {/* ── Left Panel ── */}
+            <div className="w-full md:w-5/12 p-8 md:p-12 bg-[#FAFAFA] border-b md:border-b-0 md:border-r border-[#E4E4E7] flex flex-col justify-between relative overflow-hidden">
+              <div
+                className="absolute inset-0 bg-gradient-to-br from-[#E11D48]/[0.02] to-[#F97316]/[0.02] pointer-events-none"
+                aria-hidden="true"
+              />
+              <div className="relative z-10">
+                <Logo />
+
+                <h2 className="font-display text-3xl lg:text-4xl font-extrabold mt-10 mb-8 leading-[1.1] tracking-tight">
+                  Book a{' '}
+                  <span className="text-[#E11D48]">30&#8209;minute</span>{' '}
+                  demo.
+                </h2>
+
+                <p className="text-[10px] font-semibold text-[#A1A1AA] uppercase tracking-widest mb-5">
+                  What you&apos;ll get
+                </p>
+                <ul className="space-y-5 text-[#71717A]">
+                  {[
+                    'Personalized demo for your industry',
+                    'Investment sector case study',
+                    'Enterprise pricing framework',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-lg bg-[#FFF1F2] flex items-center justify-center shrink-0 mt-0.5">
+                        <CheckCircle2 className="text-[#E11D48]" size={14} />
                       </div>
-                    ) : (
-                    <form className="space-y-5 md:space-y-6" onSubmit={handleDemoSubmit}>
-                        <div className="grid grid-cols-2 gap-4 md:gap-6">
-                            <EnterpriseInput label="Họ" name="lastName" required type="text" placeholder="Nguyễn" />
-                            <EnterpriseInput label="Tên" name="firstName" required type="text" placeholder="An" />
-                        </div>
-                        
-                        <EnterpriseInput label="Email công việc" name="email" required type="email" placeholder="ceo@company.com.vn" />
-
-                        <EnterpriseInput label="Chức vụ" name="jobTitle" required type="text" placeholder="Giám đốc chiến lược" />
-
-                        <div className="grid grid-cols-[120px_1fr] md:grid-cols-[140px_1fr] gap-4 md:gap-6">
-                            <div className="relative border rounded-xl bg-white dark:bg-gray-950/40 border-gray-200 dark:border-gray-800 p-3 px-4 h-[64px] hover:border-gray-300 transition-all group">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1 leading-none group-hover:text-gray-500">Vùng</label>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[15px] font-bold dark:text-gray-200">VN +84</span>
-                                  <ChevronDown size={14} className="text-gray-400" />
-                                </div>
-                            </div>
-                            <EnterpriseInput label="Số điện thoại" name="phone" type="tel" placeholder="090 123 4567" />
-                        </div>
-
-                        {demoError && (
-                          <p className="text-red-500 text-sm font-semibold text-center">{demoError}</p>
-                        )}
-
-                        <button 
-                            disabled={demoLoading}
-                            className="w-full bg-[#B91C1C] hover:bg-[#991B1B] disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-5 md:py-6 rounded-[1.5rem] text-lg md:text-xl transition-all shadow-[0_20px_40px_rgba(185,28,28,0.25)] hover:shadow-[0_24px_48px_rgba(185,28,28,0.35)] transform active:scale-95 mt-4 md:mt-6 uppercase tracking-widest flex items-center justify-center gap-3"
-                        >
-                            {demoLoading ? (
-                              <>
-                                <Loader2 size={20} className="animate-spin" />
-                                Đang gửi...
-                              </>
-                            ) : 'Đặt lịch ngay'}
-                        </button>
-                        
-                        <p className="text-center text-[11px] font-bold text-[#9CA3AF] uppercase tracking-[0.15em] mt-4 md:mt-6">
-                            Dữ liệu được mã hóa • Không chia sẻ bên thứ ba
-                        </p>
-                    </form>
-                    )}
-                </div>
+                      <span className="font-semibold text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
+
+            {/* ── Right Panel — Form ── */}
+            <div className="w-full md:w-7/12 p-8 md:p-12 bg-white">
+              {demoSubmitted ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 bg-[#D1FAE5] rounded-full flex items-center justify-center mb-6">
+                    <CheckCircle2 className="text-[#059669]" size={32} />
+                  </div>
+                  <h3 className="text-xl font-extrabold text-[#18181B] mb-2">Request received!</h3>
+                  <p className="text-sm text-[#71717A]">We&apos;ll reach out within 24 hours.</p>
+                </div>
+              ) : (
+                <form className="space-y-5" onSubmit={handleDemoSubmit}>
+                  <div className="grid grid-cols-2 gap-4">
+                    <EnterpriseInput label="Last name" name="lastName" required type="text" placeholder="Nguyen" />
+                    <EnterpriseInput label="First name" name="firstName" required type="text" placeholder="An" />
+                  </div>
+
+                  <EnterpriseInput label="Work email" name="email" required type="email" placeholder="ceo@company.com.vn" />
+                  <EnterpriseInput label="Job title" name="jobTitle" required type="text" placeholder="Chief Strategy Officer" />
+
+                  <div className="grid grid-cols-[120px_1fr] gap-4">
+                    <div className="relative border rounded-xl bg-white border-[#E4E4E7] p-3 px-4 h-[64px] hover:border-[#A1A1AA] transition-all group">
+                      <label className="text-[10px] font-semibold text-[#A1A1AA] uppercase tracking-wider block mb-1 leading-none group-hover:text-[#71717A]">
+                        Region
+                      </label>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-[#18181B]">VN +84</span>
+                        <ChevronDown size={14} className="text-[#A1A1AA]" />
+                      </div>
+                    </div>
+                    <EnterpriseInput label="Phone" name="phone" type="tel" placeholder="090 123 4567" />
+                  </div>
+
+                  {demoError && (
+                    <p className="text-[#BE123C] text-sm font-semibold text-center">{demoError}</p>
+                  )}
+
+                  <button
+                    disabled={demoLoading}
+                    className="w-full bg-[#E11D48] hover:bg-[#BE123C] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl text-base transition-all shadow-[0_8px_24px_rgba(225,29,72,0.25)] hover:shadow-[0_12px_32px_rgba(225,29,72,0.35)] active:scale-[0.98] mt-2 uppercase tracking-widest flex items-center justify-center gap-3"
+                  >
+                    {demoLoading ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Book Demo Now'
+                    )}
+                  </button>
+
+                  <p className="text-center text-[10px] font-semibold text-[#A1A1AA] uppercase tracking-widest mt-4">
+                    Encrypted &bull; No third-party sharing
+                  </p>
+                </form>
+              )}
+            </div>
+          </motion.div>
         </div>
       )}
     </div>

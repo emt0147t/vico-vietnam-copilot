@@ -1,6 +1,6 @@
 /**
  * Export utility — generates downloadable reports from page data.
- * Supports JSON and CSV formats with Vietnamese-friendly filenames.
+ * Supports JSON and CSV formats with UTF-8-friendly filenames.
  */
 
 // ─── Generic helpers ───────────────────────────────────────
@@ -37,13 +37,13 @@ export function exportMarketReport(report: any) {
     const add = (s: string) => lines.push(s);
 
     add('═══════════════════════════════════════════');
-    add(`BÁO CÁO THỊ TRƯỜNG — ${report.industry || 'N/A'}`);
-    add(`Ngày tạo: ${new Date(report.generatedAt).toLocaleString('vi-VN')}`);
-    add(`Nguồn dữ liệu: ${report.sources?.competitorsAnalyzed || 0} đối thủ, ${report.sources?.industryPeersFound?.toLocaleString() || 0} doanh nghiệp cùng ngành`);
+    add(`MARKET REPORT — ${report.industry || 'N/A'}`);
+    add(`Generated: ${new Date(report.generatedAt).toLocaleString('en-US')}`);
+    add(`Data sources: ${report.sources?.competitorsAnalyzed || 0} competitors, ${report.sources?.industryPeersFound?.toLocaleString() || 0} industry peers`);
     add('═══════════════════════════════════════════');
 
     // Executive Summary
-    add('\n📋 TÓM TẮT ĐIỀU HÀNH');
+    add('\n📋 EXECUTIVE SUMMARY');
     add('─────────────────────');
     if (report.executiveSummary) {
         add(report.executiveSummary);
@@ -51,44 +51,44 @@ export function exportMarketReport(report: any) {
 
     // Market Size
     if (report.marketSize) {
-        add('\n📊 QUY MÔ THỊ TRƯỜNG');
+        add('\n📊 MARKET SIZE');
         add('─────────────────────');
         const ms = report.marketSize;
-        if (ms.tam) add(`TAM (Toàn cầu): $${ms.tam}B`);
-        if (ms.sam) add(`SAM (Việt Nam): $${ms.sam}B`);
-        if (ms.som) add(`SOM (Khả thi): $${ms.som}B`);
+        if (ms.tam) add(`TAM (Global): $${ms.tam}B`);
+        if (ms.sam) add(`SAM (Vietnam): $${ms.sam}B`);
+        if (ms.som) add(`SOM (Serviceable): $${ms.som}B`);
         if (ms.cagr) add(`CAGR: ${ms.cagr}%`);
-        if (ms.methodology) add(`Phương pháp: ${ms.methodology}`);
+        if (ms.methodology) add(`Methodology: ${ms.methodology}`);
     }
 
     // Market Dynamics
     if (report.marketDynamics) {
-        add('\n⚡ ĐỘNG LỰC THỊ TRƯỜNG');
+        add('\n⚡ MARKET DYNAMICS');
         add('─────────────────────');
         const md = report.marketDynamics;
         if (md.drivers?.length) {
-            add('\nĐộng lực tăng trưởng:');
-            md.drivers.forEach((d: any) => add(`  • ${d.title}: ${d.description} [Tác động: ${d.impact}]`));
+            add('\nGrowth drivers:');
+            md.drivers.forEach((d: any) => add(`  • ${d.title}: ${d.description} [Impact: ${d.impact}]`));
         }
         if (md.restraints?.length) {
-            add('\nRào cản & Thách thức:');
-            md.restraints.forEach((r: any) => add(`  • ${r.title}: ${r.description} [Tác động: ${r.impact}]`));
+            add('\nBarriers & Challenges:');
+            md.restraints.forEach((r: any) => add(`  • ${r.title}: ${r.description} [Impact: ${r.impact}]`));
         }
         if (md.opportunities?.length) {
-            add('\nCơ hội:');
-            md.opportunities.forEach((o: any) => add(`  • ${o.title}: ${o.description} [Tác động: ${o.impact}]`));
+            add('\nOpportunities:');
+            md.opportunities.forEach((o: any) => add(`  • ${o.title}: ${o.description} [Impact: ${o.impact}]`));
         }
     }
 
     // Competitive Landscape
     if (report.competitiveLandscape) {
-        add('\n🏢 BỨC TRANH CẠNH TRANH');
+        add('\n🏢 COMPETITIVE LANDSCAPE');
         add('─────────────────────');
         const cl = report.competitiveLandscape;
         if (cl.description) add(cl.description);
         if (cl.marketShare?.length) {
-            add('\nThị phần:');
-            cl.marketShare.forEach((c: any) => add(`  • ${c.name}: ${c.share}% (Tăng trưởng: ${c.growth}%)`));
+            add('\nMarket share:');
+            cl.marketShare.forEach((c: any) => add(`  • ${c.name}: ${c.share}% (Growth: ${c.growth}%)`));
         }
     }
 
@@ -119,7 +119,7 @@ export function exportMarketReport(report: any) {
 
     // Deals
     if (report.recentDeals?.length) {
-        add('\n💰 DEALS & ĐẦU TƯ GẦN ĐÂY');
+        add('\n💰 DEALS & RECENT INVESTMENTS');
         add('─────────────────────');
         report.recentDeals.forEach((d: any) => {
             add(`  • [${d.type}] ${d.title} — ${d.value || 'N/A'} (${d.date})`);
@@ -127,7 +127,7 @@ export function exportMarketReport(report: any) {
     }
 
     add('\n═══════════════════════════════════════════');
-    add('Xuất bởi VICO — Vietnam Copilot');
+    add('Exported by VICO — Vietnam Copilot');
     add('═══════════════════════════════════════════');
 
     downloadFile(lines.join('\n'), `VICO_Market_${report.industry || 'Report'}_${timestamp()}.txt`, 'text/plain');
@@ -142,13 +142,13 @@ export function exportCompetitorReport(report: any) {
     const add = (s: string) => lines.push(s);
 
     add('═══════════════════════════════════════════');
-    add(`BÁO CÁO PHÂN TÍCH ĐỐI THỦ`);
-    add(`Tổng đối thủ: ${report.totalCompetitors || 0}`);
-    add(`Ngày tạo: ${new Date().toLocaleString('vi-VN')}`);
+    add(`COMPETITOR ANALYSIS REPORT`);
+    add(`Total competitors: ${report.totalCompetitors || 0}`);
+    add(`Generated: ${new Date().toLocaleString('en-US')}`);
     add('═══════════════════════════════════════════');
 
     if (report.overview) {
-        add('\n📋 TỔNG QUAN');
+        add('\n📋 OVERVIEW');
         add('─────────────────────');
         add(report.overview);
     }
@@ -159,42 +159,42 @@ export function exportCompetitorReport(report: any) {
         add(`\n${'─'.repeat(50)}`);
         add(`🏢 ${idx + 1}. ${comp.name}`);
         add(`${'─'.repeat(50)}`);
-        add(`Ngành: ${comp.industry || 'N/A'}`);
-        add(`Tương đồng: ${comp.similarity ? (comp.similarity * 100).toFixed(0) + '%' : 'N/A'}`);
-        add(`Nguồn: ${comp.source || 'N/A'}`);
+        add(`Industry: ${comp.industry || 'N/A'}`);
+        add(`Similarity: ${comp.similarity ? (comp.similarity * 100).toFixed(0) + '%' : 'N/A'}`);
+        add(`Source: ${comp.source || 'N/A'}`);
 
         if (comp.firmographics) {
             const f = comp.firmographics;
-            add(`\nThông tin doanh nghiệp:`);
-            add(`  Doanh thu: ${f.revenue || 'N/A'} (${f.revenueGrowth ? f.revenueGrowth + '%' : 'N/A'} YoY)`);
-            add(`  Nhân sự: ${f.headcount || 'N/A'} (${f.headcountGrowth ? f.headcountGrowth + '%' : 'N/A'} YoY)`);
-            add(`  Trụ sở: ${f.hq || 'N/A'}`);
+            add(`\nCompany information:`);
+            add(`  Revenue: ${f.revenue || 'N/A'} (${f.revenueGrowth ? f.revenueGrowth + '%' : 'N/A'} YoY)`);
+            add(`  Headcount: ${f.headcount || 'N/A'} (${f.headcountGrowth ? f.headcountGrowth + '%' : 'N/A'} YoY)`);
+            add(`  Headquarters: ${f.hq || 'N/A'}`);
             if (f.website) add(`  Website: ${f.website}`);
         }
 
         if (comp.swot) {
             add(`\nSWOT:`);
-            if (comp.swot.strengths?.length) add(`  Điểm mạnh: ${comp.swot.strengths.join('; ')}`);
-            if (comp.swot.weaknesses?.length) add(`  Điểm yếu: ${comp.swot.weaknesses.join('; ')}`);
-            if (comp.swot.opportunities?.length) add(`  Cơ hội: ${comp.swot.opportunities.join('; ')}`);
-            if (comp.swot.threats?.length) add(`  Đe dọa: ${comp.swot.threats.join('; ')}`);
+            if (comp.swot.strengths?.length) add(`  Strengths: ${comp.swot.strengths.join('; ')}`);
+            if (comp.swot.weaknesses?.length) add(`  Weaknesses: ${comp.swot.weaknesses.join('; ')}`);
+            if (comp.swot.opportunities?.length) add(`  Opportunities: ${comp.swot.opportunities.join('; ')}`);
+            if (comp.swot.threats?.length) add(`  Threats: ${comp.swot.threats.join('; ')}`);
         }
 
         if (comp.positioning) {
-            add(`  Vị thế: ${comp.positioning.quadrant} (Market share: ${comp.positioning.marketShare || 'N/A'}%)`);
+            add(`  Position: ${comp.positioning.quadrant} (Market share: ${comp.positioning.marketShare || 'N/A'}%)`);
         }
 
         if (comp.battlecard) {
             add(`\nBattlecard:`);
-            if (comp.battlecard.whyWeWin?.length) add(`  Lý do ta thắng: ${comp.battlecard.whyWeWin.join('; ')}`);
-            if (comp.battlecard.whyWeLose?.length) add(`  Lý do ta thua: ${comp.battlecard.whyWeLose.join('; ')}`);
+            if (comp.battlecard.whyWeWin?.length) add(`  Why we win: ${comp.battlecard.whyWeWin.join('; ')}`);
+            if (comp.battlecard.whyWeLose?.length) add(`  Why we lose: ${comp.battlecard.whyWeLose.join('; ')}`);
         }
     });
 
     // CSV companion — competitor summary table
     if (competitors.length > 0) {
         const csvLines: string[] = [];
-        csvLines.push('Tên,Ngành,Tương đồng,Vị thế,Thị phần,Doanh thu,Nhân sự,Trụ sở');
+        csvLines.push('Name,Industry,Similarity,Position,Market Share,Revenue,Headcount,Headquarters');
         competitors.forEach((c: any) => {
             csvLines.push([
                 escCsv(c.name),
@@ -211,7 +211,7 @@ export function exportCompetitorReport(report: any) {
     }
 
     add('\n═══════════════════════════════════════════');
-    add('Xuất bởi VICO — Vietnam Copilot');
+    add('Exported by VICO — Vietnam Copilot');
     add('═══════════════════════════════════════════');
 
     downloadFile(lines.join('\n'), `VICO_Competitor_Report_${timestamp()}.txt`, 'text/plain');
@@ -226,39 +226,39 @@ export function exportCompanyNews(companyName: string, data: any) {
     const add = (s: string) => lines.push(s);
 
     add('═══════════════════════════════════════════');
-    add(`TIN TỨC & PHÂN TÍCH — ${companyName}`);
-    add(`Tổng bài: ${data.totalResults || data.news?.length || 0}`);
-    add(`Cập nhật: ${new Date().toLocaleString('vi-VN')}`);
+    add(`NEWS & ANALYSIS — ${companyName}`);
+    add(`Total articles: ${data.totalResults || data.news?.length || 0}`);
+    add(`Updated: ${new Date().toLocaleString('en-US')}`);
     add('═══════════════════════════════════════════');
 
     // Sentiment overview
     if (data.sentimentBreakdown) {
-        add('\n📊 PHÂN TÍCH CẢM XÚC');
+        add('\n📊 SENTIMENT ANALYSIS');
         add('─────────────────────');
         const sb = data.sentimentBreakdown;
-        add(`  Tích cực: ${sb.positive || 0} | Trung lập: ${sb.neutral || 0} | Tiêu cực: ${sb.negative || 0}`);
+        add(`  Positive: ${sb.positive || 0} | Neutral: ${sb.neutral || 0} | Negative: ${sb.negative || 0}`);
     }
 
     // News items
     if (data.news?.length) {
-        add('\n📰 TIN TỨC');
+        add('\n📰 NEWS');
         add('─────────────────────');
 
         // CSV companion
         const csvLines: string[] = [];
-        csvLines.push('Tiêu đề,Nguồn,Ngày,Mục,Cảm xúc,Link');
+        csvLines.push('Title,Source,Date,Category,Sentiment,Link');
 
         data.news.forEach((item: any, idx: number) => {
             add(`\n${idx + 1}. ${item.title}`);
-            add(`   Nguồn: ${item.source || 'N/A'} | ${item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('vi-VN') : 'N/A'}`);
-            add(`   Mục: ${item.category || 'N/A'} | Cảm xúc: ${item.sentiment || 'N/A'}`);
-            if (item.summary) add(`   Tóm tắt: ${item.summary}`);
+            add(`   Source: ${item.source || 'N/A'} | ${item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('en-US') : 'N/A'}`);
+            add(`   Category: ${item.category || 'N/A'} | Sentiment: ${item.sentiment || 'N/A'}`);
+            if (item.summary) add(`   Summary: ${item.summary}`);
             if (item.url || item.link) add(`   Link: ${item.url || item.link}`);
 
             csvLines.push([
                 escCsv(item.title),
                 escCsv(item.source),
-                escCsv(item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('vi-VN') : ''),
+                escCsv(item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('en-US') : ''),
                 escCsv(item.category),
                 escCsv(item.sentiment),
                 escCsv(item.url || item.link || ''),
@@ -269,7 +269,7 @@ export function exportCompanyNews(companyName: string, data: any) {
     }
 
     add('\n═══════════════════════════════════════════');
-    add('Xuất bởi VICO — Vietnam Copilot');
+    add('Exported by VICO — Vietnam Copilot');
     add('═══════════════════════════════════════════');
 
     downloadFile(lines.join('\n'), `VICO_News_${companyName}_${timestamp()}.txt`, 'text/plain');

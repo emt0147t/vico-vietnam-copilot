@@ -53,7 +53,7 @@ export const NewsStatsDashboard: React.FC = () => {
     return (
       <div className="text-center py-12">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="mt-4 text-gray-600">Loading statistics...</p>
+        <p className="mt-4 text-[#71717A]">Loading statistics...</p>
       </div>
     );
   }
@@ -81,8 +81,8 @@ export const NewsStatsDashboard: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">📊 News Intelligence</h2>
-          <p className="text-gray-600 text-sm mt-1">Market signal distribution and sentiment analysis</p>
+          <h2 className="text-3xl font-bold text-[#18181B]">📊 News Intelligence</h2>
+          <p className="text-[#71717A] text-sm mt-1">Market signal distribution and sentiment analysis</p>
         </div>
         <button
           onClick={fetchStats}
@@ -117,8 +117,8 @@ export const NewsStatsDashboard: React.FC = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Signal Distribution */}
-        <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-[#E4E4E7]">
+          <h3 className="text-xl font-bold text-[#18181B] mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-blue-600" />
             Market Signals
           </h3>
@@ -134,8 +134,8 @@ export const NewsStatsDashboard: React.FC = () => {
         </div>
 
         {/* Sentiment Distribution */}
-        <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Sentiment Distribution</h3>
+        <div className="bg-white rounded-lg shadow-lg p-6 border border-[#E4E4E7]">
+          <h3 className="text-xl font-bold text-[#18181B] mb-4">Sentiment Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -159,23 +159,23 @@ export const NewsStatsDashboard: React.FC = () => {
       </div>
 
       {/* Top Signals Table */}
-      <div className="mt-8 bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">Top Market Signals</h3>
+      <div className="mt-8 bg-white rounded-lg shadow-lg p-6 border border-[#E4E4E7]">
+        <h3 className="text-xl font-bold text-[#18181B] mb-4">Top Market Signals</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b-2 border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Signal Type</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Count</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Percentage</th>
+              <tr className="border-b-2 border-[#E4E4E7]">
+                <th className="text-left py-3 px-4 font-semibold text-[#18181B]">Signal Type</th>
+                <th className="text-right py-3 px-4 font-semibold text-[#18181B]">Count</th>
+                <th className="text-right py-3 px-4 font-semibold text-[#18181B]">Percentage</th>
               </tr>
             </thead>
             <tbody>
               {signalData.slice(0, 8).map((item, idx) => (
-                <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 text-gray-800">{item.name}</td>
-                  <td className="text-right py-3 px-4 text-gray-800 font-semibold">{item.value}</td>
-                  <td className="text-right py-3 px-4 text-gray-600">
+                <tr key={idx} className="border-b border-[#E4E4E7] hover:bg-[#FAFAFA]">
+                  <td className="py-3 px-4 text-[#18181B]">{item.name}</td>
+                  <td className="text-right py-3 px-4 text-[#18181B] font-semibold">{item.value}</td>
+                  <td className="text-right py-3 px-4 text-[#71717A]">
                     {((item.value / stats.totalNews) * 100).toFixed(1)}%
                   </td>
                 </tr>
@@ -186,7 +186,7 @@ export const NewsStatsDashboard: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="mt-6 text-center text-sm text-gray-600">
+      <div className="mt-6 text-center text-sm text-[#71717A]">
         <p>Last updated: {new Date(stats.lastUpdated).toLocaleString()}</p>
       </div>
     </div>

@@ -36,7 +36,7 @@ interface VectorRecord {
  * - Batch size increased to 50 (local inference handles this easily)
  * - Rate limiting reduced to 50ms (was 100ms)
  */
-export async function seedVectorDatabase(): Promise<VectorRecord[]> {
+export async function seedVectorDatabase(onProgress?: (processed: number, total: number) => void): Promise<VectorRecord[]> {
     // Check if cache file exists - if so, load from cache (fast path - milliseconds!)
     if (fs.existsSync(VECTORS_CACHE_FILE)) {
         try {
@@ -51,7 +51,7 @@ export async function seedVectorDatabase(): Promise<VectorRecord[]> {
     }
 
     // ⚡ OPTIMIZATION: Skip embedding if SKIP_EMBEDDING=true (for fast development)
-    const SKIP_EMBEDDING = process.env.SKIP_EMBEDDING === 'true';
+    const SKIP_EMBEDDING = process.env['SKIP_EMBEDDING'] === 'true';
     if (SKIP_EMBEDDING) {
         console.log('⚡ SKIP_EMBEDDING=true: Skipping vector seeding for faster load');
         console.log('   💡 To enable embedding: SKIP_EMBEDDING=false npm run server');
@@ -74,7 +74,7 @@ export async function seedVectorDatabase(): Promise<VectorRecord[]> {
         
         // Process batch in parallel
         const batchPromises = batch.map(async (c) => {
-            const text = `Công ty: ${c.name}. Ngành: ${c.industry || 'N/A'}. Giới thiệu: ${c.intro || ''}. Sản phẩm: ${c.products || ''}`.trim();
+            const text = `Company: ${c.name}. Industry: ${c.industry || 'N/A'}. Introduction: ${c.intro || ''}. Products: ${c.products || ''}`.trim();
 
             try {
                 const embedding = await getVietnameseEmbedding(text);
@@ -111,6 +111,9 @@ export async function seedVectorDatabase(): Promise<VectorRecord[]> {
         batchResults.forEach(result => {
             if (result) records.push(result);
         });
+
+        // Progress callback
+        try { if (typeof onProgress === 'function') onProgress(Math.min(records.length, companies.length), companies.length); } catch (e) { }
 
         // Progress indicator every batch
         if ((i + BATCH_SIZE) % 100 === 0) {

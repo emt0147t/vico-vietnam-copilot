@@ -70,11 +70,11 @@ async function runTests() {
       console.log(`    - ${size}`);
     });
 
-    // Test 9: Random companies
-    console.log('\n✓ Test 9: Get Random Companies');
-    const random = service.getRandomCompanies(3);
-    console.log(`  Random companies:`);
-    random.forEach((c) => {
+    // Test 9: Sample companies
+    console.log('\n✓ Test 9: Get Sample Companies');
+    const sample = service.getSampleCompanies(3);
+    console.log(`  Sample companies:`);
+    sample.forEach((c) => {
       console.log(`    - ${c.name} (${c.industry})`);
     });
 

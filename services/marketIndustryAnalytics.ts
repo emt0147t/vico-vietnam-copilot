@@ -8,7 +8,8 @@
  * 4. Industry Health Metrics: Company counts, avg growth, sentiment
  */
 
-import CompaniesDataService, { EnrichedCompany } from './companiesDataService';
+import CompaniesDataService from './companiesDataService';
+import { CompanyProfile } from '../data/companies';
 
 export interface MarketIndexMetrics {
   industry: string;
@@ -38,7 +39,6 @@ export interface MarketIndexMetrics {
 
 export interface CompanyRank {
   name: string;
-  taxId?: string;
   employees: string;
   employeeCount: number;
   industry: string;
@@ -115,7 +115,7 @@ class MarketIndustryAnalytics {
     // Calculate employee metrics
     const employeeData = companies.map((c) => ({
       company: c,
-      count: this.parseEmployeeCount(c.employees),
+      count: this.parseEmployeeCount(c.size),
     }));
 
     const totalEmployees = employeeData.reduce((sum, d) => sum + d.count, 0);
@@ -126,8 +126,7 @@ class MarketIndustryAnalytics {
       .slice(0, 5)
       .map((d, idx) => ({
         name: d.company.name,
-        taxId: d.company.taxId,
-        employees: d.company.employees,
+        employees: d.company.size,
         employeeCount: d.count,
         industry: d.company.industry || 'Unknown',
         rank: idx + 1,
@@ -164,7 +163,7 @@ class MarketIndustryAnalytics {
     // Growth metrics
     const currentYear = new Date().getFullYear();
     const avgCompanyAge = companies.reduce((sum, c) => {
-      const age = c.yearFounded ? currentYear - c.yearFounded : 10;
+      const age = c.year ? currentYear - c.year : 10;
       return sum + age;
     }, 0) / companies.length;
 
@@ -177,7 +176,7 @@ class MarketIndustryAnalytics {
     // Employee size distribution
     const employeeSizeDistribution: { [key: string]: number } = {};
     companies.forEach((c) => {
-      const size = c.employees || 'Unknown';
+      const size = c.size || 'Unknown';
       employeeSizeDistribution[size] = (employeeSizeDistribution[size] || 0) + 1;
     });
 
@@ -330,7 +329,7 @@ class MarketIndustryAnalytics {
   getGrowthLeadersInIndustry(
     industry: string,
     limit: number = 10
-  ): (EnrichedCompany & { rank: number })[] {
+  ): (CompanyProfile & { rank: number })[] {
     const companies = this.service.getCompaniesByIndustry(industry);
     return companies
       .sort((a, b) => (b.growth || 0) - (a.growth || 0))

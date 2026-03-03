@@ -20,6 +20,7 @@ import { GoogleGenAI } from '@google/genai';
 import { loadAllCompanies, NormalizedCompany } from './competitorEngine';
 import type { LivingPlaybook } from '../data/gtmModels';
 import { CompetitivePosition, ScenarioType } from '../data/gtmModels';
+import { PESTELService } from './pestelService';
 
 // ============================================================================
 // GEMINI AI CLIENT
@@ -323,6 +324,15 @@ export async function generateLivingPlaybook(
     const industryLabel = company.industry || 'Technology';
     const isEarlyStage = company.employeeSize?.toLowerCase().includes('<') || company.employeeSize?.toLowerCase().includes('100');
 
+    // Fetch PESTEL quick scores for this industry
+    let pestelScores: Record<string, { score: number; trend: string }> | null = null;
+    try {
+        pestelScores = PESTELService.getQuickScores(industryLabel);
+        console.log(`   🧠 PESTEL scores loaded for ${industryLabel}`);
+    } catch {
+        console.warn(`   ⚠️ PESTEL scores unavailable for ${industryLabel}`);
+    }
+
     console.log(`   📊 Company: ${company.name} (${industryLabel})`);
     console.log(`   🏢 Competitors found: ${competitors.length}`);
     console.log(`   📈 Industry: ${industryStats.totalCompanies} companies`);
@@ -479,6 +489,32 @@ export async function generateLivingPlaybook(
                 regulatoryNotes: aiAnalysis?.marketReport.regulatoryNotes || [],
             },
         ],
+
+        // PESTEL-informed market report (if available)
+        ...(pestelScores ? [{
+            id: 'mr_pestel',
+            topic: `PESTEL Analysis — ${industryLabel} Vietnam`,
+            summary: `Phân tích PESTEL cho ngành ${industryLabel} tại Việt Nam. Dựa trên baseline data từ VICO PESTEL engine.`,
+            keyFindings: Object.entries(pestelScores).map(([dim, data]) =>
+                `${dim.charAt(0).toUpperCase() + dim.slice(1)}: ${(data as any).score}/5 (${(data as any).trend})`
+            ),
+            dataSources: [
+                { name: 'VICO PESTEL Engine', type: 'database' as const, reliability: 80, country: 'Vietnam', lastUpdated: now },
+            ],
+            generatedAt: now,
+            confidence: 70,
+            marketSize: 'N/A — PESTEL is qualitative',
+            growthRate: 'N/A',
+            trends: Object.entries(pestelScores).map(([dim, data]) => ({
+                trend: `${dim}: ${(data as any).trend === 'improving' ? 'Cải thiện' : (data as any).trend === 'declining' ? 'Giảm' : 'Ổn định'}`,
+                impact: ((data as any).score >= 3.5 ? 'positive' : (data as any).score >= 2.5 ? 'neutral' : 'negative') as any,
+                timeframe: '2024-2026',
+                confidence: 70,
+            })),
+            regulatoryNotes: pestelScores['legal']
+                ? [`Legal environment score: ${(pestelScores['legal'] as any).score}/5`]
+                : [],
+        }] : []),
 
         // ═══ MODULE 4: SCENARIO MODELING ═══
         scenarioModels: [

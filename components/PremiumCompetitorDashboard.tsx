@@ -62,10 +62,10 @@ export const PremiumCompetitorDashboard = ({ companyName }: CompetitorDashboardP
             >
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-4xl font-black text-gray-900 mb-2">
+                        <h1 className="text-4xl font-black text-[#18181B] mb-2">
                             Competitive Analysis
                         </h1>
-                        <p className="text-gray-600">
+                        <p className="text-[#71717A]">
                             Market intelligence for <span className="font-bold text-blue-600">{companyName}</span>
                         </p>
                     </div>
@@ -73,7 +73,7 @@ export const PremiumCompetitorDashboard = ({ companyName }: CompetitorDashboardP
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors flex items-center gap-2 text-sm font-medium"
+                            className="px-4 py-2 bg-white border border-[#E4E4E7] rounded-lg hover:border-[#E4E4E7] transition-colors flex items-center gap-2 text-sm font-medium"
                         >
                             <Download size={16} /> Export
                         </motion.button>
@@ -88,7 +88,7 @@ export const PremiumCompetitorDashboard = ({ companyName }: CompetitorDashboardP
                 </div>
 
                 {/* Tab Navigation */}
-                <div className="flex gap-1 bg-white rounded-lg border border-gray-200 p-1 w-fit">
+                <div className="flex gap-1 bg-white rounded-lg border border-[#E4E4E7] p-1 w-fit">
                     {[
                         { id: 'overview', label: 'Market Overview' },
                         { id: 'metrics', label: 'Competitor Metrics' },
@@ -100,7 +100,7 @@ export const PremiumCompetitorDashboard = ({ companyName }: CompetitorDashboardP
                             className={`px-6 py-2 rounded transition-all font-medium text-sm ${
                                 activeTab === tab.id
                                     ? 'bg-blue-600 text-white'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                    : 'text-[#71717A] hover:text-[#18181B]'
                             }`}
                         >
                             {tab.label}
@@ -143,17 +143,17 @@ const OverviewSection = ({ comparison }: { comparison: CompetitorComparison }) =
             className="space-y-8"
         >
             {/* Market Analysis Card */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-2xl border border-[#E4E4E7] p-8 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-4 mb-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                         <Brain size={24} className="text-blue-600" />
                     </div>
                     <div className="flex-1">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Market Landscape</h2>
-                        <p className="text-gray-500 text-sm">AI-powered competitive intelligence</p>
+                        <h2 className="text-2xl font-bold text-[#18181B] mb-2">Market Landscape</h2>
+                        <p className="text-[#71717A] text-sm">AI-powered competitive intelligence</p>
                     </div>
                 </div>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-[#18181B] leading-relaxed">
                     {comparison.overallAnalysis}
                 </p>
             </div>
@@ -182,7 +182,7 @@ const OverviewSection = ({ comparison }: { comparison: CompetitorComparison }) =
 
             {/* Competitor Overview Cards */}
             <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Competitor Profiles</h2>
+                <h2 className="text-2xl font-bold text-[#18181B] mb-4">Competitor Profiles</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {comparison.competitors.slice(0, 6).map((comp, idx) => (
                         <div key={`${comp.competitor.name}-${idx}`}>
@@ -211,7 +211,7 @@ const KPICard = ({ icon: Icon, title, items, color }: { icon: any; title: string
         >
             <div className="flex items-center gap-3 mb-4">
                 <Icon size={20} className={c.icon} />
-                <h3 className="font-bold text-gray-900">{title}</h3>
+                <h3 className="font-bold text-[#18181B]">{title}</h3>
             </div>
             <ul className="space-y-2">
                 {items.map((item, i) => (
@@ -247,31 +247,31 @@ function CompetitorCard({ competitor }: CompetitorCardDashboardProps) {
     return (
         <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all"
+            className="bg-white rounded-2xl border border-[#E4E4E7] p-6 shadow-sm hover:shadow-md transition-all"
         >
             <div className="flex items-start gap-4 mb-4">
                 <div className={`w-12 h-12 ${bgColor} rounded-lg flex items-center justify-center text-white font-bold text-lg`}>
                     {initials}
                 </div>
                 <div className="flex-1">
-                    <h3 className="font-bold text-gray-900">{competitor.competitor.name}</h3>
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">{competitor.competitor.industry}</p>
+                    <h3 className="font-bold text-[#18181B]">{competitor.competitor.name}</h3>
+                    <p className="text-xs text-[#71717A] uppercase tracking-wide">{competitor.competitor.industry}</p>
                 </div>
             </div>
 
             <div className="space-y-3 mb-4">
                 <div>
-                    <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">Market Position</p>
+                    <p className="text-xs font-bold text-[#71717A] uppercase tracking-wide mb-1">Market Position</p>
                     <div className="flex gap-3">
                         {competitor.marketPosition.marketShare && (
-                            <div className="flex-1 bg-gray-100 rounded-lg p-2">
-                                <p className="text-xs text-gray-600">Market Share</p>
-                                <p className="text-lg font-bold text-gray-900">{competitor.marketPosition.marketShare.toFixed(1)}%</p>
+                            <div className="flex-1 bg-[#F4F4F5] rounded-lg p-2">
+                                <p className="text-xs text-[#71717A]">Market Share</p>
+                                <p className="text-lg font-bold text-[#18181B]">{competitor.marketPosition.marketShare.toFixed(1)}%</p>
                             </div>
                         )}
                         {competitor.marketPosition.growthRate && (
                             <div className="flex-1 bg-green-50 rounded-lg p-2">
-                                <p className="text-xs text-gray-600">Growth</p>
+                                <p className="text-xs text-[#71717A]">Growth</p>
                                 <p className="text-lg font-bold text-green-600">+{competitor.marketPosition.growthRate.toFixed(1)}%</p>
                             </div>
                         )}
@@ -281,8 +281,8 @@ function CompetitorCard({ competitor }: CompetitorCardDashboardProps) {
 
             {competitor.news && competitor.news.length > 0 && (
                 <div>
-                    <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Latest News</p>
-                    <p className="text-xs text-gray-600 line-clamp-2">{competitor.news[0]?.title}</p>
+                    <p className="text-xs font-bold text-[#71717A] uppercase tracking-wide mb-2">Latest News</p>
+                    <p className="text-xs text-[#71717A] line-clamp-2">{competitor.news[0]?.title}</p>
                 </div>
             )}
         </motion.div>
@@ -301,28 +301,28 @@ const MetricsSection = ({ comparison }: { comparison: CompetitorComparison }) =>
             className="space-y-6"
         >
             <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Competitor Comparison Matrix</h2>
+                <h2 className="text-2xl font-bold text-[#18181B]">Competitor Comparison Matrix</h2>
                 <motion.button
                     whileHover={{ scale: 1.05 }}
-                    className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-gray-300 flex items-center gap-2 text-sm font-medium"
+                    className="px-4 py-2 bg-white border border-[#E4E4E7] rounded-lg hover:border-[#E4E4E7] flex items-center gap-2 text-sm font-medium"
                 >
                     <Filter size={16} /> Filter
                 </motion.button>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+            <div className="bg-white rounded-2xl border border-[#E4E4E7] overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Competitor</th>
-                                <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Market Share</th>
-                                <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Growth Rate</th>
-                                <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Visibility</th>
-                                <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Trend</th>
+                            <tr className="bg-[#FAFAFA] border-b border-[#E4E4E7]">
+                                <th className="px-6 py-4 text-left text-xs font-bold text-[#71717A] uppercase tracking-wider">Competitor</th>
+                                <th className="px-6 py-4 text-center text-xs font-bold text-[#71717A] uppercase tracking-wider">Market Share</th>
+                                <th className="px-6 py-4 text-center text-xs font-bold text-[#71717A] uppercase tracking-wider">Growth Rate</th>
+                                <th className="px-6 py-4 text-center text-xs font-bold text-[#71717A] uppercase tracking-wider">Visibility</th>
+                                <th className="px-6 py-4 text-center text-xs font-bold text-[#71717A] uppercase tracking-wider">Trend</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody className="divide-y divide-[#E4E4E7]">
                             {comparison.competitors.map((comp, idx) => (
                                 <motion.tr
                                     key={`table-${idx}`}
@@ -335,17 +335,17 @@ const MetricsSection = ({ comparison }: { comparison: CompetitorComparison }) =>
                                                 {comp.competitor.name.substring(0, 2).toUpperCase()}
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-gray-900">{comp.competitor.name}</p>
-                                                <p className="text-xs text-gray-500">{comp.competitor.industry}</p>
+                                                <p className="font-semibold text-[#18181B]">{comp.competitor.name}</p>
+                                                <p className="text-xs text-[#71717A]">{comp.competitor.industry}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col items-center">
-                                            <span className="font-bold text-gray-900">
+                                            <span className="font-bold text-[#18181B]">
                                                 {(comp.marketPosition.marketShare as number)?.toFixed(1) || 0}%
                                             </span>
-                                            <div className="w-16 h-2 bg-gray-200 rounded-full mt-2">
+                                            <div className="w-16 h-2 bg-[#E4E4E7] rounded-full mt-2">
                                                 <div
                                                     className="h-full bg-blue-600 rounded-full transition-all"
                                                     style={{ width: `${Math.min(100, (comp.marketPosition.marketShare as number) || 0)}%` }}
@@ -363,7 +363,7 @@ const MetricsSection = ({ comparison }: { comparison: CompetitorComparison }) =>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="text-center">
-                                            <span className="font-bold text-gray-900">
+                                            <span className="font-bold text-[#18181B]">
                                                 {(comp.marketPosition.visibility as number)?.toFixed(0) || 0}%
                                             </span>
                                         </div>
@@ -418,9 +418,9 @@ const InsightCard = ({ title, value, metric, icon: Icon, color }: { title: strin
         >
             <div className="flex items-start justify-between">
                 <div>
-                    <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">{title}</p>
-                    <p className="text-3xl font-black text-gray-900 mb-2">{value}</p>
-                    <p className="text-xs text-gray-600">{metric}</p>
+                    <p className="text-sm font-semibold text-[#71717A] uppercase tracking-wide mb-2">{title}</p>
+                    <p className="text-3xl font-black text-[#18181B] mb-2">{value}</p>
+                    <p className="text-xs text-[#71717A]">{metric}</p>
                 </div>
                 <Icon size={32} className={c.icon} opacity={0.5} />
             </div>
@@ -441,7 +441,7 @@ const AnalysisSection = ({ comparison }: { comparison: CompetitorComparison }) =
             exit={{ opacity: 0, y: -20 }}
             className="space-y-6"
         >
-            <h2 className="text-2xl font-bold text-gray-900">Strategic Insights & Recommendations</h2>
+            <h2 className="text-2xl font-bold text-[#18181B]">Strategic Insights & Recommendations</h2>
 
             {[
                 {
@@ -519,7 +519,7 @@ function AnalysisCard({ section, isExpanded, onToggle }: AnalysisCardProps) {
             >
                 <div className="flex items-center gap-3">
                     <Icon size={20} className={c.text} />
-                    <h3 className="font-bold text-gray-900">{section.title}</h3>
+                    <h3 className="font-bold text-[#18181B]">{section.title}</h3>
                 </div>
                 <motion.div
                     animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -535,7 +535,7 @@ function AnalysisCard({ section, isExpanded, onToggle }: AnalysisCardProps) {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="px-6 py-4 border-t border-gray-200"
+                        className="px-6 py-4 border-t border-[#E4E4E7]"
                     >
                         <ul className="space-y-3">
                             {section.items.map((item: string, i: number) => (

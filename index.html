@@ -18,25 +18,62 @@
         theme: {
           extend: {
             fontFamily: {
-              sans: ['"Plus Jakarta Sans"', 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', '"Noto Sans"', 'sans-serif'],
+              display: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              body: ['"Manrope"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              sans: ['"Plus Jakarta Sans"', '"Manrope"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
             },
             colors: {
-              gray: {
-                950: '#0B101B',
+              // --- VICO Executive Crimson Palette ---
+              surface: {
+                base: '#FAFAFA',
+                card: '#FFFFFF',
+                border: '#E4E4E7',
               },
-              vico: {
-                red: '#B91C1C',
-                coral: '#EF4444',
-                dark: '#0B101B',
-                panel: '#0F1623',
-              }
-            }
+              ink: {
+                primary: '#18181B',
+                muted: '#71717A',
+                faint: '#A1A1AA',
+              },
+              brand: {
+                DEFAULT: '#E11D48',
+                hover: '#BE123C',
+                light: '#FFF1F2',
+                subtle: '#FFE4E6',
+              },
+              ai: {
+                rose: '#E11D48',
+                sunset: '#F97316',
+                glow: '#FFF7ED',
+              },
+              status: {
+                growth: '#059669',
+                'growth-bg': '#D1FAE5',
+                warn: '#D97706',
+                'warn-bg': '#FEF3C7',
+                decline: '#991B1B',
+                'decline-bg': '#F5F5F4',
+              },
+              // Legacy compat
+              gray: { 950: '#0B101B' },
+              vico: { red: '#E11D48', coral: '#FB7185', dark: '#0B101B', panel: '#0F1623' },
+            },
+            borderRadius: {
+              bento: '12px',
+            },
+            boxShadow: {
+              bento: '0 1px 3px 0 rgba(0,0,0,0.04)',
+              'bento-hover': '0 4px 12px 0 rgba(0,0,0,0.06)',
+              glow: '0 0 20px 4px rgba(225,29,72,0.10)',
+            },
           }
         }
       }
     </script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,800&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
       
       body {
         font-family: 'Plus Jakarta Sans', sans-serif;
@@ -133,7 +170,7 @@
 
       /* Focus visible styles for accessibility */
       *:focus-visible {
-        outline: 2px solid #B91C1C;
+        outline: 2px solid #E11D48;
         outline-offset: 2px;
         border-radius: 4px;
       }
@@ -147,21 +184,9 @@
         }
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
-    "zod": "https://esm.sh/zod@^4.2.1"
-  }
-}
-</script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-gray-50 text-gray-900 dark:bg-[#0B101B] dark:text-white transition-colors duration-200">
+  <body class="bg-[#FAFAFA] text-[#18181B] dark:bg-[#0B101B] dark:text-white transition-colors duration-200 antialiased">
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

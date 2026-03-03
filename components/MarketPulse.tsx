@@ -80,13 +80,13 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
       case SignalType.PERSONNEL:
         return <Users {...iconProps} className="text-orange-500" />;
       case SignalType.PARTNERSHIP:
-        return <HandshakeIcon {...iconProps} className="text-indigo-500" />;
+        return <HandshakeIcon {...iconProps} className="text-[#E11D48]" />;
       case SignalType.EARNINGS:
         return <TrendingUp {...iconProps} className="text-teal-500" />;
       case SignalType.EXPANSION:
         return <Zap {...iconProps} className="text-yellow-500" />;
       default:
-        return <AlertCircle {...iconProps} className="text-gray-500" />;
+        return <AlertCircle {...iconProps} className="text-[#71717A]" />;
     }
   };
 
@@ -97,7 +97,7 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
       case SentimentType.NEGATIVE:
         return "bg-red-50 border-red-200";
       default:
-        return "bg-gray-50 border-gray-200";
+        return "bg-[#FAFAFA] border-[#E4E4E7]";
     }
   };
 
@@ -108,7 +108,7 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
       case SentimentType.NEGATIVE:
         return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-[#F4F4F5] text-[#18181B]";
     }
   };
 
@@ -116,10 +116,10 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
     <div className="w-full max-w-4xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <h2 className="text-3xl font-bold text-[#18181B] mb-2">
           📊 Market Pulse
         </h2>
-        <p className="text-gray-600">
+        <p className="text-[#71717A]">
           {companyName
             ? `Real-time news and signals for ${companyName}`
             : "Monitor market signals and company movements"}
@@ -133,7 +133,7 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
           className={`px-4 py-2 rounded-lg font-medium transition ${
             selectedSignal === "all"
               ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              : "bg-[#E4E4E7] text-[#18181B] hover:bg-[#D4D4D8]"
           }`}
         >
           All Signals
@@ -147,7 +147,7 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
               className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
                 selectedSignal === signal
                   ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  : "bg-[#F4F4F5] text-[#18181B] hover:bg-[#E4E4E7]"
               }`}
             >
               {getSignalIcon(signal)}
@@ -161,11 +161,11 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Loading news...</p>
+            <p className="mt-4 text-[#71717A]">Loading news...</p>
           </div>
         ) : news.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-            <p className="text-gray-600">No news found for this filter</p>
+          <div className="text-center py-12 bg-[#FAFAFA] rounded-lg border border-[#E4E4E7]">
+            <p className="text-[#71717A]">No news found for this filter</p>
           </div>
         ) : (
           news.map((item) => (
@@ -218,8 +218,8 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
               {/* Summary */}
               {item.summary && (
                 <div className="mb-3 text-sm bg-white bg-opacity-50 p-3 rounded border-l-4 border-blue-400">
-                  <p className="font-semibold text-gray-700 mb-1">Summary:</p>
-                  <ul className="space-y-1 text-gray-700">
+                  <p className="font-semibold text-[#18181B] mb-1">Summary:</p>
+                  <ul className="space-y-1 text-[#18181B]">
                     {item.summary.split("\n").map((bullet, i) => (
                       <li key={i} className="text-sm">
                         • {bullet.replace(/^-\s*/, "")}
@@ -235,7 +235,7 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
                   {item.mentionedCompanies.map((mention) => (
                     <span
                       key={mention.companyId}
-                      className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs font-medium"
+                      className="bg-[#FFF1F2] text-[#18181B] px-2 py-1 rounded text-xs font-medium"
                     >
                       🏢 {mention.companyName}
                     </span>
@@ -244,7 +244,7 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
               )}
 
               {/* Metadata */}
-              <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
+              <div className="flex justify-between items-center text-xs text-[#71717A] border-t pt-2">
                 <span>
                   📰 {item.sourceName || "Unknown"}
                 </span>

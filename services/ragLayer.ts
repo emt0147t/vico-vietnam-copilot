@@ -90,57 +90,72 @@ export const RagService = {
 
         let companiesFromDB: any[] = [];
         try {
-            const response = await fetch('/api/companies/raw/all', {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            if (response.ok) {
+            // Fetch companies in pages to avoid loading 10k at once
+            const pageLimit = 500;
+            let page = 1;
+            let fetched: any[] = [];
+            while (true) {
+                const response = await fetch(`/api/companies/raw?page=${page}&limit=${pageLimit}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error(`Server API error: ${response.status}`);
                 const data = await response.json();
-                companiesFromDB = data.companies || [];
-                console.log(`✅ Loaded ${companiesFromDB.length} companies from CSV via API.`);
-            } else {
-                throw new Error(`Server API error: ${response.status}`);
+                const batch = data.companies || [];
+                fetched = fetched.concat(batch);
+                console.log(`✅ Loaded page ${page} (${batch.length}) companies from API`);
+
+                if (batch.length < pageLimit) break; // last page
+                page++;
+                // allow event loop breathing
+                await sleep(50);
             }
+
+            companiesFromDB = fetched;
+            console.log(`✅ Loaded ${companiesFromDB.length} companies from CSV via API.`);
         } catch (e) {
             console.warn("⚠️ Không thể kết nối Server, sử dụng dữ liệu mẫu (Fallback).", e);
-            companiesFromDB = COMPANIES; 
+            companiesFromDB = COMPANIES;
         }
 
         const totalToProcess = companiesFromDB.length + RAW_NEWS.length;
 
-        // 1. Xử lý Companies
-        for (let i = 0; i < companiesFromDB.length; i++) {
-            const c: any = companiesFromDB[i];
-            const text = `Công ty: ${c.name}. Ngành: ${c.industry || 'N/A'}. Giới thiệu: ${c.intro || ''}. Sản phẩm: ${c.products || ''}`.trim();
-
-            const embedding = await RagService.embedText(text);
-
-            if (embedding.length > 0) {
-                records.push({
-                    id: `seed_co_${c._id ? c._id.toString() : i}`,
-                    text,
-                    embedding,
-                    metadata: {
-                        title: c.name,
-                        type: "company_profile",
-                        intro: c.intro || '',
-                        intro_new: c.intro_new || '',
-                        products: c.products || '',
-                        products_new: c.products_new || '',
-                        customers_new: c.customers_new || '',
-                        industry: c.industry,
-                        address: c.address,
-                        year: c.year,
-                        website: c.website
-                    }
-                });
-            }
+        // Process companies in batches to avoid long blocking loops
+        const batchSize = 100; // process 100 companies per micro-batch
+        for (let start = 0; start < companiesFromDB.length; start += batchSize) {
+            const slice = companiesFromDB.slice(start, start + batchSize);
+            await Promise.all(slice.map(async (c: any, idx: number) => {
+                const text = `Công ty: ${c.name}. Ngành: ${c.industry || 'N/A'}. Giới thiệu: ${c.intro || ''}. Sản phẩm: ${c.products || ''}`.trim();
+                const embedding = await RagService.embedText(text);
+                if (embedding.length > 0) {
+                    records.push({
+                        id: `seed_co_${c._id ? c._id.toString() : start + idx}`,
+                        text,
+                        embedding,
+                        metadata: {
+                            title: c.name,
+                            type: "company_profile",
+                            intro: c.intro || '',
+                            intro_new: c.intro_new || '',
+                            products: c.products || '',
+                            products_new: c.products_new || '',
+                            customers_new: c.customers_new || '',
+                            industry: c.industry,
+                            address: c.address,
+                            year: c.year,
+                            website: c.website
+                        }
+                    });
+                }
+            }));
 
             if (onProgress) {
-                onProgress(Math.round((i / totalToProcess) * 100), `Nạp dữ liệu: ${c.name}`);
+                onProgress(Math.round((Math.min(start + batchSize, companiesFromDB.length) / totalToProcess) * 100), `Nạp dữ liệu: ${Math.min(start + batchSize, companiesFromDB.length)} / ${companiesFromDB.length}`);
             }
-            await sleep(50); // Giảm delay để nhanh hơn
+
+            // brief pause to keep UI responsive and allow other events
+            await sleep(100);
         }
 
         // 2. Xử lý News

@@ -21,23 +21,23 @@ export const ControlTray: React.FC<ControlTrayProps> = ({
   onDisconnect
 }) => {
   return (
-    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-gray-900/80 backdrop-blur-md p-4 rounded-2xl border border-gray-800 shadow-2xl z-50">
+    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-[#FAFAFA]/80 backdrop-blur-md p-4 rounded-2xl border border-[#E4E4E7] shadow-2xl z-50">
       
       <button 
         onClick={onToggleVideo}
-        className={`p-4 rounded-full transition-all ${videoEnabled ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
+        className={`p-4 rounded-full transition-all ${videoEnabled ? 'bg-[#A1A1AA] hover:bg-[#A1A1AA] text-white' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
       >
         {videoEnabled ? <Video size={24} /> : <VideoOff size={24} />}
       </button>
 
       <button 
         onClick={onToggleAudio}
-        className={`p-4 rounded-full transition-all ${audioEnabled ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
+        className={`p-4 rounded-full transition-all ${audioEnabled ? 'bg-[#A1A1AA] hover:bg-[#A1A1AA] text-white' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
       >
         {audioEnabled ? <Mic size={24} /> : <MicOff size={24} />}
       </button>
 
-      <div className="w-[1px] h-8 bg-gray-700 mx-2"></div>
+      <div className="w-[1px] h-8 bg-[#A1A1AA] mx-2"></div>
 
       {connected ? (
           <button 

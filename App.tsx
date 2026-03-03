@@ -2,7 +2,7 @@ import React, { useState, useEffect, Component, ErrorInfo, ReactNode, useCallbac
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
-import { Wizard } from './components/Wizard';
+import { OnboardingPage } from './components/OnboardingPage';
 import { CompletionPage } from './components/CompletionPage';
 import { VicoChatBot } from './components/VicoChatBot';
 import { Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
@@ -79,7 +79,6 @@ function App() {
   const clerk = useClerk();
 
   // Initialize knowledge base on mount (with abort on unmount)
-  // ALL hooks must be called before any conditional return (Rules of Hooks)
   useEffect(() => {
     let cancelled = false;
     const initializeKnowledge = async (): Promise<void> => {
@@ -208,7 +207,7 @@ function App() {
           <Route path="/setup" element={
             !isSignedIn 
               ? <Navigate to="/login" replace />
-              : <Wizard 
+              : <OnboardingPage 
                   onComplete={handleWizardComplete}
                   onBack={() => navigate('/')}
                 />

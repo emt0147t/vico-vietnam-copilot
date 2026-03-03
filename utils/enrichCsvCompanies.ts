@@ -1,9 +1,9 @@
 /**
  * CSV Companies Enrichment Service
  * Enriches all 10,000+ companies from CSV with:
- * - Strategic context (tính toán từ description)
- * - Vector embeddings (sử dụng Vietnamese embedder)
- * - Similar competitors (tính toán semantic similarity)
+ * - Strategic context (calculated from description)
+ * - Vector embeddings (using Vietnamese embedder)
+ * - Similar competitors (calculated using semantic similarity)
  */
 
 import fs from 'fs';
@@ -48,11 +48,11 @@ function generateStrategicContext(company: Company): string {
     const products = company.products || '';
     const industry = company.industry || 'Unknown';
 
-    // Tạo bối cảnh chiến lược dựa trên dữ liệu hiện có
+    // Generate strategic context from existing data
     const lines = [
-        `Công ty hoạt động trong lĩnh vực: ${industry}.`,
-        intro ? `Định vị thị trường: ${intro.substring(0, 150)}...` : '',
-        products ? `Chuyên cung cấp: ${products.substring(0, 150)}...` : '',
+        `Company operates in the field of: ${industry}.`,
+        intro ? `Market positioning: ${intro.substring(0, 150)}...` : '',
+        products ? `Specializes in providing: ${products.substring(0, 150)}...` : '',
     ].filter(Boolean);
 
     return lines.join(' ');

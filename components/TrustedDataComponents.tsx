@@ -144,18 +144,18 @@ export const DataCard: React.FC<DataCardProps> = ({
   };
 
   return (
-    <div className="data-card bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition">
+    <div className="data-card bg-white border border-[#E4E4E7] rounded-lg p-5 shadow-sm hover:shadow-md transition">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-tight">{title}</h3>
+          <h3 className="text-sm font-semibold text-[#71717A] uppercase tracking-tight">{title}</h3>
         </div>
         {showTrend && trendIcons[trendDirection]}
       </div>
 
       <div className="mb-4">
-        <div className="text-3xl font-bold text-gray-900">
+        <div className="text-3xl font-bold text-[#18181B]">
           {value}
-          {unit && <span className="text-lg text-gray-500 ml-2">{unit}</span>}
+          {unit && <span className="text-lg text-[#71717A] ml-2">{unit}</span>}
         </div>
       </div>
 
@@ -177,7 +177,7 @@ export const DataCard: React.FC<DataCardProps> = ({
       </div>
 
       {data.citations && data.citations.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="mt-4 pt-4 border-t border-[#E4E4E7]">
           <button
             onClick={() => setShowCitations(!showCitations)}
             className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
@@ -190,7 +190,7 @@ export const DataCard: React.FC<DataCardProps> = ({
             <ul className="mt-3 space-y-2 text-xs">
               {data.citations.map((cite, i) => (
                 <li key={i} className="flex gap-2">
-                  <ExternalLink className="w-3 h-3 flex-shrink-0 mt-0.5 text-gray-400" />
+                  <ExternalLink className="w-3 h-3 flex-shrink-0 mt-0.5 text-[#A1A1AA]" />
                   <a
                     href={cite.url}
                     target="_blank"
@@ -199,7 +199,7 @@ export const DataCard: React.FC<DataCardProps> = ({
                   >
                     {cite.title || cite.url.split('/')[2]}
                   </a>
-                  <span className="text-gray-500 flex-shrink-0">{cite.documentType}</span>
+                  <span className="text-[#71717A] flex-shrink-0">{cite.documentType}</span>
                 </li>
               ))}
             </ul>
@@ -220,7 +220,7 @@ export const DataCard: React.FC<DataCardProps> = ({
       {onReportIssue && (
         <button
           onClick={onReportIssue}
-          className="mt-4 w-full py-2 px-3 bg-gray-100 hover:bg-gray-200 rounded text-xs font-medium text-gray-700 flex items-center justify-center gap-2"
+          className="mt-4 w-full py-2 px-3 bg-[#F4F4F5] hover:bg-[#E4E4E7] rounded text-xs font-medium text-[#18181B] flex items-center justify-center gap-2"
         >
           <MessageSquare className="w-3 h-3" />
           Report inaccuracy
@@ -258,9 +258,9 @@ export const DataLineageViewer: React.FC<DataLineageViewerProps> = ({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-5">
+    <div className="bg-white border border-[#E4E4E7] rounded-lg p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900">{title} - Data History</h3>
+        <h3 className="font-semibold text-[#18181B]">{title} - Data History</h3>
         <button
           onClick={() => setExpanded(!expanded)}
           className="text-sm text-blue-600 hover:text-blue-800"
@@ -276,28 +276,28 @@ export const DataLineageViewer: React.FC<DataLineageViewerProps> = ({
 
       {expanded && (
         <div className="space-y-3 text-sm">
-          <div className="border-l-2 border-gray-300 pl-4">
+          <div className="border-l-2 border-[#E4E4E7] pl-4">
             {history.map((entry, i) => (
               <div
                 key={i}
-                className={`pb-4 ${i < history.length - 1 ? 'border-b border-gray-200 mb-4' : ''}`}
+                className={`pb-4 ${i < history.length - 1 ? 'border-b border-[#E4E4E7] mb-4' : ''}`}
               >
                 <div className="flex items-start justify-between mb-1">
-                  <span className="font-mono text-xs text-gray-600">
+                  <span className="font-mono text-xs text-[#71717A]">
                     {entry.date.toLocaleDateString()}
                   </span>
-                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
+                  <span className="px-2 py-1 bg-[#F4F4F5] text-[#18181B] rounded text-xs font-medium">
                     {entry.source}
                   </span>
                 </div>
-                <p className="text-gray-900 font-semibold mb-2">{entry.value}</p>
-                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <p className="text-[#18181B] font-semibold mb-2">{entry.value}</p>
+                <div className="w-full bg-[#E4E4E7] rounded-full h-1.5">
                   <div
                     className="bg-green-500 h-1.5 rounded-full"
                     style={{ width: `${entry.confidence * 100}%` }}
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Confidence: {Math.round(entry.confidence * 100)}%</p>
+                <p className="text-xs text-[#71717A] mt-1">Confidence: {Math.round(entry.confidence * 100)}%</p>
               </div>
             ))}
           </div>
@@ -338,13 +338,13 @@ interface CitationListProps {
 export const CitationList: React.FC<CitationListProps> = ({ citations, onReportIssue }) => {
   if (citations.length === 0) {
     return (
-      <div className="text-sm text-gray-500 italic">No citations available for this data point</div>
+      <div className="text-sm text-[#71717A] italic">No citations available for this data point</div>
     );
   }
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-      <h4 className="font-semibold text-sm text-gray-900 mb-3">Sources</h4>
+    <div className="bg-[#FAFAFA] rounded-lg p-4 border border-[#E4E4E7]">
+      <h4 className="font-semibold text-sm text-[#18181B] mb-3">Sources</h4>
       <ol className="space-y-3 list-decimal list-inside">
         {citations.map((cite, i) => (
           <li key={i} className="text-sm">
@@ -357,12 +357,12 @@ export const CitationList: React.FC<CitationListProps> = ({ citations, onReportI
               {cite.title || cite.url.split('/')[2]}
               <ExternalLink className="w-3 h-3" />
             </a>
-            <div className="text-xs text-gray-600 mt-1 ml-5">
+            <div className="text-xs text-[#71717A] mt-1 ml-5">
               <p className="flex items-center gap-2">
                 <span>{cite.date.toLocaleDateString()}</span>
-                {cite.documentType && <span className="px-2 py-0.5 bg-gray-200 rounded">{cite.documentType}</span>}
+                {cite.documentType && <span className="px-2 py-0.5 bg-[#E4E4E7] rounded">{cite.documentType}</span>}
               </p>
-              {cite.excerpt && <p className="italic mt-1 text-gray-700">"{cite.excerpt}"</p>}
+              {cite.excerpt && <p className="italic mt-1 text-[#18181B]">"{cite.excerpt}"</p>}
             </div>
           </li>
         ))}
@@ -456,7 +456,7 @@ export const UserContributionBox: React.FC<UserContributionBoxProps> = ({
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-[#18181B] mb-1">
               Correct {field}
             </label>
             <input
@@ -464,13 +464,13 @@ export const UserContributionBox: React.FC<UserContributionBoxProps> = ({
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder={`New value for ${field}`}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-[#E4E4E7] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={submitting}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-[#18181B] mb-1">
               Source URL (required)
             </label>
             <input
@@ -478,13 +478,13 @@ export const UserContributionBox: React.FC<UserContributionBoxProps> = ({
               value={sourceUrl}
               onChange={(e) => setSourceUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-[#E4E4E7] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={submitting}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-[#18181B] mb-1">
               Why this is more accurate
             </label>
             <textarea
@@ -492,7 +492,7 @@ export const UserContributionBox: React.FC<UserContributionBoxProps> = ({
               onChange={(e) => setEvidence(e.target.value)}
               placeholder="Explain how you found this information..."
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-[#E4E4E7] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={submitting}
             />
           </div>
@@ -500,7 +500,7 @@ export const UserContributionBox: React.FC<UserContributionBoxProps> = ({
           <button
             type="submit"
             disabled={submitting || !value.trim() || !sourceUrl.trim()}
-            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition"
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-[#A1A1AA] text-white rounded-lg text-sm font-medium transition"
           >
             {submitting ? 'Submitting...' : 'Submit Contribution'}
           </button>

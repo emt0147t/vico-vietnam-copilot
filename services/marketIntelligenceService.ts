@@ -19,7 +19,8 @@
  */
 
 import { GoogleGenAI } from '@google/genai';
-import { loadAllCompanies, findTopCompetitors, CompetitorMatch } from './competitorEngine';
+import { findTopCompetitors, CompetitorMatch, loadAllCompanies } from './competitorEngine';
+import { getIndustryTradeProfile, IndustryTradeProfile } from '../data/vietnamTradeData';
 
 // ============================================================================
 // GEMINI AI CLIENT + CACHE
@@ -77,18 +78,18 @@ Context: Analyzing for company "${companyName}". VICO database has ${peerCount} 
 
 Return ONLY valid JSON:
 {
-  "marketOutlook": "2-3 sentence current market outlook in Vietnamese",
-  "currentTrends": ["trend1 in Vietnamese", "trend2", "trend3"],
-  "risks": ["risk1 in Vietnamese", "risk2", "risk3"],
-  "opportunities": ["opp1 in Vietnamese", "opp2", "opp3"],
+  "marketOutlook": "2-3 sentence current market outlook",
+  "currentTrends": ["trend1", "trend2", "trend3"],
+  "risks": ["risk1", "risk2", "risk3"],
+  "opportunities": ["opp1", "opp2", "opp3"],
   "updatedDrivers": [
-    {"title": "driver title", "description": "description with context (Vietnamese)", "impact": "High"}
+    {"title": "driver title", "description": "description with context", "impact": "High"}
   ],
   "updatedRestraints": [
-    {"title": "restraint title", "description": "description (Vietnamese)", "impact": "Medium"}
+    {"title": "restraint title", "description": "description", "impact": "Medium"}
   ],
   "executiveInsights": ["insight1", "insight2", "insight3"],
-  "dataFreshnessNote": "Note about data currency in Vietnamese"
+  "dataFreshnessNote": "Note about data currency"
 }
 
 RULES:
@@ -104,7 +105,7 @@ RULES:
             const response = await ai.models.generateContent({
                 model: 'gemini-2.0-flash',
                 contents: prompt,
-                config: { temperature: 0.3, maxOutputTokens: 2000 }
+                config: { temperature: 0.3, maxOutputTokens: 2000, tools: [{ googleSearch: {} }] }
             });
 
             const text = response.text || '';
@@ -226,19 +227,20 @@ export interface MarketIntelligenceReport {
     industry: string;
     market: string;
     companyCount: number;
-    
+
     marketSize: MarketSizeData;
     competitiveLandscape: CompetitiveLandscapeData;
     marketDynamics: MarketDynamicsData;
     portersForces: PortersForcesData;
     funding: FundingData;
-    
+    tradeProfile?: IndustryTradeProfile | null;
+
     executiveSummary: {
         overview: string;
         keyInsights: string[];
         recommendations: string[];
     };
-    
+
     sources: {
         competitorsAnalyzed: number;
         industryPeersFound: number;
@@ -549,12 +551,12 @@ const DEFAULT_DYNAMICS: MarketDynamicsData = {
 export async function generateMarketIntelligence(input: MarketIntelligenceInput): Promise<MarketIntelligenceReport> {
     const startTime = Date.now();
     console.log('🧠 Generating Market Intelligence Report...');
-    
+
     try {
         const allCompanies = await loadAllCompanies();
         const industry = normalizeIndustry(input.userCompany.industry);
         const industryPeers = allCompanies.filter(c => normalizeIndustry(c.industry) === industry);
-        
+
         let similarCompanies: CompetitorMatch[] = [];
         try {
             const searchResult = await findTopCompetitors(input.userCompany.name, 50, 20, 'all');
@@ -562,40 +564,41 @@ export async function generateMarketIntelligence(input: MarketIntelligenceInput)
         } catch (error) {
             console.warn('⚠️ Could not fetch similar companies:', error instanceof Error ? error.message : error);
         }
-        
+
         const industryData = VIETNAM_INDUSTRY_DATA[industry] || DEFAULT_INDUSTRY_DATA;
-        
+
         // Try to get AI overlay for current/dynamic analysis
         const aiOverlay = await getAIMarketOverlay(industry, input.userCompany.name, industryPeers.length);
         const dataSource = aiOverlay ? 'static_data + ai_analysis' : 'static_data_only';
-        
+
         const marketSize = calculateMarketSize(industryData, industryPeers.length, input.selectedCompetitors.length);
         const competitiveLandscape = analyzeCompetitiveLandscape(
             input.selectedCompetitors, similarCompanies, industryPeers.length, industryData
         );
-        
+
         // Use AI-enhanced dynamics if available, otherwise fall back to static
         const marketDynamics = aiOverlay
             ? mergeMarketDynamics(getMarketDynamics(industry), aiOverlay)
             : getMarketDynamics(industry);
-        
+
         const portersForces = calculatePortersForces(industry, industryData, industryPeers.length);
         const funding = getRealFundingData(industry, industryData);
-        
+        const tradeProfile = getIndustryTradeProfile(industry);
+
         const executiveSummary = generateExecutiveSummary(
             input.userCompany, marketSize, competitiveLandscape, funding,
             input.selectedCompetitors, industryData, aiOverlay
         );
-        
+
         // Determine data freshness
-        const staticDataAge = 'Dữ liệu tĩnh biên soạn ~2024';
+        const staticDataAge = 'Static data compiled ~2024';
         const dataFreshness = aiOverlay
             ? `${staticDataAge} + AI analysis (${new Date().toISOString().split('T')[0]})`
-            : `${staticDataAge} — ⚠️ có thể đã cũ, cần cập nhật`;
-        
+            : `${staticDataAge} — ⚠️ may be outdated, update needed`;
+
         const elapsed = Date.now() - startTime;
         console.log(`✅ Market Intelligence Report generated in ${elapsed}ms (source: ${dataSource})`);
-        
+
         return {
             generatedAt: new Date().toISOString(),
             industry,
@@ -606,6 +609,7 @@ export async function generateMarketIntelligence(input: MarketIntelligenceInput)
             marketDynamics,
             portersForces,
             funding,
+            tradeProfile,
             executiveSummary,
             sources: {
                 competitorsAnalyzed: input.selectedCompetitors.length,
@@ -615,6 +619,7 @@ export async function generateMarketIntelligence(input: MarketIntelligenceInput)
                     `VICO Company Database (${industryPeers.length} ${industry} companies)`,
                     `Static lookup tables (compiled ~2024 from ${industryData.source})`,
                     ...(aiOverlay ? ['Gemini 2.0 Flash AI Analysis (current)'] : []),
+                    ...(tradeProfile ? [`Trade data: ${tradeProfile.dataSource}`] : []),
                     `⚠️ Data freshness: ${dataFreshness}`,
                 ]
             }
@@ -633,26 +638,26 @@ function mergeMarketDynamics(staticData: MarketDynamicsData, ai: AIMarketOverlay
             ...ai.updatedDrivers.slice(0, 3),
             ...staticData.drivers.slice(0, 2).map(d => ({
                 ...d,
-                title: `[Biên soạn 2024] ${d.title}`,
+                title: `[Compiled 2024] ${d.title}`,
             })),
         ],
         restraints: [
             ...ai.updatedRestraints.slice(0, 2),
             ...staticData.restraints.slice(0, 1).map(r => ({
                 ...r,
-                title: `[Biên soạn 2024] ${r.title}`,
+                title: `[Compiled 2024] ${r.title}`,
             })),
         ],
         trends: [
             // AI current trends as trend items
             ...ai.currentTrends.slice(0, 3).map((t, i) => ({
                 title: t,
-                description: `[AI Analysis] ${ai.dataFreshnessNote || 'Phân tích tự động'}`,
+                description: `[AI Analysis] ${ai.dataFreshnessNote || 'Automated analysis'}`,
                 impact: (i === 0 ? 'High' : 'Medium') as 'High' | 'Medium' | 'Low',
             })),
             ...staticData.trends.slice(0, 2).map(t => ({
                 ...t,
-                title: `[Biên soạn 2024] ${t.title}`,
+                title: `[Compiled 2024] ${t.title}`,
             })),
         ],
     };
@@ -664,7 +669,7 @@ function mergeMarketDynamics(staticData: MarketDynamicsData, ai: AIMarketOverlay
 
 function normalizeIndustry(industry: string): string {
     if (!industry) return 'Technology';
-    
+
     const directMatch: Record<string, string> = {
         'technology': 'Technology', 'automotive': 'Automotive', 'education': 'Education',
         'retail': 'Retail', 'finance': 'Finance', 'healthcare': 'Healthcare',
@@ -678,10 +683,10 @@ function normalizeIndustry(industry: string): string {
         'humanresources': 'HumanResources', 'marketing': 'Marketing',
         'environmentaltech': 'EnvironmentalTech'
     };
-    
+
     const normalized = industry.toLowerCase().replace(/[\s_-]/g, '');
     if (directMatch[normalized]) return directMatch[normalized];
-    
+
     if (normalized.includes('tech') || normalized.includes('software') || normalized.includes('it') || normalized.includes('công nghệ') || normalized.includes('phần mềm')) return 'Technology';
     if (normalized.includes('fintech') || normalized.includes('tài chính') || normalized.includes('banking') || normalized.includes('ngân hàng')) return 'Finance';
     if (normalized.includes('ecommerce') || normalized.includes('thương mại') || normalized.includes('bán lẻ') || normalized.includes('retail')) return 'Retail';
@@ -703,7 +708,7 @@ function normalizeIndustry(industry: string): string {
     if (normalized.includes('media') || normalized.includes('truyền thông') || normalized.includes('báo chí')) return 'Technology';
     if (normalized.includes('fashion') || normalized.includes('thời trang') || normalized.includes('may mặc')) return 'Retail';
     if (normalized.includes('sport') || normalized.includes('thể thao')) return 'Tourism';
-    
+
     return 'Technology';
 }
 
@@ -715,11 +720,11 @@ function calculateMarketSize(
     const tamValue = data.globalTAM;
     const samValue = data.vietnamSAM;
     const somValue = Math.round(samValue * data.vietnamSOM_ratio * 10) / 10;
-    
+
     const currentYear = new Date().getFullYear();
     const years: string[] = [];
     const revenueHistory: number[] = [];
-    
+
     for (let i = -3; i <= 4; i++) {
         years.push((currentYear + i).toString());
         if (i <= 0) {
@@ -728,9 +733,9 @@ function calculateMarketSize(
             revenueHistory.push(Math.round(samValue * Math.pow(1 + data.cagr / 100, i) * 10) / 10);
         }
     }
-    
+
     const forecastSize = revenueHistory[revenueHistory.length - 1];
-    
+
     return {
         tam: tamValue >= 1000 ? `$${(tamValue / 1000).toFixed(1)}T` : `$${tamValue}B`,
         tamValue,
@@ -758,7 +763,7 @@ function analyzeCompetitiveLandscape(
     data: typeof DEFAULT_INDUSTRY_DATA
 ): CompetitiveLandscapeData {
     const marketShare: CompetitiveLandscapeData['marketShare'] = [];
-    
+
     const allCompetitors = [
         ...selectedCompetitors.map(c => ({
             name: c.name, similarity: c.similarity || 80, isSelected: true
@@ -767,7 +772,7 @@ function analyzeCompetitiveLandscape(
             name: c.company.name, similarity: c.similarity, isSelected: false
         }))
     ];
-    
+
     const seen = new Set<string>();
     const unique = allCompetitors.filter(c => {
         const key = c.name.toLowerCase().trim();
@@ -775,26 +780,26 @@ function analyzeCompetitiveLandscape(
         seen.add(key);
         return true;
     });
-    
+
     unique.sort((a, b) => b.similarity - a.similarity);
-    
+
     const top4Share = data.topPlayersShare;
     const topN = Math.min(5, unique.length);
     let usedShare = 0;
-    
+
     for (let i = 0; i < topN; i++) {
         const comp = unique[i];
         const shareWeight = (topN - i) / ((topN * (topN + 1)) / 2);
         const share = Math.round(top4Share * shareWeight * 1.3);
         usedShare += share;
-        
+
         const positionAdjust = (topN - i) * 1.5;
         const growth = Math.round(data.cagr + positionAdjust);
-        
+
         let type: 'Leader' | 'Challenger' | 'Follower' | 'Niche' = 'Follower';
         if (i < 2) type = 'Leader';
         else if (i < 4) type = 'Challenger';
-        
+
         const compName = comp?.name || `Competitor ${i + 1}`;
         marketShare.push({
             name: compName.length > 25 ? compName.substring(0, 22) + '...' : compName,
@@ -803,7 +808,7 @@ function analyzeCompetitiveLandscape(
             type
         });
     }
-    
+
     const othersShare = Math.max(100 - usedShare, 20);
     marketShare.push({
         name: 'Others',
@@ -811,23 +816,23 @@ function analyzeCompetitiveLandscape(
         growth: Math.round(data.cagr * 0.8),
         type: 'Follower'
     });
-    
+
     const totalShare = marketShare.reduce((s, c) => s + c.share, 0);
     if (totalShare !== 100 && marketShare.length > 0) {
         marketShare[marketShare.length - 1]!.share += (100 - totalShare);
     }
-    
+
     const hhi = marketShare.reduce((sum, c) => sum + Math.pow(c.share, 2), 0);
     const cr4 = marketShare.slice(0, 4).reduce((sum, c) => sum + c.share, 0);
-    
+
     let level = 'Cạnh tranh cao (Phân tán)';
     if (hhi > 2500) level = 'Tập trung cao';
     else if (hhi > 1500) level = 'Tập trung vừa';
-    
+
     const avgSimilarity = unique.length > 0
         ? unique.reduce((sum, c) => sum + c.similarity, 0) / unique.length / 100
         : 0.5;
-    
+
     return {
         marketShare,
         concentration: {
@@ -875,7 +880,7 @@ function calculatePortersForces(
             rivalry: `Rất cao — ${peerCount > 0 ? peerCount.toLocaleString() : '380,000+'} doanh nghiệp. Biên LN 2-5% (Nguồn: GSO)`
         }
     };
-    
+
     const desc = porterDescriptions[industry] || {
         supplier: `Phân tích dựa trên đặc thù ngành ${industry} tại Việt Nam (Nguồn: GSO, VICO)`,
         buyer: `Người tiêu dùng Việt Nam, thị trường 100M dân. Digital adoption 78% (Nguồn: DataReportal)`,
@@ -883,7 +888,7 @@ function calculatePortersForces(
         substitutes: `Công nghệ và global players tạo alternative solutions (Nguồn: VCCI)`,
         rivalry: `${peerCount > 0 ? peerCount.toLocaleString() : data.estimatedPlayers.toLocaleString()} doanh nghiệp cạnh tranh. Top 4 chiếm ${data.topPlayersShare}% (Nguồn: ${data.source})`
     };
-    
+
     return {
         supplierPower: { score: data.supplierPower, description: desc.supplier },
         buyerPower: { score: data.buyerPower, description: desc.buyer },
@@ -895,7 +900,7 @@ function calculatePortersForces(
 
 function getRealFundingData(industry: string, data: typeof DEFAULT_INDUSTRY_DATA): FundingData {
     const sectors = getSectorBreakdown(industry, data.fundingValue2024);
-    
+
     return {
         totalDeals: data.fundingDeals2024,
         totalValue: data.fundingValue2024 >= 1000
@@ -932,12 +937,12 @@ function getSectorBreakdown(industry: string, totalValue: number): FundingData['
             { name: 'Khác', pct: 8 }
         ]
     };
-    
+
     const sectors = breakdowns[industry] || [
         { name: industry, pct: 40 }, { name: 'Adjacent Tech', pct: 25 },
         { name: 'Services', pct: 20 }, { name: 'Khác', pct: 15 }
     ];
-    
+
     return sectors.map(s => ({
         name: s.name, value: Math.round(totalValue * s.pct / 100), percentage: s.pct
     }));
@@ -982,7 +987,7 @@ function getVerifiedDeals(industry: string): FundingData['recentDeals'] {
             { type: 'Series B', title: 'GHN (Giao Hàng Nhanh)', parties: 'Temasek', value: '$100M', date: '2024', description: 'E-commerce logistics leader. Nguồn: Bloomberg' }
         ]
     };
-    
+
     return verifiedDeals[industry] || [
         { type: 'N/A', title: `Chưa có dữ liệu deals cụ thể cho ngành ${industry}`, parties: '—', value: '—', date: '2024', description: `Liên hệ DealStreetAsia, TechInAsia để cập nhật funding ngành ${industry} tại Việt Nam` }
     ];
@@ -999,15 +1004,15 @@ function generateExecutiveSummary(
 ): MarketIntelligenceReport['executiveSummary'] {
     const companyName = userCompany.name || 'Doanh nghiệp';
     const industry = userCompany.industry || 'Technology';
-    
+
     const growthLabel = data.cagr > 15 ? 'tăng trưởng nhanh' : data.cagr > 10 ? 'tăng trưởng ổn định' : 'phát triển bền vững';
     const concentrationDesc = landscape.concentration.hhi > 2500 ? 'tập trung cao' : landscape.concentration.hhi > 1500 ? 'tập trung vừa' : 'cạnh tranh phân tán';
-    
+
     return {
         overview: aiOverlay
             ? `${aiOverlay.marketOutlook} ${companyName} cạnh tranh với ${competitors.length} đối thủ trực tiếp trong thị trường **${concentrationDesc}** (HHI: ${landscape.concentration.hhi}). [Dữ liệu tĩnh biên soạn ~2024: CAGR ${data.cagr}%, SAM ${marketSize.sam}. Nguồn: ${data.source}]`
             : `**Thị trường ${industry} tại Việt Nam** đang trong giai đoạn ${growthLabel} với CAGR ${data.cagr}% (${marketSize.cagrPeriod}). Quy mô thị trường hiện tại **${marketSize.sam}**, dự kiến đạt **$${marketSize.forecastSize.toFixed(1)}B** vào ${parseInt(marketSize.years[marketSize.years.length - 1] || String(new Date().getFullYear() + 5))}. ${companyName} cạnh tranh với ${competitors.length} đối thủ trực tiếp trong thị trường **${concentrationDesc}** (HHI: ${landscape.concentration.hhi}). ⚠️ Số liệu TAM/SAM/CAGR từ dữ liệu tĩnh biên soạn ~2024 — có thể đã thay đổi. Nguồn gốc: ${data.source}.`,
-        
+
         keyInsights: [
             `📊 TAM: ${marketSize.tam} | SAM VN: ${marketSize.sam} | SOM: ${marketSize.som} [⚠️ Dữ liệu tĩnh ~2024, nguồn: ${data.cagrSource}]`,
             `🏢 ${landscape.totalCompaniesInIndustry.toLocaleString()} doanh nghiệp trong VICO DB — Top 4 chiếm ~${data.topPlayersShare}% (ước tính tĩnh)`,
@@ -1016,7 +1021,7 @@ function generateExecutiveSummary(
             `🎯 Competitive intensity: ${landscape.avgSimilarity > 0.7 ? 'RẤT CAO' : landscape.avgSimilarity > 0.5 ? 'CAO' : 'TRUNG BÌNH'} — Avg similarity ${(landscape.avgSimilarity * 100).toFixed(0)}%`,
             aiOverlay ? '✅ Báo cáo được bổ sung bởi AI analysis hiện tại' : '⚠️ Báo cáo chỉ dùng dữ liệu tĩnh ~2024 — AI không khả dụng',
         ],
-        
+
         recommendations: [
             `Differentiation là ưu tiên #1: ${competitors.length} đối thủ có profile tương đồng. Focus vào unique value proposition`,
             `Theo dõi ${landscape.marketShare[0]?.name || 'market leader'} (${landscape.marketShare[0]?.share}% share) — đối thủ có similarity cao nhất`,
@@ -1033,16 +1038,16 @@ function generateExecutiveSummary(
 export async function handleMarketIntelligenceRequest(req: any, res: any) {
     try {
         const { userCompany, selectedCompetitors } = req.body;
-        
+
         if (!userCompany) {
             return res.status(400).json({ error: 'userCompany is required' });
         }
-        
+
         const report = await generateMarketIntelligence({
             userCompany,
             selectedCompetitors: selectedCompetitors || []
         });
-        
+
         res.json(report);
     } catch (error: any) {
         console.error('❌ Market Intelligence Error:', error);

@@ -8,7 +8,7 @@ export const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-all border border-transparent hover:border-gray-300 dark:hover:border-gray-700"
+      className="p-2 rounded-lg text-[#71717A] hover:text-[#18181B] hover:bg-[#E4E4E7] transition-all border border-transparent hover:border-[#E4E4E7]"
       title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
     >
       {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}

@@ -1,5 +1,5 @@
 
-// Tính độ tương đồng Cosine giữa 2 vector (Range: -1 đến 1, càng gần 1 càng giống nhau)
+// Calculate Cosine similarity between 2 vectors (Range: -1 to 1, closer to 1 means more similar)
 export function cosineSimilarity(vecA: number[], vecB: number[]): number {
     if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
   
@@ -18,14 +18,14 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
     return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-// Hàm làm sạch văn bản cơ bản trước khi embedding
+// Basic text cleaning function before embedding
 export function cleanText(input: string): string {
     if (!input) return "";
-    // Loại bỏ HTML tags và khoảng trắng thừa
+    // Remove HTML tags and extra whitespace
     return input.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
 }
 
-// Parse CSV Nâng cao: Hỗ trợ Quotes và Newlines bên trong trường dữ liệu
+// Advanced CSV Parser: Supports Quotes and Newlines within data fields
 export const parseCSV = (text: string) => {
     const arr = [];
     let quote = false;  // 'true' means we're inside a quoted field

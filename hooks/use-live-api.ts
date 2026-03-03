@@ -1,7 +1,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { pcm16BlobFromFloat32, base64Encode, base64Decode, pcmToAudioBuffer, blobToBase64 } from '../utils/audio';
-import { LiveConfig, ContentChunk } from '../types';
+import { base64Encode, base64Decode, pcmToAudioBuffer } from '../utils/audio';
+import { ContentChunk } from '../types';
 
 // Using Google's SDK types
 declare const google: any;
@@ -20,6 +20,8 @@ export interface UseLiveAPI {
   disconnect: () => void;
   sendRealtimeInput: (chunks: ContentChunk[]) => void;
   volume: number; // For visualization (0-1)
+  // Send a text prompt via the server-side AI proxy (`/api/ai/generate`)
+  generateText: (prompt: string, opts?: { model?: string; temperature?: number; maxOutputTokens?: number }) => Promise<any>;
 }
 
 // Updated to the latest recommended model for native audio conversation as per guidelines
@@ -46,9 +48,20 @@ export function useLiveAPI(): UseLiveAPI {
 
   // Initialization
   useEffect(() => {
-    // Initialize Google AI client if available
+    // IMPORTANT: Do NOT use client-side API keys. The API key must be kept on the server.
+    // The previous implementation passed `process.env.API_KEY` into the client which
+    // caused the secret to be embedded into the JS bundle (exposed to users).
+    // Instead, the frontend should call a server-side proxy endpoint (e.g. `/api/ai/...`)
+    // that performs requests to the Gemini/Gen AI service using a server-only API key.
     if (!clientRef.current && typeof google !== 'undefined' && google.generativeAI) {
-      clientRef.current = google.generativeAI({ apiKey: process.env.API_KEY });
+      // Initialize without an API key client-side — if an unauthenticated SDK is supported
+      // it may attempt to use browser-managed credentials, otherwise prefer server proxy.
+      try {
+        clientRef.current = google.generativeAI();
+      } catch (e) {
+        console.warn('Live AI client not initialized client-side. Use server-side proxy `/api/ai/*` instead.');
+        clientRef.current = null;
+      }
     }
     return () => {
       disconnect();
@@ -60,14 +73,15 @@ export function useLiveAPI(): UseLiveAPI {
   useEffect(() => {
     let animationFrameId: number;
     const updateVolume = () => {
-      if (analyserRef.current) {
-        const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-        analyserRef.current.getByteFrequencyData(dataArray);
+      const a = analyserRef.current;
+      if (a) {
+        const dataArray = new Uint8Array(a.frequencyBinCount);
+        a.getByteFrequencyData(dataArray);
         let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-          sum += dataArray[i];
+        for (const v of dataArray) {
+          sum += v;
         }
-        const avg = sum / dataArray.length;
+        const avg = dataArray.length ? sum / dataArray.length : 0;
         setVolume(Math.min(1, avg / 128));
       } else {
         setVolume(0);
@@ -204,21 +218,23 @@ export function useLiveAPI(): UseLiveAPI {
             console.log('Gemini Live Session Closed');
             disconnect();
           },
-          onerror: (err) => {
+          onerror: (err: any) => {
             console.error('Gemini Live Session Error', err);
             disconnect();
           }
         }
       });
 
-      processor.onaudioprocess = (e) => {
-        const inputData = e.inputBuffer.getChannelData(0);
-        
+      processor.onaudioprocess = (e: AudioProcessingEvent) => {
+        if (!e.inputBuffer) return;
+        const inputData = e.inputBuffer.getChannelData(0) ?? new Float32Array(0);
+
         // Manual implementation of encoding as per guidelines
         const l = inputData.length;
         const int16 = new Int16Array(l);
-        for (let i = 0; i < l; i++) {
-          int16[i] = inputData[i] * 32768;
+        let idx = 0;
+        for (const s of inputData) {
+          int16[idx++] = s * 32768;
         }
         const base64Data = base64Encode(new Uint8Array(int16.buffer));
         
@@ -248,11 +264,38 @@ export function useLiveAPI(): UseLiveAPI {
     });
   }, []);
 
+  const generateText = useCallback(async (prompt: string, opts: { model?: string; temperature?: number; maxOutputTokens?: number } = {}) => {
+    if (!prompt || typeof prompt !== 'string') throw new Error('prompt required');
+    try {
+      const body = {
+        prompt,
+        model: opts.model || 'gemini-2.1',
+        temperature: typeof opts.temperature === 'number' ? opts.temperature : 0.2,
+        maxOutputTokens: typeof opts.maxOutputTokens === 'number' ? opts.maxOutputTokens : 1024
+      };
+      const r = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err?.error || `AI proxy error ${r.status}`);
+      }
+      const json = await r.json();
+      return json;
+    } catch (e) {
+      console.error('generateText proxy error', e);
+      throw e;
+    }
+  }, []);
+
   return {
     connected,
     connect,
     disconnect,
     sendRealtimeInput,
-    volume
+    volume,
+    generateText
   };
 }

@@ -16,7 +16,7 @@ import { fileURLToPath } from 'url';
 
 const __filename_esm = fileURLToPath(import.meta.url);
 const __dirname_esm = path.dirname(__filename_esm);
-import { clerkMiddleware, requireAuth } from '@clerk/express';
+import { clerkMiddleware } from '@clerk/express';
 import { initializeCompanies, getAllCompanies, searchCompanies, getCompaniesByIndustry } from './utils/companyLoader';
 import { seedVectorDatabase, loadVectorsFromCache } from './utils/vectorSeeder';
 // REMOVED: import { COMPANIES } from './data/companies'; — was only used by old fake GTM endpoint
@@ -24,6 +24,7 @@ import Parser from 'rss-parser';
 import { findTopCompetitors } from './services/competitorEngine';
 import { generateMarketIntelligence } from './services/marketIntelligenceService';
 import { generateCompetitorIntelligence } from './services/competitorIntelligenceService';
+import MarketIndustryAnalytics from './services/marketIndustryAnalytics';
 import { generateCustomerInsights } from './services/customerInsightsService';
 import { getUserStrategies, getStrategy, saveStrategy, deleteStrategy, getStrategyVersions, restoreVersion } from './services/strategyStore';
 // import enrichRouter from './app/api/enrich/route';
@@ -78,12 +79,22 @@ function sanitizeQuery(input: unknown, maxLen = 200): string | null {
 const rssParser = new Parser();
 
 // ðŸ” CORS configuration
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    process.env['VITE_APP_URL'],
+    process.env['CUSTOM_DOMAIN'] ? `https://${process.env['CUSTOM_DOMAIN']}` : undefined,
+].filter(Boolean) as string[];
+
 app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        'http://localhost:3000',
-        process.env['VITE_APP_URL'] || 'http://localhost:5173'
-    ],
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.some(allowed => origin === allowed) || origin?.endsWith('.up.railway.app')) {
+            return callback(null, true);
+        }
+        callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -121,7 +132,7 @@ initializeCompanies().then((companies) => {
     companiesLoaded = true;
     allCompaniesData = companies;
     console.log('âœ… Companies initialized successfully');
-    
+
     // ðŸ†• Seed vector database after companies are loaded (optional)
     if (SKIP_VECTOR_SEEDING) {
         console.log('â­ï¸  Vector seeding SKIPPED (SKIP_VECTOR_SEEDING=true)');
@@ -139,8 +150,8 @@ initializeCompanies().then((companies) => {
 });
 
 app.get('/api/health', (_req, res) => {
-    res.json({ 
-        status: 'active', 
+    res.json({
+        status: 'active',
         identity: 'VICO Backend Service',
         timestamp: new Date().toISOString(),
         companiesLoaded,
@@ -212,7 +223,7 @@ app.get('/api/strategies/my', async (req: Request, res: Response): Promise<void>
             res.status(401).json({ error: 'Unauthorized' });
             return;
         }
-        
+
         const strategies = getUserStrategies(userId);
         res.json({ success: true, strategies, count: strategies.length });
     } catch (error) {
@@ -229,14 +240,15 @@ app.get('/api/strategies/:id', async (req: Request, res: Response): Promise<void
             res.status(401).json({ error: 'Unauthorized' });
             return;
         }
-        
-        const strategy = getStrategy(userId, req.params.id);
+
+        const strategyId = req.params['id'] ?? '';
+        const strategy = getStrategy(userId, strategyId);
         if (!strategy) {
             res.status(404).json({ error: 'Strategy not found' });
             return;
         }
-        
-        const versions = getStrategyVersions(userId, req.params.id);
+
+        const versions = getStrategyVersions(userId, strategyId);
         res.json({ success: true, strategy, versions });
     } catch (error) {
         console.error('âŒ Error fetching strategy:', error);
@@ -265,11 +277,11 @@ app.post('/api/strategies/save', async (req: Request, res: Response): Promise<vo
             description,
             companyId,
         });
-        
+
         console.log(`ðŸ’¾ Strategy ${result.isNew ? 'created' : 'updated'}: ${companyName} (${type || 'gtm'}) for user ${userId}`);
-        
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             strategy: result.strategy,
             isNew: result.isNew,
             message: result.isNew ? 'Strategy created' : `Strategy updated (v${result.strategy.version})`,
@@ -289,13 +301,13 @@ app.delete('/api/strategies/:id', async (req: Request, res: Response): Promise<v
             return;
         }
 
-        const deleted = deleteStrategy(userId, req.params.id);
+        const deleted = deleteStrategy(userId, req.params['id'] ?? '');
         if (!deleted) {
             res.status(404).json({ error: 'Strategy not found' });
             return;
         }
-        
-        console.log(`ðŸ—‘ï¸ Strategy deleted: ${req.params.id} for user ${userId}`);
+
+        console.log(`ðŸ—‘ï¸ Strategy deleted:  for user ${userId}`);
         res.json({ success: true });
     } catch (error) {
         console.error('âŒ Error deleting strategy:', error);
@@ -319,13 +331,14 @@ app.post('/api/strategies/:id/restore', async (req: Request, res: Response): Pro
             return;
         }
 
-        const restored = restoreVersion(userId, req.params.id, version);
+        const restoreId = req.params['id'] ?? '';
+        const restored = restoreVersion(userId, restoreId, version);
         if (!restored) {
             res.status(404).json({ error: 'Strategy or version not found' });
             return;
         }
-        
-        console.log(`ðŸ”„ Strategy restored: ${req.params.id} to v${version} for user ${userId}`);
+
+        console.log(`ðŸ”„ Strategy restored:  to v${version} for user ${userId}`);
         res.json({ success: true, strategy: restored });
     } catch (error) {
         console.error('âŒ Error restoring strategy:', error);
@@ -335,28 +348,58 @@ app.post('/api/strategies/:id/restore', async (req: Request, res: Response): Pro
 
 app.get('/api/companies', async (req, res) => {
     try {
-        const { search, industry } = req.query;
-        
+        const { search, industry, page: pageParam, limit: limitParam, tier, sortBy } = req.query;
+
         // Use CSV data as primary source
         let companies = getAllCompanies();
-        
+
         // Apply filters
         if (search && typeof search === 'string') {
             companies = searchCompanies(search);
         }
-        
+
         if (industry && typeof industry === 'string') {
             companies = companies.filter(c => c.industry === industry);
         }
-        
+
+        // 🎯 Tier filter — only return companies above minimum data quality
+        if (tier && typeof tier === 'string' && ['premium', 'standard', 'basic'].includes(tier)) {
+            const minScore = tier === 'premium' ? 80 : tier === 'standard' ? 50 : 0;
+            companies = companies.filter(c => (c.dataScore ?? 0) >= minScore);
+        }
+
+        // Sort by data quality score if requested
+        if (sortBy === 'dataScore') {
+            companies = [...companies].sort((a, b) => (b.dataScore ?? 0) - (a.dataScore ?? 0));
+        }
+
+        // Pagination (#30) — default 50 per page
+        const total = companies.length;
+        const page = Math.max(1, parseInt(String(pageParam || '1'), 10) || 1);
+        const limit = Math.min(200, Math.max(1, parseInt(String(limitParam || '50'), 10) || 50));
+        const start = (page - 1) * limit;
+        const paginatedCompanies = companies.slice(start, start + limit);
+
+        // Tier stats for this result set
+        const tierStats = {
+            premium: companies.filter(c => c.dataTier === 'premium').length,
+            standard: companies.filter(c => c.dataTier === 'standard').length,
+            basic: companies.filter(c => c.dataTier === 'basic').length,
+        };
+
         res.json({
-            total: companies.length,
-            companies
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+            hasMore: start + limit < total,
+            tierStats,
+            companies: paginatedCompanies
         });
     } catch (error) {
         console.error("API Error (companies):", error);
-        res.status(500).json({ 
-            error: "Failed to fetch companies", 
+        res.status(500).json({
+            error: "Failed to fetch companies",
             message: error instanceof Error ? error.message : 'Unknown error'
         });
     }
@@ -366,7 +409,7 @@ app.get('/api/companies/industry/:industry', (req, res) => {
     try {
         const { industry } = req.params;
         const companies = getCompaniesByIndustry(industry);
-        
+
         res.json({
             industry,
             total: companies.length,
@@ -374,7 +417,7 @@ app.get('/api/companies/industry/:industry', (req, res) => {
         });
     } catch (error) {
         console.error("API Error (industry filter):", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Failed to filter companies by industry"
         });
     }
@@ -383,14 +426,14 @@ app.get('/api/companies/industry/:industry', (req, res) => {
 app.get('/api/companies/search', (req, res): void => {
     try {
         const q = sanitizeQuery(req.query['q']);
-        
+
         if (!q) {
             res.status(400).json({ error: 'Query parameter "q" is required' });
             return;
         }
-        
+
         const results = searchCompanies(q);
-        
+
         res.json({
             query: q,
             total: results.length,
@@ -398,7 +441,7 @@ app.get('/api/companies/search', (req, res): void => {
         });
     } catch (error) {
         console.error("API Error (search):", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Search failed"
         });
     }
@@ -408,26 +451,26 @@ app.get('/api/companies/search', (req, res): void => {
 app.get('/api/companies/competitors', async (req, res): Promise<void> => {
     try {
         const { company, limit = '10', minSimilarity = '20', source = 'all' } = req.query;
-        
+
         const companyName = sanitizeQuery(company);
         if (!companyName) {
             res.status(400).json({ error: 'Query parameter "company" is required' });
             return;
         }
-        
+
         // Validate source filter
         const validSources = ['ts', 'csv', 'all'];
         const sourceFilter = validSources.includes(source as string) ? (source as 'ts' | 'csv' | 'all') : 'all';
-        
+
         console.log(`ðŸ” [Unified Engine] Finding competitors for: ${companyName} (source: ${sourceFilter})`);
-        
+
         const result = await findTopCompetitors(
             companyName,
             parseInt(limit as string) || 10,
             parseInt(minSimilarity as string) || 20,
             sourceFilter
         );
-        
+
         // Transform to API response format
         const competitors = result.competitors.map(match => ({
             name: match.company.name,
@@ -440,9 +483,9 @@ app.get('/api/companies/competitors', async (req, res): Promise<void> => {
             breakdown: match.breakdown,
             source: match.company.source
         }));
-        
+
         console.log(`âœ… [Unified Engine] Found ${competitors.length} competitors from ${result.totalCandidates} total companies in ${result.searchTime}ms`);
-        
+
         res.json({
             company: result.targetCompany.name,
             industry: result.targetCompany.industry,
@@ -453,7 +496,7 @@ app.get('/api/companies/competitors', async (req, res): Promise<void> => {
         });
     } catch (error) {
         console.error("API Error (competitors):", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Failed to find competitors",
             message: error instanceof Error ? error.message : 'Unknown error',
             competitors: []
@@ -470,12 +513,24 @@ app.get('/api/companies/raw/all', (_req, res) => {
         });
     } catch (error) {
         console.error("API Error (raw companies):", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Failed to fetch raw companies data"
         });
     }
 });
 
+// 📊 Data quality report endpoint
+app.get('/api/data-quality', (_req, res) => {
+    try {
+        const companies = getAllCompanies();
+        const { generateQualityReport } = require('./services/dataQualityMonitor');
+        const report = generateQualityReport(companies);
+        res.json(report);
+    } catch (error) {
+        console.error("API Error (data-quality):", error);
+        res.status(500).json({ error: "Failed to generate data quality report" });
+    }
+});
 // ðŸ†• New endpoint: Get pre-computed vectors from cache (FAST!)
 app.get('/api/vectors/cache', (_req, res) => {
     try {
@@ -488,7 +543,7 @@ app.get('/api/vectors/cache', (_req, res) => {
         });
     } catch (error) {
         console.error("API Error (vectors):", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Failed to fetch vectors"
         });
     }
@@ -498,27 +553,27 @@ app.get('/api/vectors/cache', (_req, res) => {
 app.post('/api/market-intelligence', async (req: Request, res: Response): Promise<void> => {
     try {
         const { userCompany, selectedCompetitors } = req.body;
-        
+
         if (!userCompany) {
             res.status(400).json({ error: 'userCompany is required' });
             return;
         }
-        
+
         console.log(`ðŸ§  Market Intelligence Request: ${userCompany.name} (${userCompany.industry})`);
         console.log(`   Competitors: ${selectedCompetitors?.length || 0}`);
         console.log(`   userCompany data:`, userCompany);
-        
+
         const report = await generateMarketIntelligence({
             userCompany,
             selectedCompetitors: selectedCompetitors || []
         });
-        
+
         console.log(`âœ… Market Intelligence Report generated successfully`);
         res.json(report);
     } catch (error) {
         console.error("âŒ API Error (market-intelligence):", error);
         console.error("   Stack:", error instanceof Error ? error.stack : 'no stack');
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Failed to generate market intelligence",
             message: error instanceof Error ? error.message : 'Unknown error'
         });
@@ -529,24 +584,24 @@ app.post('/api/market-intelligence', async (req: Request, res: Response): Promis
 app.post('/api/competitor-intelligence', async (req: Request, res: Response): Promise<void> => {
     try {
         const { userCompany, selectedCompetitors } = req.body;
-        
+
         if (!userCompany) {
             res.status(400).json({ error: 'userCompany is required' });
             return;
         }
-        
+
         console.log(`ðŸŽ¯ Competitor Intelligence Request: ${userCompany.name} (${userCompany.industry})`);
         console.log(`   Competitors: ${selectedCompetitors?.length || 0}`);
-        
+
         const report = await generateCompetitorIntelligence({
             userCompany,
             selectedCompetitors: selectedCompetitors || []
         });
-        
+
         res.json(report);
     } catch (error) {
         console.error("API Error (competitor-intelligence):", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Failed to generate competitor intelligence",
             message: error instanceof Error ? error.message : 'Unknown error'
         });
@@ -557,25 +612,25 @@ app.post('/api/competitor-intelligence', async (req: Request, res: Response): Pr
 app.post('/api/customer-insights', async (req: Request, res: Response): Promise<void> => {
     try {
         const { companyName, industry, products, targetMarket } = req.body;
-        
+
         if (!companyName) {
             res.status(400).json({ error: 'companyName is required' });
             return;
         }
-        
+
         console.log(`ðŸŽ¯ Customer Insights Request: ${companyName} (${industry || 'auto-detect'})`);
-        
+
         const report = await generateCustomerInsights({
             companyName,
             industry,
             products,
             targetMarket
         });
-        
+
         res.json(report);
     } catch (error) {
         console.error("API Error (customer-insights):", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Failed to generate customer insights",
             message: error instanceof Error ? error.message : 'Unknown error'
         });
@@ -599,7 +654,7 @@ app.post('/api/gtm/generate', async (req: Request, res: Response): Promise<void>
         res.json(livingPlaybook);
     } catch (error) {
         console.error("API Error (GTM generation):", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Failed to generate GTM strategy",
             message: error instanceof Error ? error.message : 'Unknown error'
         });
@@ -615,14 +670,230 @@ app.post('/api/gtm/generate', async (req: Request, res: Response): Promise<void>
 // fabricated market reports ($15.2B, CAGR 14.5%), fake expert call logs,
 // fake validation sources (GSO 95%, VCCI 88%), fake strategic metrics (95% accuracy)
 
+// Phased GTM Playbook Generation – Industry-scoped, step-by-step playbook
+app.post('/api/playbooks/generate', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { industry, companyProfile } = req.body;
+
+        if (!industry || typeof industry !== 'string') {
+            res.status(400).json({ error: 'industry (string) is required in the request body' });
+            return;
+        }
+
+        const { generateGTMPlaybook } = await import('./services/playbookService');
+        const playbook = await generateGTMPlaybook(industry, companyProfile ?? null);
+        res.json(playbook);
+    } catch (error) {
+        console.error('API Error (playbook generation):', error);
+        res.status(500).json({
+            error: 'Failed to generate GTM playbook',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+// 🎯 ICP Engine — Smart Customer Segmentation & Ideal Customer Profile (Phase 13)
+app.post('/api/icp/generate', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { companyName, industry, productDescription } = req.body;
+
+        if (!industry || typeof industry !== 'string') {
+            res.status(400).json({ error: 'industry (string) is required in the request body' });
+            return;
+        }
+        if (!productDescription || typeof productDescription !== 'string') {
+            res.status(400).json({ error: 'productDescription (string) is required in the request body' });
+            return;
+        }
+
+        const resolvedName = (companyName && typeof companyName === 'string')
+            ? companyName.trim()
+            : 'Your Company';
+
+        const { generateCustomerInsights } = await import('./services/icpEngineService');
+        const report = await generateCustomerInsights(resolvedName, industry.trim(), productDescription.trim());
+        res.json({ success: true, report });
+    } catch (error) {
+        console.error('API Error (ICP generation):', error);
+        res.status(500).json({
+            error: 'Failed to generate ICP report',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+// ============================================================================
+// 📂 Executive Workspace — Phase 14: Saved Intelligence CRUD
+// ============================================================================
+
+// POST /api/workspace/save — persist a new document (ICP, Playbook, etc.)
+app.post('/api/workspace/save', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { type, title, industry, companyName, content, dataSource, tags } = req.body;
+
+        // Validate required fields
+        if (!type || typeof type !== 'string') {
+            res.status(400).json({ error: 'type (string) is required — e.g. ICP, PLAYBOOK, MARKET_REPORT' });
+            return;
+        }
+        if (!title || typeof title !== 'string') {
+            res.status(400).json({ error: 'title (string) is required' });
+            return;
+        }
+        if (!content || typeof content !== 'object') {
+            res.status(400).json({ error: 'content (object) is required — the raw JSON report payload' });
+            return;
+        }
+
+        const { getWorkspaceService, isValidDocumentType } = await import('./services/workspaceService');
+
+        if (!isValidDocumentType(type)) {
+            res.status(400).json({ error: `Invalid document type "${type}". Accepted: ICP, PLAYBOOK, PESTEL, MARKET_REPORT, COMPETITOR_ANALYSIS, GTM_STRATEGY` });
+            return;
+        }
+
+        const ws = getWorkspaceService();
+        const doc = await ws.saveDocument({ type, title, industry, companyName, content, dataSource, tags });
+        res.json({ success: true, document: doc });
+    } catch (error) {
+        console.error('API Error (workspace save):', error);
+        res.status(500).json({
+            error: 'Failed to save document',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+// GET /api/workspace/documents — list all saved documents (newest first)
+app.get('/api/workspace/documents', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { getWorkspaceService, isValidDocumentType } = await import('./services/workspaceService');
+        const ws = getWorkspaceService();
+
+        const typeParam = req.query['type'] as string | undefined;
+        const typeFilter = typeParam && isValidDocumentType(typeParam) ? typeParam : undefined;
+
+        const documents = await ws.getDocuments(typeFilter);
+        res.json({ success: true, documents, total: documents.length });
+    } catch (error) {
+        console.error('API Error (workspace list):', error);
+        res.status(500).json({
+            error: 'Failed to retrieve documents',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+// GET /api/workspace/documents/:id — get a single document with full content
+app.get('/api/workspace/documents/:id', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const docId = req.params['id'];
+        if (!docId) {
+            res.status(400).json({ error: 'Document ID is required' });
+            return;
+        }
+
+        const { getWorkspaceService } = await import('./services/workspaceService');
+        const ws = getWorkspaceService();
+        const doc = await ws.getDocumentById(docId);
+
+        if (!doc) {
+            res.status(404).json({ error: 'Document not found' });
+            return;
+        }
+
+        res.json({ success: true, document: doc });
+    } catch (error) {
+        console.error('API Error (workspace get):', error);
+        res.status(500).json({
+            error: 'Failed to retrieve document',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+// DELETE /api/workspace/documents/:id — permanently delete a document
+app.delete('/api/workspace/documents/:id', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const docId = req.params['id'];
+        if (!docId) {
+            res.status(400).json({ error: 'Document ID is required' });
+            return;
+        }
+
+        const { getWorkspaceService } = await import('./services/workspaceService');
+        const ws = getWorkspaceService();
+        const deleted = await ws.deleteDocument(docId);
+
+        if (!deleted) {
+            res.status(404).json({ error: 'Document not found' });
+            return;
+        }
+
+        res.json({ success: true, message: `Document ${docId} deleted` });
+    } catch (error) {
+        console.error('API Error (workspace delete):', error);
+        res.status(500).json({
+            error: 'Failed to delete document',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+// PATCH /api/workspace/documents/:id — update a document
+app.patch('/api/workspace/documents/:id', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const docId = req.params['id'];
+        if (!docId) {
+            res.status(400).json({ error: 'Document ID is required' });
+            return;
+        }
+
+        const { title, content, tags, industry, companyName } = req.body;
+
+        const { getWorkspaceService } = await import('./services/workspaceService');
+        const ws = getWorkspaceService();
+        const updated = await ws.updateDocument(docId, { title, content, tags, industry, companyName });
+
+        if (!updated) {
+            res.status(404).json({ error: 'Document not found' });
+            return;
+        }
+
+        res.json({ success: true, document: updated });
+    } catch (error) {
+        console.error('API Error (workspace update):', error);
+        res.status(500).json({
+            error: 'Failed to update document',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+// GET /api/workspace/stats — aggregate counts by document type
+app.get('/api/workspace/stats', async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const { getWorkspaceService } = await import('./services/workspaceService');
+        const ws = getWorkspaceService();
+        const stats = await ws.getStats();
+        res.json({ success: true, stats });
+    } catch (error) {
+        console.error('API Error (workspace stats):', error);
+        res.status(500).json({
+            error: 'Failed to retrieve workspace stats',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
 // ðŸ†• Live RSS Feeds API: Láº¥y tin tá»©c tá»« Google News/VnExpress
 app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
     try {
         const { query } = req.body;
         if (!query || typeof query !== 'string') {
-            res.status(400).json({ 
-                error: 'Query parameter required', 
-                news: [] 
+            res.status(400).json({
+                error: 'Query parameter required',
+                news: []
             });
             return;
         }
@@ -632,16 +903,16 @@ app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
         // 1. Táº¡o URL RSS tá»« Google News (TÃ¬m kiáº¿m theo tÃªn cÃ´ng ty)
         // Máº¹o: DÃ¹ng hl=vi&gl=VN Ä‘á»ƒ láº¥y tin tiáº¿ng Viá»‡t
         const feedUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=vi&gl=VN&ceid=VN:vi`;
-        
+
         console.log(`ðŸ”— RSS Feed URL: ${feedUrl}`);
 
         let newsItems: any[] = [];
-        
+
         try {
             // 2. Äá»c RSS vá»›i timeout
             const feed = await Promise.race([
                 rssParser.parseURL(feedUrl),
-                new Promise((_, reject) => 
+                new Promise((_, reject) =>
                     setTimeout(() => reject(new Error('RSS fetch timeout')), 8000)
                 )
             ]);
@@ -659,7 +930,7 @@ app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
             console.log(`âœ… TÃ¬m tháº¥y ${newsItems.length} bÃ i viáº¿t vá» "${query}"`);
         } catch (rssError) {
             console.warn(`âš ï¸ KhÃ´ng thá»ƒ fetch RSS (${rssError instanceof Error ? rssError.message : 'unknown'}), sá»­ dá»¥ng dá»¯ liá»‡u máº«u`);
-            
+
             // Fallback: Return sample data for testing
             newsItems = [
                 {
@@ -673,7 +944,7 @@ app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
             ];
         }
 
-        res.json({ 
+        res.json({
             query,
             count: newsItems.length,
             news: newsItems,
@@ -683,9 +954,9 @@ app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
     } catch (error) {
         console.error('âŒ Lá»—i láº¥y tin tá»©c:', error instanceof Error ? error.message : error);
         console.error('Stack:', error instanceof Error ? error.stack : '');
-        
+
         // Tráº£ vá» máº£ng rá»—ng chá»© khÃ´ng bÃ¡o lá»—i Ä‘á»ƒ Frontend khÃ´ng bá»‹ cháº¿t
-        res.json({ 
+        res.json({
             query: req.body.query || '',
             count: 0,
             news: [],
@@ -721,7 +992,7 @@ app.post('/api/news/analyze', async (req: Request, res: Response): Promise<void>
 
 Tiêu đề: ${title || 'N/A'}
 Nguồn: ${source || 'N/A'}
-Nội dung: ${(content || '').substring(0, 1500)}
+Nội dung: ${articleText.substring(0, 1500)}
 
 Trả về ONLY valid JSON:
 {
@@ -745,7 +1016,7 @@ RULES:
                 const response = await ai.models.generateContent({
                     model: 'gemini-2.0-flash',
                     contents: prompt,
-                    config: { temperature: 0.3, maxOutputTokens: 800 }
+                    config: { temperature: 0.3, maxOutputTokens: 800, tools: [{ googleSearch: {} }] }
                 });
 
                 const text = response.text || '';
@@ -808,32 +1079,145 @@ function buildFallbackAnalysis(title: string, content: string) {
     };
 }
 
+// 🤖 Chat Proxy — keeps Gemini API key server-side (Issue #23)
+app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { contents, systemInstruction, tools, temperature, maxOutputTokens } = req.body;
+
+        if (!contents || !Array.isArray(contents)) {
+            res.status(400).json({ error: 'contents array required' });
+            return;
+        }
+
+        const { GoogleGenAI } = await import('@google/genai');
+        const apiKey = process.env['GEMINI_API_KEY'];
+
+        if (!apiKey) {
+            res.status(503).json({ error: 'AI engine not configured', text: '⚠️ GEMINI_API_KEY chưa được cấu hình trên server.' });
+            return;
+        }
+
+        const ai = new GoogleGenAI({ apiKey });
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents,
+            config: {
+                systemInstruction: systemInstruction || undefined,
+                tools: tools || undefined,
+                temperature: temperature ?? 0.7,
+                maxOutputTokens: maxOutputTokens ?? 2048,
+            },
+        });
+
+        res.json({
+            text: response.text || '',
+            functionCalls: response.functionCalls || [],
+        });
+    } catch (error: any) {
+        const is429 = error?.status === 429 || error?.message?.includes('429');
+        if (is429) {
+            res.status(429).json({ error: 'Rate limited', text: '⚠️ Quá nhiều yêu cầu. Vui lòng đợi vài giây.' });
+            return;
+        }
+        console.error('❌ Chat proxy error:', error?.message || error);
+        res.status(500).json({ error: 'Chat request failed', text: '⚠️ Đã xảy ra lỗi. Vui lòng thử lại.' });
+    }
+});
+
 // 🆕 Mount enrich routes for CSV company enrichment
 // app.use('/api', enrichRouter);
-// --- API Láº¥y dá»¯ liá»‡u Thá»‹ trÆ°á»ng (Market Pulse) ---
+
+// ============================================================================
+// 📊 ANALYTICS API — Industry analytics from MarketIndustryAnalytics
+// GET /api/analytics?industry=Technology → Market index for a specific industry
+// GET /api/analytics?trending=true      → Industry trend summary
+// ============================================================================
+const analyticsEngine = new MarketIndustryAnalytics();
+
+app.get('/api/analytics', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const industry = sanitizeQuery(req.query['industry']);
+        const trending = req.query['trending'];
+
+        // Industry trend summary
+        if (trending === 'true' || trending === '1') {
+            const summary = analyticsEngine.getIndustryTrendSummary();
+            res.json({ success: true, ...summary });
+            return;
+        }
+
+        // Specific industry market index
+        if (industry) {
+            try {
+                const metrics = await analyticsEngine.getMarketIndexByIndustry(industry);
+                res.json({ success: true, ...metrics });
+            } catch (err) {
+                res.status(404).json({
+                    success: false,
+                    error: err instanceof Error ? err.message : `No data for "${industry}"`,
+                });
+            }
+            return;
+        }
+
+        // No params — return usage
+        res.json({
+            success: true,
+            message: 'VICO Analytics API',
+            usage: {
+                industry: '/api/analytics?industry=Technology',
+                trending: '/api/analytics?trending=true',
+                compare: '/api/analytics/compare',
+            },
+        });
+    } catch (error) {
+        console.error('❌ Analytics API error:', error);
+        res.status(500).json({
+            success: false,
+            error: error instanceof Error ? error.message : 'Analytics failed',
+        });
+    }
+});
+
+// GET /api/analytics/compare — All industries ranked and compared
+app.get('/api/analytics/compare', async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const comparison = await analyticsEngine.getIndustryComparison();
+        res.json({ success: true, ...comparison });
+    } catch (error) {
+        console.error('❌ Industry comparison error:', error);
+        res.status(500).json({
+            success: false,
+            error: error instanceof Error ? error.message : 'Comparison failed',
+        });
+    }
+});
+
+// --- API Lấy dữ liệu Thị trường (Market Pulse) ---
 app.get("/api/market-pulse", async (_req, res) => {
-  try {
-    // 1. Láº¥y chá»‰ sá»‘ VÄ© mÃ´ (GDP, CPI, FDI)
-    const macro = await getPrisma().marketData.findMany({
-      where: { type: 'MACRO' },
-      orderBy: { key: 'asc' }
-    });
+    try {
+        // 1. Láº¥y chá»‰ sá»‘ VÄ© mÃ´ (GDP, CPI, FDI)
+        const macro = await getPrisma().marketData.findMany({
+            where: { type: 'MACRO' },
+            orderBy: { key: 'asc' }
+        });
 
-    // 2. Láº¥y chá»‰ sá»‘ TÃ i chÃ­nh ngÃ nh (P/E)
-    const finance = await getPrisma().marketData.findMany({
-      where: { type: 'FINANCE' },
-      orderBy: { value: 'desc' } // NgÃ nh nÃ o P/E cao xáº¿p trÃªn
-    });
+        // 2. Láº¥y chá»‰ sá»‘ TÃ i chÃ­nh ngÃ nh (P/E)
+        const finance = await getPrisma().marketData.findMany({
+            where: { type: 'FINANCE' },
+            orderBy: { value: 'desc' } // NgÃ nh nÃ o P/E cao xáº¿p trÃªn
+        });
 
-    res.json({
-      success: true,
-      data: { macro, finance },
-      lastUpdated: new Date()
-    });
-  } catch (error) {
-    console.error("âŒ Lá»—i láº¥y Market Pulse:", error);
-    res.status(500).json({ error: "Lá»—i Server khi láº¥y dá»¯ liá»‡u thá»‹ trÆ°á»ng" });
-  }
+        res.json({
+            success: true,
+            data: { macro, finance },
+            lastUpdated: new Date()
+        });
+    } catch (error) {
+        console.error("âŒ Lá»—i láº¥y Market Pulse:", error);
+        res.status(500).json({ error: "Lá»—i Server khi láº¥y dá»¯ liá»‡u thá»‹ trÆ°á»ng" });
+    }
 });
 // Initialize news database on startup (optional)
 const initializeNewsDBAsync = async () => {

@@ -101,14 +101,14 @@ export function MarketIndustryPageRealData() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+        <div className="min-h-screen bg-gradient-to-br from-[#FFF1F2] to-[#FFF1F2] p-8">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-black text-gray-900 mb-2">
+                    <h1 className="text-4xl font-black text-[#18181B] mb-2">
                         📊 Market & Industry Intelligence
                     </h1>
-                    <p className="text-gray-600">
+                    <p className="text-[#71717A]">
                         Real data from official sources • Updated regularly • {data.dataQuality.realDataPercent}% genuine data
                     </p>
                 </div>
@@ -121,7 +121,7 @@ export function MarketIndustryPageRealData() {
                             <select 
                                 value={industry}
                                 onChange={(e) => setIndustry(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                className="w-full px-4 py-2 border border-[#E4E4E7] rounded-lg"
                             >
                                 <option value="fintech">Fintech</option>
                                 <option value="ecommerce">E-commerce</option>
@@ -136,7 +136,7 @@ export function MarketIndustryPageRealData() {
                             <select 
                                 value={country}
                                 onChange={(e) => setCountry(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                className="w-full px-4 py-2 border border-[#E4E4E7] rounded-lg"
                             >
                                 <option value="Vietnam">Vietnam</option>
                                 <option value="Thailand">Thailand</option>
@@ -148,7 +148,7 @@ export function MarketIndustryPageRealData() {
                 </div>
 
                 {/* Data Quality Badge */}
-                <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-4 mb-8 text-white">
+                <div className="bg-gradient-to-r from-[#FFF1F2]0 to-[#E11D48] rounded-xl p-4 mb-8 text-white">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <CheckCircle className="w-6 h-6" />
@@ -227,14 +227,14 @@ export function MarketIndustryPageRealData() {
                         competitive: !expanded.competitive
                     })}
                 >
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-[#71717A] mb-4">
                         Competitive data aggregated from multiple official sources
                     </p>
                     <SourcesAttribution sources={data.competitiveLandscape.sources} />
                 </Section>
 
                 {/* Data Sources Footer */}
-                <div className="bg-gray-900 text-white rounded-xl p-6 mt-8">
+                <div className="bg-[#FAFAFA] text-white rounded-xl p-6 mt-8">
                     <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                         <Globe className="w-5 h-5" />
                         Official Data Sources
@@ -253,7 +253,7 @@ export function MarketIndustryPageRealData() {
                                 href={source.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-sm text-indigo-300 hover:text-white flex items-center gap-2 transition"
+                                className="text-sm text-[#E11D48] hover:text-white flex items-center gap-2 transition"
                             >
                                 {source.name}
                                 <ExternalLink className="w-4 h-4" />
@@ -283,17 +283,17 @@ function Section({
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <button
                 onClick={onToggle}
-                className="w-full flex items-center justify-between hover:bg-gray-50 p-2 -m-2 rounded-lg transition"
+                className="w-full flex items-center justify-between hover:bg-[#FAFAFA] p-2 -m-2 rounded-lg transition"
             >
-                <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+                <h2 className="text-xl font-bold text-[#18181B]">{title}</h2>
                 {expanded ? (
-                    <ChevronUp className="w-6 h-6 text-gray-600" />
+                    <ChevronUp className="w-6 h-6 text-[#71717A]" />
                 ) : (
-                    <ChevronDown className="w-6 h-6 text-gray-600" />
+                    <ChevronDown className="w-6 h-6 text-[#71717A]" />
                 )}
             </button>
 
-            {expanded && <div className="mt-4 pt-4 border-t border-gray-200">{children}</div>}
+            {expanded && <div className="mt-4 pt-4 border-t border-[#E4E4E7]">{children}</div>}
         </div>
     );
 }
@@ -307,10 +307,10 @@ function MetricCard({
     trend 
 }: any) {
     return (
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-indigo-200">
-            <p className="text-xs text-gray-600 font-semibold uppercase tracking-wider mb-2">{label}</p>
-            <p className="text-3xl font-black text-gray-900 mb-2">{value}</p>
-            <p className="text-xs text-gray-500 flex items-center gap-1">
+        <div className="bg-gradient-to-br from-[#FFF1F2] to-[#FFF1F2] p-4 rounded-lg border border-[#E4E4E7]">
+            <p className="text-xs text-[#71717A] font-semibold uppercase tracking-wider mb-2">{label}</p>
+            <p className="text-3xl font-black text-[#18181B] mb-2">{value}</p>
+            <p className="text-xs text-[#71717A] flex items-center gap-1">
                 {year && `Year: ${year}`}
                 {period && `Period: ${period}`}
                 {source && `Source: ${source}`}
@@ -321,15 +321,15 @@ function MetricCard({
 
 function MarketChart({ forecast }: { forecast: any[] }) {
     return (
-        <div className="bg-gray-50 p-6 rounded-lg mb-4">
+        <div className="bg-[#FAFAFA] p-6 rounded-lg mb-4">
             <div className="h-40 flex items-end justify-around gap-2">
                 {forecast.slice(0, 5).map((point, idx) => (
                     <div key={idx} className="flex-1 flex flex-col items-center">
                         <div 
-                            className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t"
+                            className="w-full bg-gradient-to-t from-[#E11D48] to-[#E11D48] rounded-t"
                             style={{ height: `${Math.random() * 100}%` }}
                         />
-                        <p className="text-xs mt-2 text-gray-600">{point.year}</p>
+                        <p className="text-xs mt-2 text-[#71717A]">{point.year}</p>
                     </div>
                 ))}
             </div>
@@ -339,7 +339,7 @@ function MarketChart({ forecast }: { forecast: any[] }) {
 
 function TrendCard({ trend }: { trend: any }) {
     return (
-        <div className="flex gap-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-indigo-200">
+        <div className="flex gap-3 p-4 bg-gradient-to-r from-[#FFF1F2] to-[#FFF1F2] rounded-lg border border-[#E4E4E7]">
             <div className="flex-shrink-0 pt-1">
                 {trend.signal === 'Bullish' ? (
                     <TrendingUp className="w-5 h-5 text-green-600" />
@@ -348,9 +348,9 @@ function TrendCard({ trend }: { trend: any }) {
                 )}
             </div>
             <div className="flex-1">
-                <p className="font-semibold text-gray-900">{trend.title}</p>
-                <p className="text-sm text-gray-600 mt-1">{trend.description}</p>
-                <p className="text-xs text-gray-500 mt-2">Source: {trend.source}</p>
+                <p className="font-semibold text-[#18181B]">{trend.title}</p>
+                <p className="text-sm text-[#71717A] mt-1">{trend.description}</p>
+                <p className="text-xs text-[#71717A] mt-2">Source: {trend.source}</p>
             </div>
         </div>
     );
@@ -358,13 +358,13 @@ function TrendCard({ trend }: { trend: any }) {
 
 function SourcesAttribution({ sources }: { sources: string[] }) {
     return (
-        <div className="bg-gray-50 p-4 rounded-lg mt-4 border-l-4 border-indigo-500">
-            <p className="text-sm font-semibold text-gray-900 mb-2">📚 Data Sources:</p>
+        <div className="bg-[#FAFAFA] p-4 rounded-lg mt-4 border-l-4 border-[#E11D48]">
+            <p className="text-sm font-semibold text-[#18181B] mb-2">📚 Data Sources:</p>
             <div className="flex flex-wrap gap-2">
                 {sources.map((source) => (
                     <span
                         key={source}
-                        className="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full"
+                        className="inline-flex items-center px-3 py-1 bg-[#FFF1F2] text-[#BE123C] text-xs font-medium rounded-full"
                     >
                         ✓ {source}
                     </span>

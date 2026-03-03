@@ -51,7 +51,7 @@ interface NewsCardProps {
 export const NewsCardSkeleton = ({ variant = 'default' }: { variant?: 'default' | 'compact' | 'featured' }) => {
     if (variant === 'compact') {
         return (
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4 flex items-start gap-3">
+            <div className="bg-white rounded-xl border border-[#E4E4E7] p-4 flex items-start gap-3">
                 <Skeleton className="w-1 h-12 rounded-full flex-shrink-0" />
                 <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-full" />
@@ -63,7 +63,7 @@ export const NewsCardSkeleton = ({ variant = 'default' }: { variant?: 'default' 
 
     if (variant === 'featured') {
         return (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+            <div className="bg-white rounded-2xl border border-[#E4E4E7] overflow-hidden">
                 <Skeleton className="h-48 w-full rounded-none" />
                 <div className="p-6 space-y-3">
                     <Skeleton className="h-5 w-3/4" />
@@ -79,7 +79,7 @@ export const NewsCardSkeleton = ({ variant = 'default' }: { variant?: 'default' 
     }
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-5 space-y-3">
+        <div className="bg-white rounded-xl border border-[#E4E4E7] p-5 space-y-3">
             <div className="flex items-center gap-3">
                 <Skeleton className="w-3 h-3 rounded-full" />
                 <Skeleton className="h-3 w-24" />
@@ -118,22 +118,22 @@ const getSentimentConfig = (sentiment?: 'Positive' | 'Neutral' | 'Negative' | nu
     const configs = {
         Positive: {
             bg: 'bg-emerald-500',
-            lightBg: 'bg-emerald-100 dark:bg-emerald-900/30',
-            text: 'text-emerald-700 dark:text-emerald-400',
+            lightBg: 'bg-emerald-100',
+            text: 'text-emerald-700',
             icon: TrendingUp,
             label: 'Positive'
         },
         Negative: {
             bg: 'bg-red-500',
-            lightBg: 'bg-red-100 dark:bg-red-900/30',
-            text: 'text-red-700 dark:text-red-400',
+            lightBg: 'bg-red-100',
+            text: 'text-red-700',
             icon: TrendingDown,
             label: 'Negative'
         },
         Neutral: {
-            bg: 'bg-gray-400',
-            lightBg: 'bg-gray-100 dark:bg-gray-800',
-            text: 'text-gray-600 dark:text-gray-400',
+            bg: 'bg-[#A1A1AA]',
+            lightBg: 'bg-[#F4F4F5]',
+            text: 'text-[#71717A]',
             icon: Minus,
             label: 'Neutral'
         }
@@ -168,12 +168,12 @@ export const NewsCard = ({
             <motion.div
                 whileHover={{ scale: 1.01 }}
                 onClick={() => onClick?.(news)}
-                className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-4 flex items-start gap-3 cursor-pointer hover:border-gray-200 dark:hover:border-gray-700 transition-all"
+                className="bg-white rounded-xl border border-[#E4E4E7] p-4 flex items-start gap-3 cursor-pointer hover:border-[#E4E4E7] transition-all"
             >
                 <div className={`w-1 h-12 ${sentimentConfig.bg} rounded-full flex-shrink-0`} />
                 <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm text-gray-900 dark:text-white line-clamp-2">{news.title}</h4>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                    <h4 className="font-medium text-sm text-[#18181B] line-clamp-2">{news.title}</h4>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-[#71717A]">
                         <span>{news.sourceName}</span>
                         <span>•</span>
                         <span>{formatTimeAgo(news.publishedAt)}</span>
@@ -189,7 +189,7 @@ export const NewsCard = ({
             <motion.div
                 whileHover={{ scale: 1.01, y: -4 }}
                 onClick={() => onClick?.(news)}
-                className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300"
+                className="bg-white rounded-2xl border border-[#E4E4E7] overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300"
             >
                 {/* Image */}
                 {news.imageUrl ? (
@@ -215,16 +215,16 @@ export const NewsCard = ({
 
                 {/* Content */}
                 <div className="p-6">
-                    <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-2 mb-2">
+                    <h3 className="font-bold text-lg text-[#18181B] line-clamp-2 mb-2">
                         {news.title}
                     </h3>
                     {news.summary && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4">
+                        <p className="text-sm text-[#71717A] line-clamp-2 mb-4">
                             {news.summary}
                         </p>
                     )}
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-[#71717A]">
                             <Clock className="w-4 h-4" />
                             <span>{formatTimeAgo(news.publishedAt)}</span>
                             {news.sourceName && (
@@ -234,7 +234,7 @@ export const NewsCard = ({
                                 </>
                             )}
                         </div>
-                        <ExternalLink className="w-4 h-4 text-gray-400" />
+                        <ExternalLink className="w-4 h-4 text-[#A1A1AA]" />
                     </div>
                 </div>
             </motion.div>
@@ -249,12 +249,12 @@ export const NewsCard = ({
             onHoverStart={() => setIsHovered(true)}
             onHoverEnd={() => setIsHovered(false)}
             onClick={() => onClick?.(news)}
-            className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-5 cursor-pointer hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-md transition-all duration-200"
+            className="bg-white rounded-xl border border-[#E4E4E7] p-5 cursor-pointer hover:border-[#E4E4E7] hover:shadow-md transition-all duration-200"
         >
             {/* Header */}
             <div className="flex items-center gap-3 mb-3">
                 <div className={`w-3 h-3 ${sentimentConfig.bg} rounded-full flex-shrink-0`} />
-                <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                <span className="text-sm text-[#71717A] font-medium">
                     {news.sourceName || 'Unknown Source'}
                 </span>
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 ${sentimentConfig.lightBg} ${sentimentConfig.text} text-xs font-semibold rounded-full`}>
@@ -264,20 +264,20 @@ export const NewsCard = ({
             </div>
 
             {/* Title */}
-            <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2">
+            <h3 className="font-semibold text-[#18181B] line-clamp-2 mb-2">
                 {news.title}
             </h3>
 
             {/* Summary */}
             {news.summary && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                <p className="text-sm text-[#71717A] line-clamp-2 mb-3">
                     {news.summary}
                 </p>
             )}
 
             {/* Footer */}
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
-                <div className="flex items-center gap-3 text-xs text-gray-500">
+            <div className="flex items-center justify-between pt-3 border-t border-[#E4E4E7]">
+                <div className="flex items-center gap-3 text-xs text-[#71717A]">
                     <span className="flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
                         {formatTimeAgo(news.publishedAt)}
@@ -306,17 +306,17 @@ export const NewsCard = ({
                         >
                             <button 
                                 onClick={(e) => { e.stopPropagation(); }}
-                                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                className="p-1.5 hover:bg-[#F4F4F5] rounded-lg transition-colors"
                             >
-                                <Bookmark className="w-4 h-4 text-gray-400" />
+                                <Bookmark className="w-4 h-4 text-[#A1A1AA]" />
                             </button>
                             <button 
                                 onClick={(e) => { e.stopPropagation(); }}
-                                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                className="p-1.5 hover:bg-[#F4F4F5] rounded-lg transition-colors"
                             >
-                                <Share2 className="w-4 h-4 text-gray-400" />
+                                <Share2 className="w-4 h-4 text-[#A1A1AA]" />
                             </button>
-                            <ExternalLink className="w-4 h-4 text-gray-400 ml-1" />
+                            <ExternalLink className="w-4 h-4 text-[#A1A1AA] ml-1" />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -355,8 +355,8 @@ export const NewsFeed = ({
     // Error state
     if (error) {
         return (
-            <div className="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 p-6 text-center">
-                <p className="text-red-700 dark:text-red-400 font-medium mb-3">{error}</p>
+            <div className="bg-red-50 rounded-xl border border-red-200 p-6 text-center">
+                <p className="text-red-700 font-medium mb-3">{error}</p>
                 {onRetry && (
                     <button
                         onClick={onRetry}
@@ -391,9 +391,9 @@ export const NewsFeed = ({
     // Empty state
     if (news.length === 0) {
         return (
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
-                <Newspaper className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 font-medium">{emptyMessage}</p>
+            <div className="bg-[#FAFAFA] rounded-xl border border-[#E4E4E7] p-12 text-center">
+                <Newspaper className="w-12 h-12 text-[#A1A1AA] mx-auto mb-4" />
+                <p className="text-[#71717A] font-medium">{emptyMessage}</p>
             </div>
         );
     }
@@ -402,8 +402,8 @@ export const NewsFeed = ({
         <div className="space-y-4">
             {title && (
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">{title}</h3>
-                    <span className="text-sm text-gray-500">{news.length} articles</span>
+                    <h3 className="font-bold text-lg text-[#18181B]">{title}</h3>
+                    <span className="text-sm text-[#71717A]">{news.length} articles</span>
                 </div>
             )}
             
