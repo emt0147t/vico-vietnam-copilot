@@ -165,27 +165,9 @@ function App() {
     );
   }
 
-  const loadingOverlay = appState.isSeeding && (
-    <div className="fixed bottom-6 left-6 z-[100] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-fade-in max-w-xs">
-      <div className="relative w-10 h-10 flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#B91C1C]" size={24} />
-        <span className="absolute text-[8px] font-black text-gray-900 dark:text-white">{appState.seedProgress.p}%</span>
-      </div>
-      <div className="flex flex-col">
-        <span className="text-[10px] font-black uppercase tracking-widest text-[#B91C1C]">
-          VICO Intelligence
-        </span>
-        <span className="text-[10px] text-gray-500 font-bold truncate max-w-[180px]">
-          {appState.seedProgress.msg}
-        </span>
-      </div>
-    </div>
-  );
-
   return (
     <AppErrorBoundary>
       <div className="relative">
-        {loadingOverlay}
 
         <Routes>
           <Route path="/" element={
