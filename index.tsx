@@ -15,19 +15,26 @@ if (!rootElement) {
 
 const root = ReactDOM.createRoot(rootElement);
 
+// Wrap with ClerkProvider only when publishableKey is available
+const AppTree = (
+  <BrowserRouter>
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  </BrowserRouter>
+);
+
 root.render(
   <React.StrictMode>
-    <ClerkProvider 
-      publishableKey={CLERK_PUBLISHABLE_KEY}
-      appearance={{
-        variables: { colorPrimary: '#B91C1C' },
-      }}
-    >
-      <BrowserRouter>
-        <ThemeProvider>
-          <App />
-        </ThemeProvider>
-      </BrowserRouter>
-    </ClerkProvider>
+    {CLERK_PUBLISHABLE_KEY ? (
+      <ClerkProvider
+        publishableKey={CLERK_PUBLISHABLE_KEY}
+        appearance={{ variables: { colorPrimary: '#B91C1C' } }}
+      >
+        {AppTree}
+      </ClerkProvider>
+    ) : (
+      AppTree
+    )}
   </React.StrictMode>
 );

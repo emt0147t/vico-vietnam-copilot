@@ -9,7 +9,7 @@ import { Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { RagService } from './services/ragLayer';
 import { logger } from './utils/logger';
 import type { UserSession, WizardData } from './types/index';
-import { useAuth, useUser, useClerk } from '@clerk/clerk-react';
+import { useSafeAuth, useSafeUser, useSafeClerk } from './hooks/useSafeClerk';
 
 // --- Error Boundary ---
 interface ErrorBoundaryState { hasError: boolean; error?: Error }
@@ -73,10 +73,10 @@ function App() {
     user: null,
   });
 
-  // Clerk hooks for auth state
-  const { isSignedIn, isLoaded: isAuthLoaded, userId } = useAuth();
-  const { user: clerkUser } = useUser();
-  const clerk = useClerk();
+  // Clerk hooks for auth state (safe — works without ClerkProvider)
+  const { isSignedIn, isLoaded: isAuthLoaded, userId } = useSafeAuth();
+  const { user: clerkUser } = useSafeUser();
+  const clerk = useSafeClerk();
 
   // Initialize knowledge base on mount (with abort on unmount)
   useEffect(() => {
