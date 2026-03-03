@@ -218,7 +218,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLoginClick 
               className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-white border border-[#E4E4E7] text-[#18181B] text-base font-bold hover:border-[#E11D48]/30 hover:bg-white active:scale-[0.97] transition-all duration-150 shadow-sm w-full sm:w-auto"
             >
               <Play weight="fill" size={16} className="text-[#E11D48]" />
-              Watch Demo
+              Book Demo
             </button>
           </motion.div>
         </motion.div>

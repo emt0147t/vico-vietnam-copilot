@@ -539,8 +539,8 @@ export function OnboardingPage({ onComplete, onBack }: OnboardingPageProps) {
               <div className="relative mx-auto w-28 h-28">
                 <div className="absolute inset-0 rounded-full border-2 border-[#E11D48]/30 animate-spin" style={{ animationDuration: '3s' }} />
                 <div className="absolute inset-3 rounded-full border-2 border-dashed border-[#E11D48]/50 animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }} />
-                <div className="absolute inset-6 rounded-full bg-gradient-to-br from-[#E11D48] to-[#F97316] flex items-center justify-center shadow-2xl shadow-[#E11D48]/30">
-                  <span className="text-white font-extrabold text-2xl">V</span>
+                <div className="absolute inset-6 rounded-full overflow-hidden shadow-2xl shadow-[#E11D48]/30">
+                  <img src="/logo.png" alt="VICO" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute inset-0 rounded-full bg-[#E11D48]/20 animate-ping" style={{ animationDuration: '1.5s' }} />
               </div>

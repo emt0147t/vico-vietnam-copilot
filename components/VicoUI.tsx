@@ -8,7 +8,7 @@ import {
 
 export const Logo = () => (
   <div className="flex items-center gap-3 group cursor-pointer select-none" role="banner">
-    <div className="w-11 h-11 bg-gradient-to-br from-[#E11D48] to-[#BE123C] rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-[#E11D48]/30 group-hover:scale-105 transition-transform duration-300">V</div>
+    <img src="/logo.png" alt="VICO" className="w-11 h-11 rounded-xl object-cover shadow-lg shadow-[#E11D48]/30 group-hover:scale-105 transition-transform duration-300" />
     <div className="flex flex-col">
         <span className="text-xl font-black tracking-tighter text-[#18181B] leading-none">VICO</span>
         <div className="flex items-center gap-1.5 mt-0.5">
