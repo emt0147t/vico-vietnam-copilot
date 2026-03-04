@@ -1,5 +1,5 @@
-﻿/**
- *  News Intelligence Page â€” Phase 20 (Professional Overhaul)
+/**
+ *  News Intelligence Page — Phase 20 (Professional Overhaul)
  *
  * Inspired by Bloomberg, Reuters & TechCrunch layouts:
  *   - Hero featured article with large visual thumbnail
@@ -9,10 +9,10 @@
  *   - Trending topics sidebar
  *   - Data Sources & Methodology footer
  *
- * Data: Live RSS via getCompanyNews() â€” no images in feed,
+ * Data: Live RSS via getCompanyNews() — no images in feed,
  *       so we generate visually rich CSS thumbnails per source.
  *
- * Design: Executive Crimson â€” config/designSystem.ts
+ * Design: Executive Crimson — config/designSystem.ts
  */
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
@@ -60,14 +60,14 @@ const analyzeSentiment = (text: string): 'positive' | 'neutral' | 'negative' => 
   const t = text.toLowerCase();
 
   const negationRe =
-    /(phá»§ nháº­n|khÃ´ng|chÆ°a|cháº³ng|khÃ´ng há»|bÃ¡c bá»|pháº£n bÃ¡c|báº¥t cháº¥p|vÆ°á»£t qua|kháº¯c phá»¥c|\bnot\b|\bno\b|\bdon'?t\b|\bdespite\b|\bdeny\b|\bdenies\b|\bdenied\b|\bnever\b|\bovercome\b)/i;
+    /(phủ nhận|không|chưa|chẳng|không hề|bác bỏ|phản bác|bất chấp|vượt qua|khắc phục|\bnot\b|\bno\b|\bdon'?t\b|\bdespite\b|\bdeny\b|\bdenies\b|\bdenied\b|\bnever\b|\bovercome\b)/i;
   const clauseBoundary =
-    /[,;.!?]|\bnhÆ°ng\b|\btuy nhiÃªn\b|\bsong\b|\bbut\b|\bhowever\b/;
+    /[,;.!?]|\bnhưng\b|\btuy nhiên\b|\bsong\b|\bbut\b|\bhowever\b/;
 
   const negativeRe =
-    /(\bfall\b|\bdrop\b|\bdecline\b|\bloss\b|\blayoff\b|\blawsuit\b|\bscandal\b|\bcrisis\b|\bcrash\b|\bbankruptcy\b|giáº£m|sá»¥t giáº£m|thua lá»—|phÃ¡ sáº£n|khá»§ng hoáº£ng|cáº¯t giáº£m|sa tháº£i|vi pháº¡m|thu há»“i|cáº£nh bÃ¡o|tháº¥t báº¡i|ná»£ xáº¥u|suy thoÃ¡i|Ä‘Ã³ng cá»­a|bÃª bá»‘i|lao dá»‘c|thiá»‡t háº¡i)/gi;
+    /(\bfall\b|\bdrop\b|\bdecline\b|\bloss\b|\blayoff\b|\blawsuit\b|\bscandal\b|\bcrisis\b|\bcrash\b|\bbankruptcy\b|giảm|sụt giảm|thua lỗ|phá sản|khủng hoảng|cắt giảm|sa thải|vi phạm|thu hồi|cảnh báo|thất bại|nợ xấu|suy thoái|đóng cửa|bê bối|lao dốc|thiệt hại)/gi;
   const positiveRe =
-    /(\bsurge\b|\bjump\b|\bsoar\b|\bgrowth\b|\bsuccess\b|\brecord\b|\binnovation\b|\bprofit\b|\bgain\b|\brecover\b|tÄƒng trÆ°á»Ÿng|tÄƒng|Ä‘á»™t phÃ¡|thÃ nh cÃ´ng|ká»· lá»¥c|dáº«n Ä‘áº§u|má»Ÿ rá»™ng|lá»£i nhuáº­n|phÃ¡t triá»ƒn|giáº£i thÆ°á»Ÿng|khá»Ÿi sáº¯c|Ä‘áº§u tÆ°|ra máº¯t|bá»©t phÃ¡|phá»¥c há»“i)/gi;
+    /(\bsurge\b|\bjump\b|\bsoar\b|\bgrowth\b|\bsuccess\b|\brecord\b|\binnovation\b|\bprofit\b|\bgain\b|\brecover\b|tăng trưởng|tăng|đột phá|thành công|kỷ lục|dẫn đầu|mở rộng|lợi nhuận|phát triển|giải thưởng|khởi sắc|đầu tư|ra mắt|bứt phá|phục hồi)/gi;
 
   const isNegatedAt = (idx: number): boolean => {
     const windowStart = Math.max(0, idx - 40);
@@ -129,22 +129,22 @@ interface NewsArticle {
 }
 
 // ============================================================================
-// THUMBNAIL GENERATION â€” deterministic gradient per source
+// THUMBNAIL GENERATION — deterministic gradient per source
 // ============================================================================
 
 const SOURCE_PALETTES: Record<string, [string, string]> = {
   'VnExpress':     ['#E11D48', '#BE123C'],
-  'Tuá»•i Tráº»':     ['#0284C7', '#0369A1'],
-  'Thanh NiÃªn':    ['#059669', '#047857'],
+  'Tuổi Trẻ':     ['#0284C7', '#0369A1'],
+  'Thanh Niên':    ['#059669', '#047857'],
   'VietnamNet':    ['#7C3AED', '#6D28D9'],
-  'DÃ¢n TrÃ­':       ['#D97706', '#B45309'],
+  'Dân Trí':       ['#D97706', '#B45309'],
   'CafeF':         ['#DC2626', '#B91C1C'],
   'VnEconomy':     ['#0891B2', '#0E7490'],
   'Zing News':     ['#EA580C', '#C2410C'],
-  'BÃ¡o Má»›i':       ['#4F46E5', '#4338CA'],
-  'Nhá»‹p Sá»‘ng':     ['#DB2777', '#BE185D'],
-  'Lao Äá»™ng':      ['#16A34A', '#15803D'],
-  'NgÆ°á»i Lao Äá»™ng':['#CA8A04', '#A16207'],
+  'Báo Mới':       ['#4F46E5', '#4338CA'],
+  'Nhịp Sống':     ['#DB2777', '#BE185D'],
+  'Lao Động':      ['#16A34A', '#15803D'],
+  'Người Lao Động':['#CA8A04', '#A16207'],
   'Reuters':       ['#F97316', '#EA580C'],
   'Bloomberg':     ['#18181B', '#3F3F46'],
   'TechCrunch':    ['#22C55E', '#16A34A'],
@@ -212,25 +212,25 @@ function countWords(text: string): number {
   return text.split(/\s+/).filter(Boolean).length;
 }
 
-/** Extract a concise summary â€” first N meaningful sentences */
+/** Extract a concise summary — first N meaningful sentences */
 function extractSummary(content: string, maxSentences = 3): string {
   if (!content) return '';
   const cleaned = content.replace(/\s+/g, ' ').trim();
   // Split by sentence-ending punctuation
   const sentences = cleaned
-    .split(/(?<=[.!?ã€‚])\s+/)
+    .split(/(?<=[.!?。])\s+/)
     .map(s => s.trim())
     .filter(s => s.length > 25);
   if (sentences.length === 0) return cleaned.slice(0, 200) + (cleaned.length > 200 ? '...' : '');
   return sentences.slice(0, maxSentences).join(' ');
 }
 
-/** Extract key points â€” sentences scored by keyword overlap with title + data signals */
+/** Extract key points — sentences scored by keyword overlap with title + data signals */
 function extractKeyPoints(content: string, title: string): string[] {
   if (!content) return [];
   const sentences = content
     .replace(/\s+/g, ' ')
-    .split(/(?<=[.!?ã€‚])\s+/)
+    .split(/(?<=[.!?。])\s+/)
     .map(s => s.trim())
     .filter(s => s.length > 30);
 
@@ -245,7 +245,7 @@ function extractKeyPoints(content: string, title: string): string[] {
     const overlapScore = words.filter(w => titleWords.has(w)).length;
     const hasNumber = /\d+/.test(s) ? 2 : 0;
     const hasKeyData =
-      /tÄƒng|giáº£m|growth|revenue|lá»£i nhuáº­n|doanh thu|market|thá»‹ trÆ°á»ng|Ä‘áº§u tÆ°|invest|ká»· lá»¥c|record|triá»‡u|tá»·|billion|million|percent|%/i.test(s)
+      /tăng|giảm|growth|revenue|lợi nhuận|doanh thu|market|thị trường|đầu tư|invest|kỷ lục|record|triệu|tỷ|billion|million|percent|%/i.test(s)
         ? 3
         : 0;
     return { sentence: s, score: overlapScore + hasNumber + hasKeyData };
@@ -298,11 +298,11 @@ function formatFullDate(dateStr: string): string {
 // ============================================================================
 
 const DATA_SOURCES = [
-  'Google News RSS â€” Vietnamese Language Feed',
-  'VnExpress, Tuá»•i Tráº» & Thanh NiÃªn',
+  'Google News RSS — Vietnamese Language Feed',
+  'VnExpress, Tuổi Trẻ & Thanh Niên',
   'CafeF & VnEconomy Financial Data',
   'Reuters & Bloomberg Wire Services',
-  'VICO Enterprise Database â€” 10,000+ Companies',
+  'VICO Enterprise Database — 10,000+ Companies',
   'Real-time Sentiment Analysis Engine',
 ];
 
@@ -310,7 +310,7 @@ const DATA_SOURCES = [
 // SUB-COMPONENTS
 // ============================================================================
 
-/** Generated thumbnail â€” gradient + source initial + icon */
+/** Generated thumbnail — gradient + source initial + icon */
 function NewsThumbnail({
   source,
   size = 'md',
@@ -379,7 +379,7 @@ function HeroArticle({ article, onClick }: { article: NewsArticle; onClick: () =
           <NewsThumbnail source={article.source} size="hero" className="lg:!rounded-none lg:!rounded-l-[12px] !rounded-b-none lg:!rounded-bl-[12px] !h-full min-h-[200px]" />
           <div className="absolute top-3 left-3">
             <span className={tw.badge('brand')}>
-              <Star size={iconSize.xs} weight="fill" /> Tin ná»•i báº­t
+              <Star size={iconSize.xs} weight="fill" /> Tin nổi bật
             </span>
           </div>
         </div>
@@ -495,7 +495,7 @@ function CompactArticle({ article, onClick }: { article: NewsArticle; onClick: (
         </h4>
         <div className="flex items-center gap-2 mt-1.5">
           <span className="text-[10px] font-medium text-[#71717A]">{article.source}</span>
-          <span className="text-[10px] text-[#A1A1AA]">Â·</span>
+          <span className="text-[10px] text-[#A1A1AA]">·</span>
           <span className="text-[10px] text-[#A1A1AA]">{timeAgo(article.pubDate)}</span>
           <span className={`w-1.5 h-1.5 rounded-full ${sc.dot} ml-auto shrink-0`} />
         </div>
@@ -647,7 +647,7 @@ function ArticleDetailPanel({
         className="fixed inset-y-0 right-0 w-full sm:w-[520px] lg:w-[600px] bg-white z-50 shadow-2xl overflow-y-auto transition-transform duration-300 animate-slide-in-right"
         style={{ animationDuration: '300ms' }}
       >
-        {/* â”€â”€â”€ Panel Header â”€â”€â”€ */}
+        {/* ─── Panel Header ─── */}
         <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-[#E4E4E7]">
           <div className="flex items-center justify-between px-5 py-3.5">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -733,7 +733,7 @@ function ArticleDetailPanel({
           </div>
         </div>
 
-        {/* â”€â”€â”€ Article Title & Meta â”€â”€â”€ */}
+        {/* ─── Article Title & Meta ─── */}
         <div className="px-5 pt-5 pb-4 border-b border-[#E4E4E7]/50">
           <h2 className={`${fs.heading} font-bold text-[#18181B] leading-snug mb-3`}>
             {article.title}
@@ -761,7 +761,7 @@ function ArticleDetailPanel({
           </div>
         </div>
 
-        {/* â”€â”€â”€ Reading Aid Tabs â”€â”€â”€ */}
+        {/* ─── Reading Aid Tabs ─── */}
         <div className="px-5 pt-4 pb-0">
           <div className="flex items-center gap-1 border-b border-[#E4E4E7]">
             {[
@@ -788,7 +788,7 @@ function ArticleDetailPanel({
           </div>
         </div>
 
-        {/* â”€â”€â”€ Tab Content â”€â”€â”€ */}
+        {/* ─── Tab Content ─── */}
         <div className="px-5 py-4 space-y-4">
           {/* SUMMARY TAB */}
           {activeSection === 'summary' && (
@@ -810,9 +810,9 @@ function ArticleDetailPanel({
                   <span className="text-xs font-bold text-[#18181B]">Sentiment Analysis</span>
                 </div>
                 <p className={`text-xs text-[#71717A] leading-relaxed`}>
-                  {article.sentiment === 'positive' && 'This article has a positive tone â€” it contains signals of growth, success, or development. This could be good news for the business or industry.'}
-                  {article.sentiment === 'negative' && 'This article has a negative tone â€” it contains signals of decline, risk, or difficulty. Potential impact should be closely monitored.'}
-                  {article.sentiment === 'neutral' && 'This article has a neutral tone â€” reporting is objective, without a clear positive or negative bias.'}
+                  {article.sentiment === 'positive' && 'This article has a positive tone — it contains signals of growth, success, or development. This could be good news for the business or industry.'}
+                  {article.sentiment === 'negative' && 'This article has a negative tone — it contains signals of decline, risk, or difficulty. Potential impact should be closely monitored.'}
+                  {article.sentiment === 'neutral' && 'This article has a neutral tone — reporting is objective, without a clear positive or negative bias.'}
                 </p>
                 <div className="mt-2.5 flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-[#F4F4F5] rounded-full overflow-hidden">
@@ -915,12 +915,12 @@ function ArticleDetailPanel({
               {/* Source info */}
               <div className="flex items-center gap-2 text-[10px] text-[#A1A1AA]">
                 <Database size={12} weight="duotone" />
-                <span>Content from RSS source â€” may be truncated. Read the original article for full content.</span>
+                <span>Content from RSS source — may be truncated. Read the original article for full content.</span>
               </div>
             </div>
           )}
 
-          {/* â”€â”€â”€ Related Articles â”€â”€â”€ */}
+          {/* ─── Related Articles ─── */}
           {related.length > 0 && (
             <div className="pt-2">
               <div className="flex items-center gap-2 mb-3">
@@ -948,7 +948,7 @@ function ArticleDetailPanel({
                         </h4>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span className="text-[9px] text-[#A1A1AA]">{rel.source}</span>
-                          <span className="text-[9px] text-[#A1A1AA]">Â·</span>
+                          <span className="text-[9px] text-[#A1A1AA]">·</span>
                           <span className="text-[9px] text-[#A1A1AA]">{timeAgo(rel.pubDate)}</span>
                           <span className={`w-1.5 h-1.5 rounded-full ${relSc.dot} ml-auto shrink-0`} />
                         </div>
@@ -961,7 +961,7 @@ function ArticleDetailPanel({
           )}
         </div>
 
-        {/* â”€â”€â”€ Panel Footer: Open Original â”€â”€â”€ */}
+        {/* ─── Panel Footer: Open Original ─── */}
         <div className="sticky bottom-0 bg-white/95 backdrop-blur-md border-t border-[#E4E4E7] px-5 py-3.5">
           <a
             href={article.link}
@@ -970,10 +970,10 @@ function ArticleDetailPanel({
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#E11D48] hover:bg-[#BE123C] text-white text-sm font-semibold transition-colors"
           >
             <ArrowUpRight size={16} weight="bold" />
-            Read Original â€” {article.source}
+            Read Original — {article.source}
           </a>
           <p className="text-[9px] text-center text-[#A1A1AA] mt-2">
-            Press Esc to close Â· Auto-summary & analysis from RSS content
+            Press Esc to close · Auto-summary & analysis from RSS content
           </p>
         </div>
       </div>
@@ -1171,7 +1171,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
 
   return (
     <div className="space-y-6 pb-10">
-      {/* â”€â”€â”€ Page Header â”€â”€â”€ */}
+      {/* ─── Page Header ─── */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-3 mb-1.5">
@@ -1181,12 +1181,12 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
             </span>
           </div>
           <p className={`${tw.body} max-w-xl`}>
-            Track, analyze & discover news about your business, competitors, and industry â€” real-time data updates
+            Track, analyze & discover news about your business, competitors, and industry — real-time data updates
           </p>
         </div>
       </div>
 
-      {/* â”€â”€â”€ Stat Cards â”€â”€â”€ */}
+      {/* ─── Stat Cards ─── */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
           { label: 'Total Articles', value: stats.total, icon: Newspaper, color: 'text-[#E11D48]' },
@@ -1202,7 +1202,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
                 <Icon size={iconSize.sm} weight="duotone" />
               </div>
               <div>
-                <p className={tw.metric + ' text-lg lg:text-xl text-[#18181B]'}>{isLoading ? 'â€”' : s.value}</p>
+                <p className={tw.metric + ' text-lg lg:text-xl text-[#18181B]'}>{isLoading ? '—' : s.value}</p>
                 <p className="text-[9px] font-semibold uppercase tracking-wider text-[#A1A1AA]">{s.label}</p>
               </div>
             </div>
@@ -1210,7 +1210,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
         })}
       </div>
 
-      {/* â”€â”€â”€ Search & Filters â”€â”€â”€ */}
+      {/* ─── Search & Filters ─── */}
       <div className={`${tw.card} ${tw.cardPadding} space-y-3`}>
         {/* Search */}
         <div className="relative">
@@ -1281,7 +1281,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
         </div>
       </div>
 
-      {/* â”€â”€â”€ Loading State â”€â”€â”€ */}
+      {/* ─── Loading State ─── */}
       {isLoading && (
         <div className="space-y-6">
           {/* Hero skeleton */}
@@ -1312,7 +1312,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
         </div>
       )}
 
-      {/* â”€â”€â”€ Content â”€â”€â”€ */}
+      {/* ─── Content ─── */}
       {!isLoading && filteredNews.length === 0 && (
         <div className={`${tw.card} ${tw.cardPadding} text-center py-16`}>
           <Newspaper size={48} weight="duotone" className="text-[#A1A1AA] mx-auto mb-4" />
@@ -1324,15 +1324,15 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
       {!isLoading && filteredNews.length > 0 && (
         <FadeIn duration={400}>
           <div className="space-y-6">
-            {/* â”€â”€â”€ Hero Article â”€â”€â”€ */}
+            {/* ─── Hero Article ─── */}
             {heroArticle && (
               <HeroArticle article={heroArticle} onClick={() => openArticle(heroArticle)} />
             )}
 
-            {/* â”€â”€â”€ Trending Topics â”€â”€â”€ */}
+            {/* ─── Trending Topics ─── */}
             <TrendingTopics articles={filteredNews} />
 
-            {/* â”€â”€â”€ Grid News Cards â”€â”€â”€ */}
+            {/* ─── Grid News Cards ─── */}
             {gridArticles.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -1352,7 +1352,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
               </div>
             )}
 
-            {/* â”€â”€â”€ List Articles (remaining) â”€â”€â”€ */}
+            {/* ─── List Articles (remaining) ─── */}
             {listArticles.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -1372,7 +1372,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
               </div>
             )}
 
-            {/* â”€â”€â”€ Data Sources & Methodology Footer â”€â”€â”€ */}
+            {/* ─── Data Sources & Methodology Footer ─── */}
             <div className={`${tw.card} ${tw.cardPadding}`}>
               <div className="flex items-center gap-2 mb-3">
                 <Database size={iconSize.md} weight="duotone" className="text-[#E11D48]" />
@@ -1395,7 +1395,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
         </FadeIn>
       )}
 
-      {/* â”€â”€â”€ Article Detail Slide-Over Panel â”€â”€â”€ */}
+      {/* ─── Article Detail Slide-Over Panel ─── */}
       {selectedArticle && (
         <ArticleDetailPanel
           article={selectedArticle}

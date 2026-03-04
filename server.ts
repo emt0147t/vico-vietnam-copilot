@@ -55,7 +55,7 @@ declare global {
 const app = express();
 const PORT = parseInt(process.env['PORT'] || '3001', 10);
 
-// ðŸ›¡ï¸ Basic in-memory rate limiter (per IP, 100 req/min)
+// 🛡️ Basic in-memory rate limiter (per IP, 100 req/min)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 app.use((req, _res, next) => {
     const ip = req.ip || 'unknown';
@@ -87,10 +87,10 @@ function sanitizeQuery(input: unknown, maxLen = 200): string | null {
     return input.trim().slice(0, maxLen);
 }
 
-// ðŸ†• Initialize RSS Parser for Live News
+// 🆕 Initialize RSS Parser for Live News
 const rssParser = new Parser();
 
-// ðŸ” CORS configuration
+// 🔐 CORS configuration
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
@@ -114,7 +114,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// ðŸ†• Cache middleware for GET requests
+// 🆕 Cache middleware for GET requests
 const cacheMiddleware = (_duration: number) => (_req: Request, res: Response, next: Function) => {
     if (_req.method === 'GET') {
         res.set('Cache-Control', `public, max-age=${_duration}`);
@@ -126,7 +126,7 @@ const cacheMiddleware = (_duration: number) => (_req: Request, res: Response, ne
 app.use('/api/companies', cacheMiddleware(300));
 app.use('/api/vectors', cacheMiddleware(3600));
 
-// ðŸ” Clerk auth middleware
+// 🔐 Clerk auth middleware
 
 // Clerk auth middleware (optional)
 if (process.env['CLERK_SECRET_KEY']) {
@@ -146,18 +146,18 @@ let companiesLoaded = false;
 let allCompaniesData: any[] = [];
 let vectorsReady = false;
 
-// ðŸ”§ Option to skip vector seeding for faster startup (dev mode)
+// 🔧 Option to skip vector seeding for faster startup (dev mode)
 // Set SKIP_VECTOR_SEEDING=true to skip (for testing without 15min wait)
 const SKIP_VECTOR_SEEDING = process.env['SKIP_VECTOR_SEEDING'] === 'true';
 
 initializeCompanies().then((companies) => {
     companiesLoaded = true;
     allCompaniesData = companies;
-    console.log('âœ… Companies initialized successfully');
+    console.log('✅ Companies initialized successfully');
 
-    // ðŸ†• Seed vector database after companies are loaded (optional)
+    // 🆕 Seed vector database after companies are loaded (optional)
     if (SKIP_VECTOR_SEEDING) {
-        console.log('â­ï¸  Vector seeding SKIPPED (SKIP_VECTOR_SEEDING=true)');
+        console.log('⏭️  Vector seeding SKIPPED (SKIP_VECTOR_SEEDING=true)');
         console.log('   To enable: remove SKIP_VECTOR_SEEDING or set to false');
         vectorsReady = false; // Vectors not available
         return Promise.resolve();
@@ -165,10 +165,10 @@ initializeCompanies().then((companies) => {
 
     return seedVectorDatabase().then(() => {
         vectorsReady = true;
-        console.log('âœ… Vector database seeding completed');
+        console.log('✅ Vector database seeding completed');
     });
 }).catch((error) => {
-    console.error('âŒ Failed to initialize companies:', error);
+    console.error('❌ Failed to initialize companies:', error);
 });
 
 app.get('/api/health', (_req, res) => {
@@ -183,7 +183,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 // ============================================================================
-// ï¿½ DEMO REQUEST API - Captures "Book a Demo" leads
+// � DEMO REQUEST API - Captures "Book a Demo" leads
 // Data stored in data/db/demo-requests.json
 // ============================================================================
 app.post('/api/demo-request', async (req: Request, res: Response): Promise<void> => {
@@ -224,16 +224,16 @@ app.post('/api/demo-request', async (req: Request, res: Response): Promise<void>
         leads.push(lead);
         fs.writeFileSync(filePath, JSON.stringify(leads, null, 2), 'utf-8');
 
-        console.log(`ðŸ“© New demo request: ${firstName} ${lastName} <${email}> â€” ${jobTitle}`);
+        console.log(`📩 New demo request: ${firstName} ${lastName} <${email}> — ${jobTitle}`);
         res.json({ success: true, message: 'Demo request received', id: lead.id });
     } catch (error) {
-        console.error('âŒ Error saving demo request:', error);
+        console.error('❌ Error saving demo request:', error);
         res.status(500).json({ error: 'Failed to submit demo request' });
     }
 });
 
 // ============================================================================
-// ï¿½ðŸ” STRATEGIES API - Real persistence (file-based JSON store)
+// �🔐 STRATEGIES API - Real persistence (file-based JSON store)
 // Data stored in data/db/strategies/{userId}/*.json
 // ============================================================================
 
@@ -249,7 +249,7 @@ app.get('/api/strategies/my', async (req: Request, res: Response): Promise<void>
         const strategies = getUserStrategies(userId);
         res.json({ success: true, strategies, count: strategies.length });
     } catch (error) {
-        console.error('âŒ Error fetching strategies:', error);
+        console.error('❌ Error fetching strategies:', error);
         res.status(500).json({ error: 'Failed to fetch strategies' });
     }
 });
@@ -273,7 +273,7 @@ app.get('/api/strategies/:id', async (req: Request, res: Response): Promise<void
         const versions = getStrategyVersions(userId, strategyId);
         res.json({ success: true, strategy, versions });
     } catch (error) {
-        console.error('âŒ Error fetching strategy:', error);
+        console.error('❌ Error fetching strategy:', error);
         res.status(500).json({ error: 'Failed to fetch strategy' });
     }
 });
@@ -300,7 +300,7 @@ app.post('/api/strategies/save', async (req: Request, res: Response): Promise<vo
             companyId,
         });
 
-        console.log(`ðŸ’¾ Strategy ${result.isNew ? 'created' : 'updated'}: ${companyName} (${type || 'gtm'}) for user ${userId}`);
+        console.log(`💾 Strategy ${result.isNew ? 'created' : 'updated'}: ${companyName} (${type || 'gtm'}) for user ${userId}`);
 
         res.json({
             success: true,
@@ -309,7 +309,7 @@ app.post('/api/strategies/save', async (req: Request, res: Response): Promise<vo
             message: result.isNew ? 'Strategy created' : `Strategy updated (v${result.strategy.version})`,
         });
     } catch (error) {
-        console.error('âŒ Error saving strategy:', error);
+        console.error('❌ Error saving strategy:', error);
         res.status(500).json({ error: 'Failed to save strategy' });
     }
 });
@@ -329,10 +329,10 @@ app.delete('/api/strategies/:id', async (req: Request, res: Response): Promise<v
             return;
         }
 
-        console.log(`ðŸ—‘ï¸ Strategy deleted:  for user ${userId}`);
+        console.log(`🗑️ Strategy deleted:  for user ${userId}`);
         res.json({ success: true });
     } catch (error) {
-        console.error('âŒ Error deleting strategy:', error);
+        console.error('❌ Error deleting strategy:', error);
         res.status(500).json({ error: 'Failed to delete strategy' });
     }
 });
@@ -360,10 +360,10 @@ app.post('/api/strategies/:id/restore', async (req: Request, res: Response): Pro
             return;
         }
 
-        console.log(`ðŸ”„ Strategy restored:  to v${version} for user ${userId}`);
+        console.log(`🔄 Strategy restored:  to v${version} for user ${userId}`);
         res.json({ success: true, strategy: restored });
     } catch (error) {
-        console.error('âŒ Error restoring strategy:', error);
+        console.error('❌ Error restoring strategy:', error);
         res.status(500).json({ error: 'Failed to restore strategy' });
     }
 });
@@ -469,7 +469,7 @@ app.get('/api/companies/search', (req, res): void => {
     }
 });
 
-// ðŸ†• Competitors API: Get competitors for a company (UNIFIED ENGINE)
+// 🆕 Competitors API: Get competitors for a company (UNIFIED ENGINE)
 app.get('/api/companies/competitors', async (req, res): Promise<void> => {
     try {
         const { company, limit = '10', minSimilarity = '20', source = 'all' } = req.query;
@@ -484,7 +484,7 @@ app.get('/api/companies/competitors', async (req, res): Promise<void> => {
         const validSources = ['ts', 'csv', 'all'];
         const sourceFilter = validSources.includes(source as string) ? (source as 'ts' | 'csv' | 'all') : 'all';
 
-        console.log(`ðŸ” [Unified Engine] Finding competitors for: ${companyName} (source: ${sourceFilter})`);
+        console.log(`🔍 [Unified Engine] Finding competitors for: ${companyName} (source: ${sourceFilter})`);
 
         const result = await findTopCompetitors(
             companyName,
@@ -506,7 +506,7 @@ app.get('/api/companies/competitors', async (req, res): Promise<void> => {
             source: match.company.source
         }));
 
-        console.log(`âœ… [Unified Engine] Found ${competitors.length} competitors from ${result.totalCandidates} total companies in ${result.searchTime}ms`);
+        console.log(`✅ [Unified Engine] Found ${competitors.length} competitors from ${result.totalCandidates} total companies in ${result.searchTime}ms`);
 
         res.json({
             company: result.targetCompany.name,
@@ -526,7 +526,7 @@ app.get('/api/companies/competitors', async (req, res): Promise<void> => {
     }
 });
 
-// ðŸ†• New endpoint: Get all companies for RAG vectorization
+// 🆕 New endpoint: Get all companies for RAG vectorization
 app.get('/api/companies/raw/all', (_req, res) => {
     try {
         res.json({
@@ -708,7 +708,7 @@ app.get('/api/verified-stats', async (_req: Request, res: Response): Promise<voi
     }
 });
 
-// ðŸ†• New endpoint: Get pre-computed vectors from cache (FAST!)
+// 🆕 New endpoint: Get pre-computed vectors from cache (FAST!)
 app.get('/api/vectors/cache', (_req, res) => {
     try {
         const vectors = loadVectorsFromCache();
@@ -726,7 +726,7 @@ app.get('/api/vectors/cache', (_req, res) => {
     }
 });
 
-// ðŸ§  Market Intelligence API - Dynamic Market Analysis
+// 🧠 Market Intelligence API - Dynamic Market Analysis
 app.post('/api/market-intelligence', async (req: Request, res: Response): Promise<void> => {
     try {
         const { userCompany, selectedCompetitors } = req.body;
@@ -736,7 +736,7 @@ app.post('/api/market-intelligence', async (req: Request, res: Response): Promis
             return;
         }
 
-        console.log(`ðŸ§  Market Intelligence Request: ${userCompany.name} (${userCompany.industry})`);
+        console.log(`🧠 Market Intelligence Request: ${userCompany.name} (${userCompany.industry})`);
         console.log(`   Competitors: ${selectedCompetitors?.length || 0}`);
         console.log(`   userCompany data:`, userCompany);
 
@@ -745,10 +745,10 @@ app.post('/api/market-intelligence', async (req: Request, res: Response): Promis
             selectedCompetitors: selectedCompetitors || []
         });
 
-        console.log(`âœ… Market Intelligence Report generated successfully`);
+        console.log(`✅ Market Intelligence Report generated successfully`);
         res.json(report);
     } catch (error) {
-        console.error("âŒ API Error (market-intelligence):", error);
+        console.error("❌ API Error (market-intelligence):", error);
         console.error("   Stack:", error instanceof Error ? error.stack : 'no stack');
         res.status(500).json({
             error: "Failed to generate market intelligence",
@@ -757,7 +757,7 @@ app.post('/api/market-intelligence', async (req: Request, res: Response): Promis
     }
 });
 
-// ðŸŽ¯ Competitor Intelligence API - Comprehensive Competitor Analysis
+// 🎯 Competitor Intelligence API - Comprehensive Competitor Analysis
 app.post('/api/competitor-intelligence', async (req: Request, res: Response): Promise<void> => {
     try {
         const { userCompany, selectedCompetitors } = req.body;
@@ -767,7 +767,7 @@ app.post('/api/competitor-intelligence', async (req: Request, res: Response): Pr
             return;
         }
 
-        console.log(`ðŸŽ¯ Competitor Intelligence Request: ${userCompany.name} (${userCompany.industry})`);
+        console.log(`🎯 Competitor Intelligence Request: ${userCompany.name} (${userCompany.industry})`);
         console.log(`   Competitors: ${selectedCompetitors?.length || 0}`);
 
         const report = await generateCompetitorIntelligence({
@@ -785,7 +785,7 @@ app.post('/api/competitor-intelligence', async (req: Request, res: Response): Pr
     }
 });
 
-// ðŸŽ¯ Customer Insights API - Deep Customer Understanding
+// 🎯 Customer Insights API - Deep Customer Understanding
 app.post('/api/customer-insights', async (req: Request, res: Response): Promise<void> => {
     try {
         const { companyName, industry, products, targetMarket } = req.body;
@@ -795,7 +795,7 @@ app.post('/api/customer-insights', async (req: Request, res: Response): Promise<
             return;
         }
 
-        console.log(`ðŸŽ¯ Customer Insights Request: ${companyName} (${industry || 'auto-detect'})`);
+        console.log(`🎯 Customer Insights Request: ${companyName} (${industry || 'auto-detect'})`);
 
         const report = await generateCustomerInsights({
             companyName,
@@ -814,7 +814,7 @@ app.post('/api/customer-insights', async (req: Request, res: Response): Promise<
     }
 });
 
-// ðŸ†• GTM Strategy Generation Endpoint â€” AI-Powered Living Playbook (No Fake Data)
+// 🆕 GTM Strategy Generation Endpoint — AI-Powered Living Playbook (No Fake Data)
 app.post('/api/gtm/generate', async (req: Request, res: Response): Promise<void> => {
     try {
         const { companyName, targetMarkets = [] } = req.body;
@@ -839,11 +839,11 @@ app.post('/api/gtm/generate', async (req: Request, res: Response): Promise<void>
 });
 
 // REPLACED: ~520 lines of hardcoded/fabricated GTM data removed
-// Old code had fake "Dr. Nguyá»…n VÄƒn Minh", "Tráº§n Thá»‹ HÆ°Æ¡ng at McKinsey"
+// Old code had fake "Dr. Nguyễn Văn Minh", "Trần Thị Hương at McKinsey"
 // expert interviews and fabricated GSO/World Bank citations
 // Now uses services/gtmPlaybookService.ts with AI + real database
 
-// DEAD CODE REMOVED â€” was: company lookup, competitive tracker with Math.max(),
+// DEAD CODE REMOVED — was: company lookup, competitive tracker with Math.max(),
 // fabricated market reports ($15.2B, CAGR 14.5%), fake expert call logs,
 // fake validation sources (GSO 95%, VCCI 88%), fake strategic metrics (95% accuracy)
 
@@ -1063,7 +1063,7 @@ app.get('/api/workspace/stats', async (_req: Request, res: Response): Promise<vo
     }
 });
 
-// ðŸ†• Live RSS Feeds API: Láº¥y tin tá»©c tá»« Google News/VnExpress
+// 🆕 Live RSS Feeds API: Lấy tin tức từ Google News/VnExpress
 app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
     try {
         const { query } = req.body;
@@ -1075,18 +1075,18 @@ app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        console.log(`ðŸ“° Äang tÃ¬m tin tá»©c cho: "${query}"`);
+        console.log(`📰 Đang tìm tin tức cho: "${query}"`);
 
-        // 1. Táº¡o URL RSS tá»« Google News (TÃ¬m kiáº¿m theo tÃªn cÃ´ng ty)
-        // Máº¹o: DÃ¹ng hl=vi&gl=VN Ä‘á»ƒ láº¥y tin tiáº¿ng Viá»‡t
+        // 1. Tạo URL RSS từ Google News (Tìm kiếm theo tên công ty)
+        // Mẹo: Dùng hl=vi&gl=VN để lấy tin tiếng Việt
         const feedUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=vi&gl=VN&ceid=VN:vi`;
 
-        console.log(`ðŸ”— RSS Feed URL: ${feedUrl}`);
+        console.log(`🔗 RSS Feed URL: ${feedUrl}`);
 
         let newsItems: any[] = [];
 
         try {
-            // 2. Äá»c RSS vá»›i timeout
+            // 2. Đọc RSS với timeout
             const feed = await Promise.race([
                 rssParser.parseURL(feedUrl),
                 new Promise((_, reject) =>
@@ -1094,7 +1094,7 @@ app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
                 )
             ]);
 
-            // 3. LÃ m sáº¡ch dá»¯ liá»‡u tráº£ vá»
+            // 3. Làm sạch dữ liệu trả về
             newsItems = (feed as any).items.slice(0, 8).map((item: any) => ({
                 title: item.title || 'Untitled',
                 link: item.link || '',
@@ -1104,17 +1104,17 @@ app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
                 guid: item.guid || item.link
             }));
 
-            console.log(`âœ… TÃ¬m tháº¥y ${newsItems.length} bÃ i viáº¿t vá» "${query}"`);
+            console.log(`✅ Tìm thấy ${newsItems.length} bài viết về "${query}"`);
         } catch (rssError) {
-            console.warn(`âš ï¸ KhÃ´ng thá»ƒ fetch RSS (${rssError instanceof Error ? rssError.message : 'unknown'}), sá»­ dá»¥ng dá»¯ liá»‡u máº«u`);
+            console.warn(`⚠️ Không thể fetch RSS (${rssError instanceof Error ? rssError.message : 'unknown'}), sử dụng dữ liệu mẫu`);
 
             // Fallback: Return sample data for testing
             newsItems = [
                 {
-                    title: `${query} - Tin tá»©c cÃ´ng ty (Máº«u)`,
+                    title: `${query} - Tin tức công ty (Mẫu)`,
                     link: `https://google.com/search?q=${encodeURIComponent(query)}`,
                     pubDate: new Date().toISOString(),
-                    content: `Tin tá»©c máº«u vá» ${query}. Náº¿u báº¡n tháº¥y dá»¯ liá»‡u nÃ y, RSS feed táº¡m thá»i khÃ´ng kháº£ dá»¥ng.`,
+                    content: `Tin tức mẫu về ${query}. Nếu bạn thấy dữ liệu này, RSS feed tạm thời không khả dụng.`,
                     source: 'Demo Data',
                     guid: `demo-${query}`
                 }
@@ -1129,10 +1129,10 @@ app.post('/api/news', async (req: Request, res: Response): Promise<void> => {
         });
 
     } catch (error) {
-        console.error('âŒ Lá»—i láº¥y tin tá»©c:', error instanceof Error ? error.message : error);
+        console.error('❌ Lỗi lấy tin tức:', error instanceof Error ? error.message : error);
         console.error('Stack:', error instanceof Error ? error.stack : '');
 
-        // Tráº£ vá» máº£ng rá»—ng chá»© khÃ´ng bÃ¡o lá»—i Ä‘á»ƒ Frontend khÃ´ng bá»‹ cháº¿t
+        // Trả về mảng rỗng chứ không báo lỗi để Frontend không bị chết
         res.json({
             query: req.body.query || '',
             count: 0,
@@ -1379,17 +1379,17 @@ app.get('/api/analytics/compare', async (_req: Request, res: Response): Promise<
 // --- API Lấy dữ liệu Thị trường (Market Pulse) ---
 app.get("/api/market-pulse", async (_req, res) => {
     try {
-        // 1. Láº¥y chá»‰ sá»‘ VÄ© mÃ´ (GDP, CPI, FDI)
+        // 1. Lấy chỉ số Vĩ mô (GDP, CPI, FDI)
         const prisma = getPrisma(); if (!prisma) { res.status(503).json({ error: 'Database not configured' }); return; }
         const macro = await prisma.marketData.findMany({
             where: { type: 'MACRO' },
             orderBy: { key: 'asc' }
         });
 
-        // 2. Láº¥y chá»‰ sá»‘ TÃ i chÃ­nh ngÃ nh (P/E)
+        // 2. Lấy chỉ số Tài chính ngành (P/E)
         const finance = await prisma.marketData.findMany({
             where: { type: 'FINANCE' },
-            orderBy: { value: 'desc' } // NgÃ nh nÃ o P/E cao xáº¿p trÃªn
+            orderBy: { value: 'desc' } // Ngành nào P/E cao xếp trên
         });
 
         res.json({
@@ -1398,8 +1398,8 @@ app.get("/api/market-pulse", async (_req, res) => {
             lastUpdated: new Date()
         });
     } catch (error) {
-        console.error("âŒ Lá»—i láº¥y Market Pulse:", error);
-        res.status(500).json({ error: "Lá»—i Server khi láº¥y dá»¯ liá»‡u thá»‹ trÆ°á»ng" });
+        console.error("❌ Lỗi lấy Market Pulse:", error);
+        res.status(500).json({ error: "Lỗi Server khi lấy dữ liệu thị trường" });
     }
 });
 // Initialize news database on startup (optional)
@@ -1407,40 +1407,40 @@ const initializeNewsDBAsync = async () => {
     try {
         const { initializeNewsDB: initDB } = await import('./utils/newsDatabase');
         await initDB();
-        console.log('âœ… News database initialized');
+        console.log('✅ News database initialized');
     } catch (error) {
-        console.warn('âš ï¸ News database not available (MongoDB connection may not be set up):', error instanceof Error ? error.message : 'Unknown');
+        console.warn('⚠️ News database not available (MongoDB connection may not be set up):', error instanceof Error ? error.message : 'Unknown');
     }
 };
 
 // Call it in background (non-blocking)
 initializeNewsDBAsync().catch(console.error);
 
-// ðŸŒ PRODUCTION: Phá»¥c vá»¥ frontend Ä‘Ã£ build (dist/)
+// 🌐 PRODUCTION: Phục vụ frontend đã build (dist/)
 const distPath = path.join(__dirname_esm, 'dist');
 if (fs.existsSync(distPath)) {
-    console.log('ðŸ“¦ Production mode: Serving frontend from ./dist');
+    console.log('📦 Production mode: Serving frontend from ./dist');
     app.use(express.static(distPath));
 
-    // SPA fallback: má»i route khÃ´ng pháº£i /api â†’ tráº£ vá» index.html
+    // SPA fallback: mọi route không phải /api → trả về index.html
     app.get('*', (req, res) => {
         if (!req.path.startsWith('/api')) {
             res.sendFile(path.join(distPath, 'index.html'));
         }
     });
 } else {
-    console.log('âš™ï¸ Development mode: Frontend served by Vite dev server');
+    console.log('⚙️ Development mode: Frontend served by Vite dev server');
 }
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`ðŸš€ VICO Backend: http://localhost:${PORT}`);
+    console.log(`🚀 VICO Backend: http://localhost:${PORT}`);
 });
 
 server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-        console.error(`âŒ Port ${PORT} is already in use`);
+        console.error(`❌ Port ${PORT} is already in use`);
     } else {
-        console.error('âŒ Server error:', err);
+        console.error('❌ Server error:', err);
     }
     process.exit(1);
 });

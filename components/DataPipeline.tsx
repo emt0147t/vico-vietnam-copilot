@@ -1,4 +1,4 @@
-﻿    
+    
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Database, Upload, Trash2, CheckCircle, Cpu, 
@@ -45,24 +45,24 @@ export const DataPipeline: React.FC = () => {
         try {
             const data = await loadFromDB('vectors');
             setVectors(data);
-            addLog(`ðŸ“¡ Local DB: Found ${data.length} records.`);
+            addLog(`📡 Local DB: Found ${data.length} records.`);
         } catch (e: any) {
-            addLog(`âŒ Error: ${e.message}`);
+            addLog(`❌ Error: ${e.message}`);
         } finally { setIsSyncing(false); }
     };
 
     const processBatch = async (items: any[]) => {
         const testConn = await RagService.testConnection();
         if (!testConn.success) {
-            addLog("âš ï¸ ERROR: API Connection failed.");
+            addLog("⚠️ ERROR: API Connection failed.");
             return;
         }
 
         setStatus('processing');
         setTotalItems(items.length);
         setProcessedCount(0);
-        addLog(`ðŸš€ Starting to ingest ${items.length} records...`);
-        addLog(isServerConnected ? "â„¹ï¸ Mode: Cloud Sync (Server)" : "â„¹ï¸ Mode: Local Storage (Browser)");
+        addLog(`🚀 Starting to ingest ${items.length} records...`);
+        addLog(isServerConnected ? "ℹ️ Mode: Cloud Sync (Server)" : "ℹ️ Mode: Local Storage (Browser)");
         
         const BATCH_SIZE = 5; 
         for (let i = 0; i < items.length; i += BATCH_SIZE) {
@@ -78,8 +78,8 @@ export const DataPipeline: React.FC = () => {
                     let metadata: any = {};
 
                     if (ingestMode === 'news') {
-                        const title = normalizedItem['title'] || normalizedItem['tiÃªu Ä‘á»'] || "";
-                        const content = normalizedItem['content'] || normalizedItem['ná»™i dung'] || "";
+                        const title = normalizedItem['title'] || normalizedItem['tiêu đề'] || "";
+                        const content = normalizedItem['content'] || normalizedItem['nội dung'] || "";
                         const link = normalizedItem['link'] || normalizedItem['url'] || "";
                         combinedText = `News: ${title}. Content: ${content}`.trim();
                         metadata = {
@@ -87,20 +87,20 @@ export const DataPipeline: React.FC = () => {
                             content,
                             link,
                             type: 'news_article',
-                            date: normalizedItem['date'] || normalizedItem['ngÃ y'] || new Date().toLocaleDateString('en-US')
+                            date: normalizedItem['date'] || normalizedItem['ngày'] || new Date().toLocaleDateString('en-US')
                         };
                     } else {
-                        const name = normalizedItem['company name'] || normalizedItem['name'] || normalizedItem['tÃªn cÃ´ng ty'] || normalizedItem['tÃªn'] || "N/A";
-                        const intro = normalizedItem['new intro'] || normalizedItem['intro'] || normalizedItem['giá»›i thiá»‡u má»›i'] || normalizedItem['giá»›i thiá»‡u'] || "";
-                        const prods = normalizedItem['new products/services'] || normalizedItem['products/services'] || normalizedItem['sáº£n pháº©m dá»‹ch vá»¥ má»›i'] || normalizedItem['sáº£n pháº©m/dá»‹ch vá»¥'] || "";
+                        const name = normalizedItem['company name'] || normalizedItem['name'] || normalizedItem['tên công ty'] || normalizedItem['tên'] || "N/A";
+                        const intro = normalizedItem['new intro'] || normalizedItem['intro'] || normalizedItem['giới thiệu mới'] || normalizedItem['giới thiệu'] || "";
+                        const prods = normalizedItem['new products/services'] || normalizedItem['products/services'] || normalizedItem['sản phẩm dịch vụ mới'] || normalizedItem['sản phẩm/dịch vụ'] || "";
                         combinedText = `Company: ${name}. Description: ${intro}. Products: ${prods}`.trim();
                         metadata = {
                             title: name,
                             intro_new: intro,
                             products_new: prods,
                             type: 'company_profile',
-                            size: normalizedItem['headcount'] || normalizedItem['quy mÃ´ nhÃ¢n sá»±'] || "N/A",
-                            year: normalizedItem['founded year'] || normalizedItem['nÄƒm thÃ nh láº­p'] || "N/A"
+                            size: normalizedItem['headcount'] || normalizedItem['quy mô nhân sự'] || "N/A",
+                            year: normalizedItem['founded year'] || normalizedItem['năm thành lập'] || "N/A"
                         };
                     }
 
@@ -124,7 +124,7 @@ export const DataPipeline: React.FC = () => {
         }
 
         setStatus('complete');
-        addLog(`âœ… Complete.`);
+        addLog(`✅ Complete.`);
         forceRefresh();
     };
 
@@ -137,8 +137,8 @@ export const DataPipeline: React.FC = () => {
                 const data = parseCSV(e.target?.result as string);
                 setPendingData(data);
                 setStatus('review');
-                addLog(`ðŸ” Detected ${data.length} data rows.`);
-            } catch (err: any) { addLog(`âŒ CSV Error: ${err.message}`); }
+                addLog(`🔍 Detected ${data.length} data rows.`);
+            } catch (err: any) { addLog(`❌ CSV Error: ${err.message}`); }
         };
         reader.readAsText(file);
     };

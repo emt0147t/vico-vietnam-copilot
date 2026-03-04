@@ -1,5 +1,5 @@
-﻿/**
- * ðŸ”” Notification Center Component
+/**
+ * 🔔 Notification Center Component
  * Bell icon with badge + dropdown panel showing real-time alerts.
  * Breaking news, competitor moves, market alerts from Google News RSS.
  */

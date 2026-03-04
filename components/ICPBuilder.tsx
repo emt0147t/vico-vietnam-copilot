@@ -1,21 +1,21 @@
-﻿/**
- *  ICP Intelligence  Phase 20 (Professional Overhaul)
+/**
+ * ICP Intelligence — Phase 20 (Professional Overhaul)
  *
  * Renders pre-researched Ideal Customer Profile data for hero companies.
- * Zero API calls â€” 100% verified static data with company selector.
+ * Zero API calls — 100% verified static data with company selector.
  *
  * Sections:
- *   Platform Metrics â€” aggregate stats across all hero profiles
- *   A. Executive Strategy Brief â€” professional summary card
- *   B. Firmographics â€” company profile with visual indicators
- *   C. Buyer Personas â€” tabbed persona cards with rich VN callouts
- *   D. Buying Triggers â€” urgency-ranked event cards with severity bars
- *   E. Pain Points â€” severity-coded grid with workaround + cost
- *   F. Positioning & Channels â€” strategic recommendations
- *   G. Vietnam Market Notes â€” localized insights
- *   H. Data Sources & Methodology â€” verified source attribution
+ *   Platform Metrics — aggregate stats across all hero profiles
+ *   A. Executive Strategy Brief — professional summary card
+ *   B. Firmographics — company profile with visual indicators
+ *   C. Buyer Personas — tabbed persona cards with rich VN callouts
+ *   D. Buying Triggers — urgency-ranked event cards with severity bars
+ *   E. Pain Points — severity-coded grid with workaround + cost
+ *   F. Positioning & Channels — strategic recommendations
+ *   G. Vietnam Market Notes — localized insights
+ *   H. Data Sources & Methodology — verified source attribution
  *
- * Design: Executive Crimson â€” config/designSystem.ts
+ * Design: Executive Crimson — config/designSystem.ts
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -144,7 +144,7 @@ const AGGREGATE_STATS = {
 // ============================================================================
 
 const DATA_SOURCES = [
-  'VICO Enterprise Database â€” 10,000+ Vietnam Companies',
+  'VICO Enterprise Database — 10,000+ Vietnam Companies',
   'LinkedIn Sales Navigator & JobStreet Vietnam',
   'Glassdoor & Company Career Pages',
   'CafeF, VnExpress & VietnamBiz Business Data',
@@ -243,7 +243,7 @@ export default function ICPBuilder() {
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle company selection â€” fake 1.5s load for UX polish
+  // Handle company selection — fake 1.5s load for UX polish
   function handleSelectCompany(company: CompanyProfile) {
     setSelectedCompany(company);
     setDropdownOpen(false);
@@ -309,7 +309,7 @@ export default function ICPBuilder() {
 
   return (
     <div className="space-y-8 pb-10">
-      {/* â”€â”€â”€ Page Header â”€â”€â”€ */}
+      {/* ─── Page Header ─── */}
       <div>
         <div className="flex items-center gap-3 mb-1.5">
           <h1 className={tw.h1}>ICP Intelligence</h1>
@@ -319,11 +319,11 @@ export default function ICPBuilder() {
           </span>
         </div>
         <p className={`${tw.body} max-w-2xl`}>
-          Pre-researched Ideal Customer Profiles, Buyer Personas & Pain-Point analysis â€” built from verified market data and deeply localized for Vietnam
+          Pre-researched Ideal Customer Profiles, Buyer Personas & Pain-Point analysis — built from verified market data and deeply localized for Vietnam
         </p>
       </div>
 
-      {/* â”€â”€â”€ Platform Metrics Bar â”€â”€â”€ */}
+      {/* ─── Platform Metrics Bar ─── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: 'Hero Companies', value: AGGREGATE_STATS.companies, icon: Buildings },
@@ -346,7 +346,7 @@ export default function ICPBuilder() {
         })}
       </div>
 
-      {/* â”€â”€â”€ Company Selector â”€â”€â”€ */}
+      {/* ─── Company Selector ─── */}
       {!icpData && !loading && (
         <FadeIn duration={300}>
           <div className={`${tw.card} ${tw.cardPadding} max-w-2xl space-y-5`}>
@@ -378,7 +378,7 @@ export default function ICPBuilder() {
                   value={searchQuery || (selectedCompany ? selectedCompany.name : '')}
                   onChange={(e) => { setSearchQuery(e.target.value); setDropdownOpen(true); }}
                   onFocus={() => setDropdownOpen(true)}
-                  placeholder="Search hero companiesâ€¦"
+                  placeholder="Search hero companies…"
                   className="flex-1 bg-transparent outline-none text-sm text-[#18181B] placeholder-[#A1A1AA]"
                 />
               </div>
@@ -441,7 +441,7 @@ export default function ICPBuilder() {
         </FadeIn>
       )}
 
-      {/* â”€â”€â”€ Loading State â”€â”€â”€ */}
+      {/* ─── Loading State ─── */}
       {loading && (
         <FadeIn duration={300}>
           <div className={`${tw.card} ${tw.cardPadding} max-w-lg mx-auto`}>
@@ -510,11 +510,11 @@ export default function ICPBuilder() {
         </FadeIn>
       )}
 
-      {/* â”€â”€â”€ Results Dashboard â”€â”€â”€ */}
+      {/* ─── Results Dashboard ─── */}
       {icpData && !loading && selectedCompany && (
         <FadeIn duration={400}>
           <div className="space-y-6">
-            {/* â”€â”€â”€ Action Bar â”€â”€â”€ */}
+            {/* ─── Action Bar ─── */}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <span className={tw.badge('brand')}>
@@ -524,14 +524,14 @@ export default function ICPBuilder() {
                 <span className="text-sm font-semibold text-[#18181B]">
                   {selectedCompany.name}
                 </span>
-                <span className="text-xs text-[#A1A1AA]">â€” Ideal Customer Profile</span>
+                <span className="text-xs text-[#A1A1AA]">— Ideal Customer Profile</span>
               </div>
               <button onClick={handleReset} className={tw.btnGhost}>
-                â† Select Different Company
+                ← Select Different Company
               </button>
             </div>
 
-            {/* â”€â”€â”€ Executive Strategy Brief â”€â”€â”€ */}
+            {/* ─── Executive Strategy Brief ─── */}
             <div className={`${tw.card} overflow-hidden`}>
               <div className="h-1 bg-gradient-to-r from-[#E11D48] via-[#BE123C] to-[#E11D48]" />
               <div className="px-5 py-5 lg:px-6 lg:py-5">
@@ -570,10 +570,10 @@ export default function ICPBuilder() {
               </div>
             </div>
 
-            {/* â”€â”€â”€ SECTION A: Firmographics â”€â”€â”€ */}
+            {/* ─── SECTION A: Firmographics ─── */}
             <FirmographicsCard data={icpData.firmographics} />
 
-            {/* â”€â”€â”€ SECTION B: Buyer Personas (Tabbed) â”€â”€â”€ */}
+            {/* ─── SECTION B: Buyer Personas (Tabbed) ─── */}
             <div className={`${tw.card} overflow-hidden`}>
               <div className="px-5 pt-5 lg:px-6 lg:pt-6">
                 <div className="flex items-center gap-2 mb-1">
@@ -597,7 +597,7 @@ export default function ICPBuilder() {
                           : 'text-[#71717A] hover:text-[#18181B]:text-white hover:bg-[#FAFAFA]:bg-gray-800'
                       }`}
                     >
-                      {p.title.length > 28 ? p.title.slice(0, 28) + 'â€¦' : p.title}
+                      {p.title.length > 28 ? p.title.slice(0, 28) + '…' : p.title}
                       {activePersona === i && (
                         <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E11D48]" />
                       )}
@@ -635,7 +635,7 @@ export default function ICPBuilder() {
               )}
             </div>
 
-            {/* â”€â”€â”€ SECTION C: Buying Triggers â”€â”€â”€ */}
+            {/* ─── SECTION C: Buying Triggers ─── */}
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Lightning size={iconSize.md} weight="duotone" className="text-[#E11D48]" />
@@ -652,7 +652,7 @@ export default function ICPBuilder() {
               </div>
             </div>
 
-            {/* â”€â”€â”€ SECTION D: Pain Points â”€â”€â”€ */}
+            {/* ─── SECTION D: Pain Points ─── */}
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Gauge size={iconSize.md} weight="duotone" className="text-[#E11D48]" />
@@ -669,7 +669,7 @@ export default function ICPBuilder() {
               </div>
             </div>
 
-            {/* â”€â”€â”€ SECTION E: Positioning & Channels â”€â”€â”€ */}
+            {/* ─── SECTION E: Positioning & Channels ─── */}
             <div className={`${tw.bentoGrid} grid-cols-1 lg:grid-cols-2`}>
               {/* Positioning Statement */}
               <div className={`${tw.card} overflow-hidden`}>
@@ -707,7 +707,7 @@ export default function ICPBuilder() {
               </div>
             </div>
 
-            {/* â”€â”€â”€ Vietnam Market Notes â”€â”€â”€ */}
+            {/* ─── Vietnam Market Notes ─── */}
             {icpData.vietnam_market_notes.length > 0 && (
               <div className={`${tw.card} overflow-hidden`}>
                 <div className="h-1 bg-gradient-to-r from-[#E11D48] to-[#BE123C]" />
@@ -733,7 +733,7 @@ export default function ICPBuilder() {
               </div>
             )}
 
-            {/* â”€â”€â”€ Data Sources & Methodology Footer â”€â”€â”€ */}
+            {/* ─── Data Sources & Methodology Footer ─── */}
             <div className={`${tw.card} ${tw.cardPadding}`}>
               <div className="flex items-center gap-2 mb-3">
                 <Database size={iconSize.md} weight="duotone" className="text-[#E11D48]" />
@@ -763,14 +763,14 @@ export default function ICPBuilder() {
 // SUB-COMPONENTS
 // ============================================================================
 
-/** Section A â€” Firmographics summary card */
+/** Section A — Firmographics summary card */
 function FirmographicsCard({ data }: { data: Firmographics }) {
   const items: Array<{ icon: React.ReactNode; label: string; value: string }> = [
     { icon: <Users size={iconSize.sm} weight="duotone" />,       label: 'Company Size',        value: data.company_size_range },
     { icon: <ChartLineUp size={iconSize.sm} weight="duotone" />, label: 'Revenue Range',        value: data.revenue_range },
     { icon: <Briefcase size={iconSize.sm} weight="duotone" />,   label: 'Maturity Stage',       value: data.company_maturity },
     { icon: <Buildings size={iconSize.sm} weight="duotone" />,   label: 'Ownership Structure',  value: data.ownership_structure },
-    { icon: <Globe size={iconSize.sm} weight="duotone" />,       label: 'Geographic Focus',     value: (data.geographic_focus || []).join(', ') || 'â€”' },
+    { icon: <Globe size={iconSize.sm} weight="duotone" />,       label: 'Geographic Focus',     value: (data.geographic_focus || []).join(', ') || '—' },
     { icon: <ShieldCheck size={iconSize.sm} weight="duotone" />, label: 'Regulatory Pressure',  value: data.regulatory_pressure },
   ];
 
@@ -826,7 +826,7 @@ function FirmographicsCard({ data }: { data: Firmographics }) {
   );
 }
 
-/** Section B â€” Single persona detail panel */
+/** Section B — Single persona detail panel */
 function PersonaDetail({ persona }: { persona: BuyerPersona }) {
   return (
     <div className="px-5 py-5 lg:px-6 lg:py-5 space-y-5">
@@ -839,7 +839,7 @@ function PersonaDetail({ persona }: { persona: BuyerPersona }) {
           <div>
             <h3 className={tw.h3}>{persona.title}</h3>
             <p className="text-xs text-[#71717A]">
-              {persona.department} Â· {persona.seniority} Â· {persona.age_range}
+              {persona.department} · {persona.seniority} · {persona.age_range}
             </p>
           </div>
         </div>
@@ -848,7 +848,7 @@ function PersonaDetail({ persona }: { persona: BuyerPersona }) {
         </span>
       </div>
 
-      {/* KPIs, Goals, Frustrations â€” 3 columns */}
+      {/* KPIs, Goals, Frustrations — 3 columns */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-[#FFF1F2] border border-[#E11D48]/10 rounded-xl px-4 py-3">
           <p className={`${tw.label} text-[#E11D48] mb-2`}>Key KPIs</p>
@@ -911,14 +911,14 @@ function PersonaDetail({ persona }: { persona: BuyerPersona }) {
         <Quotes size={iconSize.md} weight="fill" className="text-[#E11D48] shrink-0 mt-0.5" />
         <div>
           <p className="text-sm italic text-[#18181B] leading-relaxed">"{persona.quote_snippet}"</p>
-          <p className="text-[10px] text-[#A1A1AA] mt-1">â€” {persona.title}, {persona.department}</p>
+          <p className="text-[10px] text-[#A1A1AA] mt-1">— {persona.title}, {persona.department}</p>
         </div>
       </div>
     </div>
   );
 }
 
-/** Section C â€” Single buying trigger card */
+/** Section C — Single buying trigger card */
 function TriggerCard({ trigger }: { trigger: BuyingTrigger }) {
   return (
     <div className={`${tw.card} ${tw.cardPadding}`}>
@@ -960,7 +960,7 @@ function TriggerCard({ trigger }: { trigger: BuyingTrigger }) {
   );
 }
 
-/** Section D â€” Single pain point card */
+/** Section D — Single pain point card */
 function PainPointCard({ painPoint }: { painPoint: PainPoint }) {
   return (
     <div className={`${tw.card} ${tw.cardPadding}`}>

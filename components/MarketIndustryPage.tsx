@@ -1,5 +1,5 @@
-﻿/**
- * ðŸŒ Market & Industry Page - Dynamic Enterprise Market Intelligence
+/**
+ * 🌍 Market & Industry Page - Dynamic Enterprise Market Intelligence
  * 
  * NOW USES REAL DATA from:
  * - User's company profile
@@ -115,7 +115,7 @@ interface MarketIntelligenceReport {
 
 // ==================== SECTION COMPONENTS ====================
 
-// Loading Skeleton â€” Executive Crimson
+// Loading Skeleton — Executive Crimson
 const LoadingSkeleton = () => (
     <div className="space-y-8 animate-fade-in">
         {/* Premium branded loader */}
@@ -126,7 +126,7 @@ const LoadingSkeleton = () => (
                 <div className="absolute inset-3 rounded-full bg-gradient-to-br from-[#E11D48] to-[#F97316] animate-pulse" />
             </div>
             <div className="text-center space-y-1.5">
-                <p className="text-sm font-semibold text-[#18181B]">Crunching real-time market dataâ€¦</p>
+                <p className="text-sm font-semibold text-[#18181B]">Crunching real-time market data…</p>
                 <p className="text-xs text-[#A1A1AA]">Analyzing 10,000+ companies across Vietnam</p>
             </div>
         </div>
@@ -331,10 +331,10 @@ const CompetitorMatrix = ({ companies }: { companies: MarketIntelligenceReport['
     return (
         <div className="relative h-80 bg-[#FAFAFA] rounded-2xl p-6">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-medium text-[#A1A1AA] whitespace-nowrap">
-                Market Growth Rate â†’
+                Market Growth Rate →
             </div>
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs font-medium text-[#A1A1AA]">
-                Relative Market Share â†’
+                Relative Market Share →
             </div>
             
             <div className="absolute inset-8 grid grid-cols-2 grid-rows-2 gap-1">
@@ -428,7 +428,7 @@ const ConcentrationGauge = ({ level, hhi }: { level: string; hhi: number }) => {
     );
 };
 
-// PESTLE data â€” varies by industry and includes company context
+// PESTLE data — varies by industry and includes company context
 const getPESTLEData = (industry: string) => {
     const industrySpecific: Record<string, { pDetails: string[]; eDetails: string[]; sDetails: string[]; tDetails: string[]; lDetails: string[]; envDetails: string[] }> = {
         'Technology': {
@@ -571,7 +571,7 @@ const ExportModal: React.FC<{
         {
             key: 'html' as const,
             title: 'Premium HTML Report',
-            desc: 'Beautiful branded VICO report â€” open in browser or print to PDF',
+            desc: 'Beautiful branded VICO report — open in browser or print to PDF',
             icon: FileText,
             color: 'bg-gradient-to-br from-[#E11D48] to-[#BE123C]',
             recommended: true,
@@ -579,7 +579,7 @@ const ExportModal: React.FC<{
         {
             key: 'txt' as const,
             title: 'Plain Text Report',
-            desc: 'Plain text format â€” easy to copy/paste into email or documents',
+            desc: 'Plain text format — easy to copy/paste into email or documents',
             icon: FileText,
             color: 'bg-gradient-to-br from-[#3F3F46] to-[#18181B]',
             recommended: false,
@@ -587,7 +587,7 @@ const ExportModal: React.FC<{
         {
             key: 'json' as const,
             title: 'JSON (Machine-Readable)',
-            desc: 'Raw data â€” for system integrations or advanced analysis',
+            desc: 'Raw data — for system integrations or advanced analysis',
             icon: FileJson,
             color: 'bg-gradient-to-br from-[#7C3AED] to-[#6D28D9]',
             recommended: false,
@@ -660,7 +660,7 @@ const ExportModal: React.FC<{
 
                     {/* Footer */}
                     <div className="px-6 py-3 bg-[#FAFAFA] border-t border-[#E4E4E7] flex items-center justify-between">
-                        <span className="text-[10px] text-[#A1A1AA]">VICO Intelligence Â· {report.industry} Â· {report.market}</span>
+                        <span className="text-[10px] text-[#A1A1AA]">VICO Intelligence · {report.industry} · {report.market}</span>
                         <button onClick={onClose} className="text-xs font-semibold text-[#71717A] hover:text-[#18181B] transition-colors">
                             Close
                         </button>
@@ -805,7 +805,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
         });
     }, []);
     
-    // Artificial minimum load time â€” "crunching data" feel
+    // Artificial minimum load time — "crunching data" feel
     useEffect(() => {
         const t = setTimeout(() => setIsPageReady(true), 1800);
         return () => clearTimeout(t);
@@ -884,7 +884,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                         Dynamic analysis for {report?.industry || industry} in {market}
                         {report && (
                             <span className="ml-2 text-green-600">
-                                â€¢ {report.sources.industryPeersFound.toLocaleString()} companies analyzed
+                                • {report.sources.industryPeersFound.toLocaleString()} companies analyzed
                             </span>
                         )}
                     </p>
@@ -925,7 +925,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                         Refresh
                     </button>
 
-                    {/* Export â€” opens modal */}
+                    {/* Export — opens modal */}
                     <button
                         onClick={() => setShowExportModal(true)}
                         disabled={!report}
@@ -943,8 +943,8 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     <div className="flex items-center gap-2">
                         <Database size={14} className="text-[#E11D48]" />
                         <span>
-                            Data from <strong>{report.sources.competitorsAnalyzed}</strong> selected competitors and <strong>{report.sources.industryPeersFound.toLocaleString()}</strong> industry peers â€¢ 
-                            Similarity threshold: {(report.sources.similarityThreshold * 100).toFixed(0)}% â€¢ 
+                            Data from <strong>{report.sources.competitorsAnalyzed}</strong> selected competitors and <strong>{report.sources.industryPeersFound.toLocaleString()}</strong> industry peers • 
+                            Similarity threshold: {(report.sources.similarityThreshold * 100).toFixed(0)}% • 
                             Generated: {new Date(report.generatedAt).toLocaleString('en-US')}
                         </span>
                     </div>
@@ -960,7 +960,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             
             {/* Section Navigation */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-                <span className="text-sm text-[#71717A] mr-2 flex-shrink-0">â‰¡ Table of Contents</span>
+                <span className="text-sm text-[#71717A] mr-2 flex-shrink-0">≡ Table of Contents</span>
                 {sections.map(section => (
                     <button
                         key={section.id}
@@ -1019,7 +1019,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                                     ? 'bg-amber-50 text-amber-500'
                                                     : 'hover:bg-[#F4F4F5]:bg-gray-800 text-[#A1A1AA]'
                                             }`}
-                                            title={bookmarkedSections.has('overview') ? 'Bá» bookmark' : 'Bookmark pháº§n nÃ y'}
+                                            title={bookmarkedSections.has('overview') ? 'Bỏ bookmark' : 'Bookmark phần này'}
                                         >
                                             {bookmarkedSections.has('overview') ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
                                         </button>
@@ -1031,7 +1031,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                     {parseSimpleMarkdown(report.executiveSummary.overview)}
                                 </p>
                                 
-                                {/* Key Metrics â€” with highlight mode & copy buttons */}
+                                {/* Key Metrics — with highlight mode & copy buttons */}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                                     <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-[#FFF1F2] ring-2 ring-[#E11D48]/30 shadow-md scale-[1.02]' : 'bg-gradient-to-br from-[#FFF1F2] to-[#FFF1F2]'}`}>
                                         <div className="flex items-center justify-between">
@@ -1552,7 +1552,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             {highlightMode && (
                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-5 py-2.5 bg-amber-100 border border-amber-300 rounded-full shadow-lg backdrop-blur-sm">
                     <Eye size={14} className="text-amber-700" />
-                    <span className="text-xs font-semibold text-amber-800">Highlight Mode â€” Key metrics are highlighted</span>
+                    <span className="text-xs font-semibold text-amber-800">Highlight Mode — Key metrics are highlighted</span>
                     <button
                         onClick={() => setHighlightMode(false)}
                         className="p-1 rounded-full hover:bg-amber-200:bg-amber-800 text-amber-700 transition-colors"

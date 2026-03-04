@@ -1,4 +1,4 @@
-﻿
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
     MessageCircle, X, Send, Trash2, Search, Newspaper,
@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { chatService, type ChatMessage } from '../services/chatService';
 
-// â”€â”€â”€ Quick Action Items â”€â”€â”€
+// ─── Quick Action Items ───
 const QUICK_ACTIONS = [
     { icon: Search, label: 'Find company', prompt: 'Search for information about VinFast', color: 'blue' },
     { icon: Newspaper, label: 'Latest news', prompt: 'Latest news about Vietnam market today', color: 'green' },
@@ -19,18 +19,18 @@ const QUICK_ACTIONS = [
 ];
 
 const TOOL_LABELS: Record<string, string> = {
-    search_companies: 'ðŸ” Tra cá»©u cÃ´ng ty',
-    get_latest_news: 'ðŸ“° TÃ¬m tin tá»©c',
-    find_competitors: 'âš”ï¸ PhÃ¢n tÃ­ch Ä‘á»‘i thá»§',
-    search_knowledge_base: 'ðŸ§  Tra cá»©u tri thá»©c',
-    get_pestel_analysis: 'ðŸ›ï¸ PESTEL Analysis',
-    get_vietnam_macro: 'ðŸ“Š Dá»¯ liá»‡u vÄ© mÃ´ VN',
-    generate_customer_insights: 'ðŸ‘¤ Customer Insights',
-    get_trade_data: 'ðŸ“¦ Dá»¯ liá»‡u thÆ°Æ¡ng máº¡i',
-    get_industry_analytics: 'ðŸ“ˆ PhÃ¢n tÃ­ch ngÃ nh',
+    search_companies: '🔍 Tra cứu công ty',
+    get_latest_news: '📰 Tìm tin tức',
+    find_competitors: '⚔️ Phân tích đối thủ',
+    search_knowledge_base: '🧠 Tra cứu tri thức',
+    get_pestel_analysis: '🏛️ PESTEL Analysis',
+    get_vietnam_macro: '📊 Dữ liệu vĩ mô VN',
+    generate_customer_insights: '👤 Customer Insights',
+    get_trade_data: '📦 Dữ liệu thương mại',
+    get_industry_analytics: '📈 Phân tích ngành',
 };
 
-// â”€â”€â”€ Markdown Renderer â”€â”€â”€
+// ─── Markdown Renderer ───
 function renderMarkdown(text: string): React.ReactNode {
     const lines = text.split('\n');
     const elements: React.ReactNode[] = [];
@@ -85,10 +85,10 @@ function renderMarkdown(text: string): React.ReactNode {
         }
 
         // Unordered list
-        if (/^[-*â€¢]\s/.test(trimmed)) {
+        if (/^[-*•]\s/.test(trimmed)) {
             if (listType !== 'ul') flushList();
             listType = 'ul';
-            listBuffer.push(trimmed.replace(/^[-*â€¢]\s/, ''));
+            listBuffer.push(trimmed.replace(/^[-*•]\s/, ''));
             continue;
         }
 
@@ -110,7 +110,7 @@ function renderMarkdown(text: string): React.ReactNode {
     return <>{elements}</>;
 }
 
-// â”€â”€â”€ Main Component â”€â”€â”€
+// ─── Main Component ───
 export const VicoChatBot: React.FC = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -200,7 +200,7 @@ export const VicoChatBot: React.FC = () => {
         if (!lastUserMsg) return;
         // Remove the error response
         const lastAssistant = messages[messages.length - 1];
-        if (lastAssistant?.role === 'assistant' && lastAssistant.content.includes('âš ï¸')) {
+        if (lastAssistant?.role === 'assistant' && lastAssistant.content.includes('⚠️')) {
             chatService.clearHistory();
             // Re-add all messages except the last assistant error
             const cleaned = messages.slice(0, -1);
@@ -261,7 +261,7 @@ export const VicoChatBot: React.FC = () => {
 
     return (
         <>
-            {/* â”€â”€â”€ Floating Button â”€â”€â”€ */}
+            {/* ─── Floating Button ─── */}
             <button
                 onClick={toggleOpen}
                 className={`fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 group ${isOpen
@@ -290,7 +290,7 @@ export const VicoChatBot: React.FC = () => {
                 )}
             </button>
 
-            {/* â”€â”€â”€ Chat Panel â”€â”€â”€ */}
+            {/* ─── Chat Panel ─── */}
             {isOpen && (
                 <div
                     className="fixed bottom-24 right-6 z-[9998] w-[420px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-8rem)]
@@ -301,7 +301,7 @@ export const VicoChatBot: React.FC = () => {
                     role="dialog"
                     aria-label="VICO AI Chat"
                 >
-                    {/* â”€â”€â”€ Header â”€â”€â”€ */}
+                    {/* ─── Header ─── */}
                     <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-[#E11D48] to-red-700 text-white flex-shrink-0">
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
@@ -332,7 +332,7 @@ export const VicoChatBot: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* â”€â”€â”€ Messages Area â”€â”€â”€ */}
+                    {/* ─── Messages Area ─── */}
                     <div
                         ref={messagesContainerRef}
                         onScroll={handleScroll}
@@ -345,9 +345,9 @@ export const VicoChatBot: React.FC = () => {
                                 <div className="w-16 h-16 bg-gradient-to-br from-[#E11D48] to-red-700 rounded-2xl flex items-center justify-center mb-4 shadow-xl shadow-red-900/20">
                                     <Bot size={32} className="text-white" />
                                 </div>
-                                <h4 className="text-lg font-black text-[#18181B] mb-1">Hello! ðŸ‘‹</h4>
+                                <h4 className="text-lg font-black text-[#18181B] mb-1">Hello! 👋</h4>
                                 <p className="text-xs text-[#71717A] max-w-[280px] leading-relaxed mb-6">
-                                    I'm <strong className="text-[#E11D48]">VICO AI</strong> â€” your Vietnam market assistant. Ask me anything about companies, markets, competitors, or news.
+                                    I'm <strong className="text-[#E11D48]">VICO AI</strong> — your Vietnam market assistant. Ask me anything about companies, markets, competitors, or news.
                                 </p>
 
                                 {/* Quick Actions Grid */}
@@ -432,13 +432,13 @@ export const VicoChatBot: React.FC = () => {
                                                 >
                                                     {copiedId === msg.id ? <Check size={12} className="text-green-500" /> : <Copy size={12} className="text-[#A1A1AA]" />}
                                                 </button>
-                                                {msg.content.includes('âš ï¸') && (
+                                                {msg.content.includes('⚠️') && (
                                                     <button
                                                         onClick={handleRetry}
                                                         className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-[#FFF1F2] rounded flex items-center gap-1 text-[10px] text-[#E11D48] font-medium"
-                                                        title="Thá»­ láº¡i"
+                                                        title="Thử lại"
                                                     >
-                                                        <RotateCcw size={11} /> Thá»­ láº¡i
+                                                        <RotateCcw size={11} /> Thử lại
                                                     </button>
                                                 )}
                                             </>
@@ -463,8 +463,8 @@ export const VicoChatBot: React.FC = () => {
                                         </div>
                                         <span className="text-[10px] text-[#71717A] font-medium ml-1">
                                             {activeTools.length > 0
-                                                ? activeTools.map(t => TOOL_LABELS[t] || t).join(' â†’ ')
-                                                : 'Äang xá»­ lÃ½...'
+                                                ? activeTools.map(t => TOOL_LABELS[t] || t).join(' → ')
+                                                : 'Đang xử lý...'
                                             }
                                         </span>
                                     </div>
@@ -486,7 +486,7 @@ export const VicoChatBot: React.FC = () => {
                         </button>
                     )}
 
-                    {/* â”€â”€â”€ Input Area â”€â”€â”€ */}
+                    {/* ─── Input Area ─── */}
                     <div className="flex-shrink-0 border-t border-[#E4E4E7] bg-white px-4 py-3">
                         {/* Quick action chips (visible after first interaction) */}
                         {hasInteracted && messages.length > 0 && !isLoading && (

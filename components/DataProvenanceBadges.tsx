@@ -1,7 +1,7 @@
-﻿/**
- * â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
- * ðŸ† DATA PROVENANCE UI â€” Badges, tooltips, and panels for verified data
- * â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/**
+ * ════════════════════════════════════════════════════════════════════════════
+ * 🏆 DATA PROVENANCE UI — Badges, tooltips, and panels for verified data
+ * ════════════════════════════════════════════════════════════════════════════
  *
  * React components that display data provenance information:
  *   - VerifiedBadge: Small inline badge showing confidence level
@@ -16,9 +16,9 @@
 
 import React, { useState } from 'react';
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
 // TYPES (mirrors server-side types for client-side use)
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
 
 export type DataSourceType =
   | 'company_website' | 'hose_filing' | 'hnx_filing' | 'upcom_filing'
@@ -50,9 +50,9 @@ export interface ProvenanceSummary {
   badge: { label: string; color: string; bg: string };
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
 // HELPERS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
 
 const SOURCE_LABELS: Record<DataSourceType, string> = {
   company_website: 'Company Website',
@@ -87,37 +87,37 @@ const SOURCE_LABELS: Record<DataSourceType, string> = {
 };
 
 const SOURCE_ICONS: Partial<Record<DataSourceType, string>> = {
-  company_website: 'â—‹',
-  hose_filing: 'â–£',
-  hnx_filing: 'â–£',
-  upcom_filing: 'â–£',
-  cafef: 'â–²',
-  dkkd_gov: 'â–¡',
-  press_release: 'â—‡',
+  company_website: '○',
+  hose_filing: '▣',
+  hnx_filing: '▣',
+  upcom_filing: '▣',
+  cafef: '▲',
+  dkkd_gov: '□',
+  press_release: '◇',
   investor_disclosure: '$',
-  dealstreetasia: 'â—‡',
-  techinasia: 'â—‡',
-  crunchbase: 'â—Ž',
-  linkedin_company: 'â—Ž',
-  topcv_jobs: 'â—‰',
-  google_news_rss: 'â—‡',
-  ai_generated: 'â–³',
-  manual_research: 'â—†',
+  dealstreetasia: '◇',
+  techinasia: '◇',
+  crunchbase: '◎',
+  linkedin_company: '◎',
+  topcv_jobs: '◉',
+  google_news_rss: '◇',
+  ai_generated: '△',
+  manual_research: '◆',
 };
 
 function getConfidenceConfig(confidence: number) {
   if (confidence >= 0.85) return {
     label: 'Verified',
-    labelVi: 'ÄÃ£ xÃ¡c minh',
+    labelVi: 'Đã xác minh',
     color: 'text-green-700',
     bg: 'bg-green-50',
     border: 'border-green-200',
     dot: 'bg-green-500',
-    icon: 'âœ“',
+    icon: '✓',
   };
   if (confidence >= 0.60) return {
     label: 'Estimated',
-    labelVi: 'Æ¯á»›c tÃ­nh',
+    labelVi: 'Ước tính',
     color: 'text-amber-700',
     bg: 'bg-amber-50',
     border: 'border-amber-200',
@@ -126,7 +126,7 @@ function getConfidenceConfig(confidence: number) {
   };
   return {
     label: 'Low Confidence',
-    labelVi: 'Äá»™ tin cáº­y tháº¥p',
+    labelVi: 'Độ tin cậy thấp',
     color: 'text-red-700',
     bg: 'bg-red-50',
     border: 'border-red-200',
@@ -135,9 +135,9 @@ function getConfidenceConfig(confidence: number) {
   };
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// 1. VERIFIED BADGE â€” Small inline badge showing verification status
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
+// 1. VERIFIED BADGE — Small inline badge showing verification status
+// ════════════════════════════════════════════════════════════════════════════
 
 interface VerifiedBadgeProps {
   confidence: number;
@@ -159,7 +159,7 @@ export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
     return (
       <span
         className={`inline-flex items-center gap-0.5 px-1 py-px rounded text-[9px] font-bold ${config.bg} ${config.color} border ${config.border} ${className}`}
-        title={`${config.label} (${Math.round(confidence * 100)}%)${sourceLabel ? ` â€” ${sourceLabel}` : ''}`}
+        title={`${config.label} (${Math.round(confidence * 100)}%)${sourceLabel ? ` — ${sourceLabel}` : ''}`}
       >
         <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
         {config.icon}
@@ -179,9 +179,9 @@ export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
   );
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// 2. SOURCE TAG â€” Shows where a specific data point comes from
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
+// 2. SOURCE TAG — Shows where a specific data point comes from
+// ════════════════════════════════════════════════════════════════════════════
 
 interface SourceTagProps {
   provenance: DataProvenance;
@@ -194,7 +194,7 @@ export const SourceTag: React.FC<SourceTagProps> = ({
   showUrl = false,
   className = '',
 }) => {
-  const icon = SOURCE_ICONS[provenance.source] || 'â—‹';
+  const icon = SOURCE_ICONS[provenance.source] || '○';
   const label = SOURCE_LABELS[provenance.source] || provenance.source;
   const config = getConfidenceConfig(provenance.confidence);
 
@@ -215,15 +215,15 @@ export const SourceTag: React.FC<SourceTagProps> = ({
         <span>{label}</span>
       )}
       {provenance.isVerified && (
-        <span className="text-green-600" title="Human-verified">âœ“</span>
+        <span className="text-green-600" title="Human-verified">✓</span>
       )}
     </span>
   );
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// 3. PROVENANCE TOOLTIP â€” Hover detail for any verified field
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
+// 3. PROVENANCE TOOLTIP — Hover detail for any verified field
+// ════════════════════════════════════════════════════════════════════════════
 
 interface ProvenanceTooltipProps {
   fieldName: string;
@@ -239,7 +239,7 @@ export const ProvenanceTooltip: React.FC<ProvenanceTooltipProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const config = getConfidenceConfig(provenance.confidence);
   const sourceLabel = SOURCE_LABELS[provenance.source] || provenance.source;
-  const icon = SOURCE_ICONS[provenance.source] || 'â—‹';
+  const icon = SOURCE_ICONS[provenance.source] || '○';
 
   return (
     <span className="relative inline-block group">
@@ -263,7 +263,7 @@ export const ProvenanceTooltip: React.FC<ProvenanceTooltipProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-zinc-500">Confidence</span>
               <span className={`font-bold ${config.color}`}>
-                {Math.round(provenance.confidence * 100)}% â€” {config.label}
+                {Math.round(provenance.confidence * 100)}% — {config.label}
               </span>
             </div>
 
@@ -279,7 +279,7 @@ export const ProvenanceTooltip: React.FC<ProvenanceTooltipProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-zinc-500">Verified</span>
               <span className={provenance.isVerified ? 'text-green-600 font-bold' : 'text-zinc-400'}>
-                {provenance.isVerified ? 'âœ“ Yes' : 'âœ— No'}
+                {provenance.isVerified ? '✓ Yes' : '✗ No'}
               </span>
             </div>
 
@@ -316,9 +316,9 @@ export const ProvenanceTooltip: React.FC<ProvenanceTooltipProps> = ({
   );
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// 4. DATA SOURCES PANEL â€” Full panel showing all sources for a company
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
+// 4. DATA SOURCES PANEL — Full panel showing all sources for a company
+// ════════════════════════════════════════════════════════════════════════════
 
 interface DataSourcesPanelProps {
   provenanceSummary: ProvenanceSummary;
@@ -348,7 +348,7 @@ export const DataSourcesPanel: React.FC<DataSourcesPanelProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-zinc-800">
-                Data Sources â€” {companyName}
+                Data Sources — {companyName}
               </h3>
               <p className="text-[11px] text-zinc-500 mt-0.5">
                 Verified-first data policy
@@ -358,7 +358,7 @@ export const DataSourcesPanel: React.FC<DataSourcesPanelProps> = ({
               onClick={onClose}
               className="p-1.5 hover:bg-zinc-200:bg-zinc-700 rounded-md transition-colors text-zinc-500"
             >
-              âœ•
+              ✕
             </button>
           </div>
         </div>
@@ -409,7 +409,7 @@ export const DataSourcesPanel: React.FC<DataSourcesPanelProps> = ({
               {topSources.map((ts, i) => (
                 <div key={i} className="flex items-center justify-between text-[11px]">
                   <span className="flex items-center gap-1.5">
-                    <span>{SOURCE_ICONS[ts.source] || 'â—‹'}</span>
+                    <span>{SOURCE_ICONS[ts.source] || '○'}</span>
                     <span className="text-zinc-700">{ts.label}</span>
                   </span>
                   <span className="text-zinc-400 font-mono">{ts.count} fields</span>
@@ -420,7 +420,7 @@ export const DataSourcesPanel: React.FC<DataSourcesPanelProps> = ({
 
           {/* Total */}
           <div className="pt-2 border-t border-zinc-100 text-[10px] text-zinc-400 text-center">
-            {totalFields} total data fields â€¢ Policy: Verified-First
+            {totalFields} total data fields • Policy: Verified-First
           </div>
         </div>
       </div>
@@ -428,9 +428,9 @@ export const DataSourcesPanel: React.FC<DataSourcesPanelProps> = ({
   );
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// 5. VERIFIED COMPANY BANNER â€” Header badge for verified-first companies
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
+// 5. VERIFIED COMPANY BANNER — Header badge for verified-first companies
+// ════════════════════════════════════════════════════════════════════════════
 
 interface VerifiedCompanyBannerProps {
   companyName: string;
@@ -466,7 +466,7 @@ export const VerifiedCompanyBanner: React.FC<VerifiedCompanyBannerProps> = ({
           </div>
           <div className="text-green-600">
             Score: {dataScore}/100
-            {provenanceSummary && ` â€¢ ${provenanceSummary.verificationRate}% verified`}
+            {provenanceSummary && ` • ${provenanceSummary.verificationRate}% verified`}
           </div>
         </div>
 
@@ -494,9 +494,9 @@ export const VerifiedCompanyBanner: React.FC<VerifiedCompanyBannerProps> = ({
   );
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// 6. AI GENERATED WARNING â€” Shows when data is AI-generated
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
+// 6. AI GENERATED WARNING — Shows when data is AI-generated
+// ════════════════════════════════════════════════════════════════════════════
 
 interface AIGeneratedWarningProps {
   section: string;
@@ -509,7 +509,7 @@ export const AIGeneratedWarning: React.FC<AIGeneratedWarningProps> = ({
 }) => {
   return (
     <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-50 border border-amber-200 text-[10px] text-amber-700 ${className}`}>
-      <span>â–³</span>
+      <span>△</span>
       <span>
         <strong>{section}</strong> is AI-generated analysis, not verified data
       </span>
@@ -517,9 +517,9 @@ export const AIGeneratedWarning: React.FC<AIGeneratedWarningProps> = ({
   );
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// 7. VERIFIED FIELD WRAPPER â€” Wraps any value display with provenance info
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════════════════════════════════════════════════════════════════
+// 7. VERIFIED FIELD WRAPPER — Wraps any value display with provenance info
+// ════════════════════════════════════════════════════════════════════════════
 
 interface VerifiedFieldDisplayProps {
   fieldName: string;
