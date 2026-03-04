@@ -10,7 +10,6 @@ import {
 import { getCompanyNews } from '../services/newsService';
 import { DataPipeline } from './DataPipeline';
 import { loadFromDB } from '../utils/db';
-import { ThemeToggle } from './ThemeToggle';
 import { Logo, StatCard, PremiumCard, Badge } from './VicoUI';
 import { GTMStrategyPanel } from './GTMStrategyPanel';
 import GTMPlaybookBuilder from './GTMPlaybookBuilder';
@@ -369,7 +368,6 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                     onClearAll={clearAll}
                     onRefresh={refreshNotifs}
                   />
-                  <ThemeToggle />
                   <div className="flex items-center gap-3">
                       <div className="text-right hidden sm:block">
                           <div className="text-[10px] font-bold text-[#18181B] uppercase tracking-wide">{userData.firstName} {userData.lastName}</div>

@@ -1,5 +1,5 @@
-/**
- *  News Intelligence Page — Phase 20 (Professional Overhaul)
+﻿/**
+ *  News Intelligence Page â€” Phase 20 (Professional Overhaul)
  *
  * Inspired by Bloomberg, Reuters & TechCrunch layouts:
  *   - Hero featured article with large visual thumbnail
@@ -9,10 +9,10 @@
  *   - Trending topics sidebar
  *   - Data Sources & Methodology footer
  *
- * Data: Live RSS via getCompanyNews() — no images in feed,
+ * Data: Live RSS via getCompanyNews() â€” no images in feed,
  *       so we generate visually rich CSS thumbnails per source.
  *
- * Design: Executive Crimson — config/designSystem.ts
+ * Design: Executive Crimson â€” config/designSystem.ts
  */
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
@@ -60,14 +60,14 @@ const analyzeSentiment = (text: string): 'positive' | 'neutral' | 'negative' => 
   const t = text.toLowerCase();
 
   const negationRe =
-    /(phủ nhận|không|chưa|chẳng|không hề|bác bỏ|phản bác|bất chấp|vượt qua|khắc phục|\bnot\b|\bno\b|\bdon'?t\b|\bdespite\b|\bdeny\b|\bdenies\b|\bdenied\b|\bnever\b|\bovercome\b)/i;
+    /(phá»§ nháº­n|khÃ´ng|chÆ°a|cháº³ng|khÃ´ng há»|bÃ¡c bá»|pháº£n bÃ¡c|báº¥t cháº¥p|vÆ°á»£t qua|kháº¯c phá»¥c|\bnot\b|\bno\b|\bdon'?t\b|\bdespite\b|\bdeny\b|\bdenies\b|\bdenied\b|\bnever\b|\bovercome\b)/i;
   const clauseBoundary =
-    /[,;.!?]|\bnhưng\b|\btuy nhiên\b|\bsong\b|\bbut\b|\bhowever\b/;
+    /[,;.!?]|\bnhÆ°ng\b|\btuy nhiÃªn\b|\bsong\b|\bbut\b|\bhowever\b/;
 
   const negativeRe =
-    /(\bfall\b|\bdrop\b|\bdecline\b|\bloss\b|\blayoff\b|\blawsuit\b|\bscandal\b|\bcrisis\b|\bcrash\b|\bbankruptcy\b|giảm|sụt giảm|thua lỗ|phá sản|khủng hoảng|cắt giảm|sa thải|vi phạm|thu hồi|cảnh báo|thất bại|nợ xấu|suy thoái|đóng cửa|bê bối|lao dốc|thiệt hại)/gi;
+    /(\bfall\b|\bdrop\b|\bdecline\b|\bloss\b|\blayoff\b|\blawsuit\b|\bscandal\b|\bcrisis\b|\bcrash\b|\bbankruptcy\b|giáº£m|sá»¥t giáº£m|thua lá»—|phÃ¡ sáº£n|khá»§ng hoáº£ng|cáº¯t giáº£m|sa tháº£i|vi pháº¡m|thu há»“i|cáº£nh bÃ¡o|tháº¥t báº¡i|ná»£ xáº¥u|suy thoÃ¡i|Ä‘Ã³ng cá»­a|bÃª bá»‘i|lao dá»‘c|thiá»‡t háº¡i)/gi;
   const positiveRe =
-    /(\bsurge\b|\bjump\b|\bsoar\b|\bgrowth\b|\bsuccess\b|\brecord\b|\binnovation\b|\bprofit\b|\bgain\b|\brecover\b|tăng trưởng|tăng|đột phá|thành công|kỷ lục|dẫn đầu|mở rộng|lợi nhuận|phát triển|giải thưởng|khởi sắc|đầu tư|ra mắt|bứt phá|phục hồi)/gi;
+    /(\bsurge\b|\bjump\b|\bsoar\b|\bgrowth\b|\bsuccess\b|\brecord\b|\binnovation\b|\bprofit\b|\bgain\b|\brecover\b|tÄƒng trÆ°á»Ÿng|tÄƒng|Ä‘á»™t phÃ¡|thÃ nh cÃ´ng|ká»· lá»¥c|dáº«n Ä‘áº§u|má»Ÿ rá»™ng|lá»£i nhuáº­n|phÃ¡t triá»ƒn|giáº£i thÆ°á»Ÿng|khá»Ÿi sáº¯c|Ä‘áº§u tÆ°|ra máº¯t|bá»©t phÃ¡|phá»¥c há»“i)/gi;
 
   const isNegatedAt = (idx: number): boolean => {
     const windowStart = Math.max(0, idx - 40);
@@ -129,22 +129,22 @@ interface NewsArticle {
 }
 
 // ============================================================================
-// THUMBNAIL GENERATION — deterministic gradient per source
+// THUMBNAIL GENERATION â€” deterministic gradient per source
 // ============================================================================
 
 const SOURCE_PALETTES: Record<string, [string, string]> = {
   'VnExpress':     ['#E11D48', '#BE123C'],
-  'Tuổi Trẻ':     ['#0284C7', '#0369A1'],
-  'Thanh Niên':    ['#059669', '#047857'],
+  'Tuá»•i Tráº»':     ['#0284C7', '#0369A1'],
+  'Thanh NiÃªn':    ['#059669', '#047857'],
   'VietnamNet':    ['#7C3AED', '#6D28D9'],
-  'Dân Trí':       ['#D97706', '#B45309'],
+  'DÃ¢n TrÃ­':       ['#D97706', '#B45309'],
   'CafeF':         ['#DC2626', '#B91C1C'],
   'VnEconomy':     ['#0891B2', '#0E7490'],
   'Zing News':     ['#EA580C', '#C2410C'],
-  'Báo Mới':       ['#4F46E5', '#4338CA'],
-  'Nhịp Sống':     ['#DB2777', '#BE185D'],
-  'Lao Động':      ['#16A34A', '#15803D'],
-  'Người Lao Động':['#CA8A04', '#A16207'],
+  'BÃ¡o Má»›i':       ['#4F46E5', '#4338CA'],
+  'Nhá»‹p Sá»‘ng':     ['#DB2777', '#BE185D'],
+  'Lao Äá»™ng':      ['#16A34A', '#15803D'],
+  'NgÆ°á»i Lao Äá»™ng':['#CA8A04', '#A16207'],
   'Reuters':       ['#F97316', '#EA580C'],
   'Bloomberg':     ['#18181B', '#3F3F46'],
   'TechCrunch':    ['#22C55E', '#16A34A'],
@@ -178,11 +178,11 @@ function timeAgo(dateStr: string): string {
   const hrs = Math.floor(diffMs / 3600000);
   const days = Math.floor(diffMs / 86400000);
 
-  if (mins < 1) return 'Vừa xong';
-  if (mins < 60) return `${mins} phút trước`;
-  if (hrs < 24) return `${hrs} giờ trước`;
-  if (days < 7) return `${days} ngày trước`;
-  return d.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' });
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  if (hrs < 24) return `${hrs}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 }
 
 // ============================================================================
@@ -190,9 +190,9 @@ function timeAgo(dateStr: string): string {
 // ============================================================================
 
 function sentimentConfig(s?: string) {
-  if (s === 'positive') return { bg: 'bg-[#D1FAE5]', text: 'text-[#059669]', label: 'Tích cực', icon: TrendUp, dot: 'bg-[#059669]' };
-  if (s === 'negative') return { bg: 'bg-[#FEE2E2]', text: 'text-[#991B1B]', label: 'Tiêu cực', icon: TrendDown, dot: 'bg-[#991B1B]' };
-  return { bg: 'bg-[#F4F4F5]', text: 'text-[#71717A]', label: 'Trung tính', icon: Minus, dot: 'bg-[#A1A1AA]' };
+  if (s === 'positive') return { bg: 'bg-[#D1FAE5]', text: 'text-[#059669]', label: 'Positive', icon: TrendUp, dot: 'bg-[#059669]' };
+  if (s === 'negative') return { bg: 'bg-[#FEE2E2]', text: 'text-[#991B1B]', label: 'Negative', icon: TrendDown, dot: 'bg-[#991B1B]' };
+  return { bg: 'bg-[#F4F4F5]', text: 'text-[#71717A]', label: 'Neutral', icon: Minus, dot: 'bg-[#A1A1AA]' };
 }
 
 // ============================================================================
@@ -212,25 +212,25 @@ function countWords(text: string): number {
   return text.split(/\s+/).filter(Boolean).length;
 }
 
-/** Extract a concise summary — first N meaningful sentences */
+/** Extract a concise summary â€” first N meaningful sentences */
 function extractSummary(content: string, maxSentences = 3): string {
   if (!content) return '';
   const cleaned = content.replace(/\s+/g, ' ').trim();
   // Split by sentence-ending punctuation
   const sentences = cleaned
-    .split(/(?<=[.!?。])\s+/)
+    .split(/(?<=[.!?ã€‚])\s+/)
     .map(s => s.trim())
     .filter(s => s.length > 25);
   if (sentences.length === 0) return cleaned.slice(0, 200) + (cleaned.length > 200 ? '...' : '');
   return sentences.slice(0, maxSentences).join(' ');
 }
 
-/** Extract key points — sentences scored by keyword overlap with title + data signals */
+/** Extract key points â€” sentences scored by keyword overlap with title + data signals */
 function extractKeyPoints(content: string, title: string): string[] {
   if (!content) return [];
   const sentences = content
     .replace(/\s+/g, ' ')
-    .split(/(?<=[.!?。])\s+/)
+    .split(/(?<=[.!?ã€‚])\s+/)
     .map(s => s.trim())
     .filter(s => s.length > 30);
 
@@ -245,7 +245,7 @@ function extractKeyPoints(content: string, title: string): string[] {
     const overlapScore = words.filter(w => titleWords.has(w)).length;
     const hasNumber = /\d+/.test(s) ? 2 : 0;
     const hasKeyData =
-      /tăng|giảm|growth|revenue|lợi nhuận|doanh thu|market|thị trường|đầu tư|invest|kỷ lục|record|triệu|tỷ|billion|million|percent|%/i.test(s)
+      /tÄƒng|giáº£m|growth|revenue|lá»£i nhuáº­n|doanh thu|market|thá»‹ trÆ°á»ng|Ä‘áº§u tÆ°|invest|ká»· lá»¥c|record|triá»‡u|tá»·|billion|million|percent|%/i.test(s)
         ? 3
         : 0;
     return { sentence: s, score: overlapScore + hasNumber + hasKeyData };
@@ -283,7 +283,7 @@ function findRelatedArticles(
 /** Format full date in Vietnamese */
 function formatFullDate(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('vi-VN', {
+  return d.toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -298,11 +298,11 @@ function formatFullDate(dateStr: string): string {
 // ============================================================================
 
 const DATA_SOURCES = [
-  'Google News RSS — Vietnamese Language Feed',
-  'VnExpress, Tuổi Trẻ & Thanh Niên',
+  'Google News RSS â€” Vietnamese Language Feed',
+  'VnExpress, Tuá»•i Tráº» & Thanh NiÃªn',
   'CafeF & VnEconomy Financial Data',
   'Reuters & Bloomberg Wire Services',
-  'VICO Enterprise Database — 10,000+ Companies',
+  'VICO Enterprise Database â€” 10,000+ Companies',
   'Real-time Sentiment Analysis Engine',
 ];
 
@@ -310,7 +310,7 @@ const DATA_SOURCES = [
 // SUB-COMPONENTS
 // ============================================================================
 
-/** Generated thumbnail — gradient + source initial + icon */
+/** Generated thumbnail â€” gradient + source initial + icon */
 function NewsThumbnail({
   source,
   size = 'md',
@@ -379,7 +379,7 @@ function HeroArticle({ article, onClick }: { article: NewsArticle; onClick: () =
           <NewsThumbnail source={article.source} size="hero" className="lg:!rounded-none lg:!rounded-l-[12px] !rounded-b-none lg:!rounded-bl-[12px] !h-full min-h-[200px]" />
           <div className="absolute top-3 left-3">
             <span className={tw.badge('brand')}>
-              <Star size={iconSize.xs} weight="fill" /> Tin nổi bật
+              <Star size={iconSize.xs} weight="fill" /> Tin ná»•i báº­t
             </span>
           </div>
         </div>
@@ -398,7 +398,7 @@ function HeroArticle({ article, onClick }: { article: NewsArticle; onClick: () =
               </span>
             </div>
 
-            <h2 className="text-lg lg:text-xl font-bold text-[#18181B] dark:text-white leading-snug mb-3 group-hover:text-[#E11D48] transition-colors line-clamp-3">
+            <h2 className="text-lg lg:text-xl font-bold text-[#18181B] leading-snug mb-3 group-hover:text-[#E11D48] transition-colors line-clamp-3">
               {article.title}
             </h2>
 
@@ -407,9 +407,9 @@ function HeroArticle({ article, onClick }: { article: NewsArticle; onClick: () =
             </p>
           </div>
 
-          <div className="flex items-center justify-between pt-3 border-t border-[#E4E4E7] dark:border-gray-700">
+          <div className="flex items-center justify-between pt-3 border-t border-[#E4E4E7]">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-[#18181B] dark:text-white">{article.source}</span>
+              <span className="text-xs font-semibold text-[#18181B]">{article.source}</span>
               {article.keywords && article.keywords.slice(0, 2).map((kw, i) => (
                 <span key={i} className={tw.badge('neutral')}>
                   <Tag size={10} weight="duotone" /> {kw}
@@ -417,7 +417,7 @@ function HeroArticle({ article, onClick }: { article: NewsArticle; onClick: () =
               ))}
             </div>
             <span className="text-xs text-[#E11D48] font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
-              Đọc tiếp <CaretRight size={14} weight="bold" />
+              Read more <CaretRight size={14} weight="bold" />
             </span>
           </div>
         </div>
@@ -456,18 +456,18 @@ function ArticleCard({ article, onClick }: { article: NewsArticle; onClick: () =
         </div>
 
         {/* Title */}
-        <h3 className="text-sm font-bold text-[#18181B] dark:text-white line-clamp-2 leading-snug group-hover:text-[#E11D48] transition-colors">
+        <h3 className="text-sm font-bold text-[#18181B] line-clamp-2 leading-snug group-hover:text-[#E11D48] transition-colors">
           {article.title}
         </h3>
 
         {/* Preview */}
-        <p className="text-xs text-[#71717A] dark:text-zinc-400 line-clamp-2 leading-relaxed">
+        <p className="text-xs text-[#71717A] line-clamp-2 leading-relaxed">
           {article.content}
         </p>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-[#E4E4E7]/50 dark:border-gray-700/50">
-          <span className="text-[10px] font-semibold text-[#71717A] dark:text-zinc-400">{article.source}</span>
+        <div className="flex items-center justify-between pt-2 border-t border-[#E4E4E7]/50">
+          <span className="text-[10px] font-semibold text-[#71717A]">{article.source}</span>
           <ArrowSquareOut size={14} className="text-[#A1A1AA]" weight="duotone" />
         </div>
       </div>
@@ -490,12 +490,12 @@ function CompactArticle({ article, onClick }: { article: NewsArticle; onClick: (
         style={{ backgroundColor: c1 }}
       />
       <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-semibold text-[#18181B] dark:text-white line-clamp-2 group-hover:text-[#E11D48] transition-colors leading-snug">
+        <h4 className="text-sm font-semibold text-[#18181B] line-clamp-2 group-hover:text-[#E11D48] transition-colors leading-snug">
           {article.title}
         </h4>
         <div className="flex items-center gap-2 mt-1.5">
           <span className="text-[10px] font-medium text-[#71717A]">{article.source}</span>
-          <span className="text-[10px] text-[#A1A1AA]">·</span>
+          <span className="text-[10px] text-[#A1A1AA]">Â·</span>
           <span className="text-[10px] text-[#A1A1AA]">{timeAgo(article.pubDate)}</span>
           <span className={`w-1.5 h-1.5 rounded-full ${sc.dot} ml-auto shrink-0`} />
         </div>
@@ -524,7 +524,7 @@ function TrendingTopics({ articles }: { articles: NewsArticle[] }) {
     <div className={`${tw.card} ${tw.cardPadding}`}>
       <div className="flex items-center gap-2 mb-3">
         <Fire size={iconSize.md} weight="duotone" className="text-[#E11D48]" />
-        <h3 className={tw.h3}>Chủ đề nổi bật</h3>
+        <h3 className={tw.h3}>Trending Topics</h3>
       </div>
       <div className="flex flex-wrap gap-2">
         {topics.map(([topic, count], idx) => (
@@ -532,8 +532,8 @@ function TrendingTopics({ articles }: { articles: NewsArticle[] }) {
             key={topic}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors cursor-default ${
               idx === 0
-                ? 'bg-[#FFF1F2] dark:bg-[#E11D48]/10 border-[#E11D48]/20 text-[#E11D48]'
-                : 'bg-[#FAFAFA] dark:bg-gray-800 border-[#E4E4E7] dark:border-gray-700 text-[#3F3F46] dark:text-zinc-300'
+                ? 'bg-[#FFF1F2] border-[#E11D48]/20 text-[#E11D48]'
+                : 'bg-[#FAFAFA] border-[#E4E4E7] text-[#3F3F46]'
             }`}
           >
             {idx === 0 && <Fire size={12} weight="fill" />}
@@ -553,9 +553,9 @@ function TrendingTopics({ articles }: { articles: NewsArticle[] }) {
 type FontSize = 'sm' | 'md' | 'lg';
 
 const FONT_SIZES: Record<FontSize, { body: string; heading: string; label: string }> = {
-  sm: { body: 'text-xs leading-relaxed', heading: 'text-base lg:text-lg', label: 'Nhỏ' },
-  md: { body: 'text-sm leading-relaxed', heading: 'text-lg lg:text-xl', label: 'Vừa' },
-  lg: { body: 'text-base leading-loose', heading: 'text-xl lg:text-2xl', label: 'Lớn' },
+  sm: { body: 'text-xs leading-relaxed', heading: 'text-base lg:text-lg', label: 'S' },
+  md: { body: 'text-sm leading-relaxed', heading: 'text-lg lg:text-xl', label: 'M' },
+  lg: { body: 'text-base leading-loose', heading: 'text-xl lg:text-2xl', label: 'L' },
 };
 
 function ArticleDetailPanel({
@@ -644,11 +644,11 @@ function ArticleDetailPanel({
       {/* Panel */}
       <div
         ref={panelRef}
-        className="fixed inset-y-0 right-0 w-full sm:w-[520px] lg:w-[600px] bg-white dark:bg-[#18181B] z-50 shadow-2xl overflow-y-auto transition-transform duration-300 animate-slide-in-right"
+        className="fixed inset-y-0 right-0 w-full sm:w-[520px] lg:w-[600px] bg-white z-50 shadow-2xl overflow-y-auto transition-transform duration-300 animate-slide-in-right"
         style={{ animationDuration: '300ms' }}
       >
-        {/* ─── Panel Header ─── */}
-        <div className="sticky top-0 z-10 bg-white/95 dark:bg-[#18181B]/95 backdrop-blur-md border-b border-[#E4E4E7] dark:border-gray-700">
+        {/* â”€â”€â”€ Panel Header â”€â”€â”€ */}
+        <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-[#E4E4E7]">
           <div className="flex items-center justify-between px-5 py-3.5">
             <div className="flex items-center gap-2.5 min-w-0">
               <div
@@ -656,7 +656,7 @@ function ArticleDetailPanel({
                 style={{ backgroundColor: c1 }}
               />
               <div className="min-w-0">
-                <span className="text-xs font-bold text-[#18181B] dark:text-white block truncate">
+                <span className="text-xs font-bold text-[#18181B] block truncate">
                   {article.source}
                 </span>
                 <span className="text-[10px] text-[#A1A1AA]">{timeAgo(article.pubDate)}</span>
@@ -668,25 +668,25 @@ function ArticleDetailPanel({
                 onClick={() => onToggleBookmark(article.guid)}
                 className={`p-2 rounded-lg transition-colors ${
                   isBookmarked
-                    ? 'bg-[#FFF7ED] dark:bg-amber-500/10 text-amber-500'
-                    : 'hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA]'
+                    ? 'bg-[#FFF7ED] text-amber-500'
+                    : 'hover:bg-[#F4F4F5]:bg-gray-800 text-[#A1A1AA]'
                 }`}
-                title={isBookmarked ? 'Bỏ lưu' : 'Lưu bài viết'}
+                title={isBookmarked ? 'Remove bookmark' : 'Bookmark article'}
               >
                 <BookmarkSimple size={18} weight={isBookmarked ? 'fill' : 'regular'} />
               </button>
               {/* Share */}
               <button
                 onClick={handleShare}
-                className="p-2 rounded-lg hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA] transition-colors"
-                title="Chia sẻ"
+                className="p-2 rounded-lg hover:bg-[#F4F4F5]:bg-gray-800 text-[#A1A1AA] transition-colors"
+                title="Share"
               >
                 <ShareNetwork size={18} />
               </button>
               {/* Close */}
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-[#FEE2E2] dark:hover:bg-red-500/10 text-[#A1A1AA] hover:text-[#991B1B] transition-colors"
+                className="p-2 rounded-lg hover:bg-[#FEE2E2]:bg-red-500/10 text-[#A1A1AA] hover:text-[#991B1B] transition-colors"
               >
                 <X size={18} weight="bold" />
               </button>
@@ -704,8 +704,8 @@ function ArticleDetailPanel({
                   onClick={() => setFontSize(size)}
                   className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
                     fontSize === size
-                      ? 'bg-[#18181B] dark:bg-white text-white dark:text-[#18181B]'
-                      : 'bg-[#F4F4F5] dark:bg-gray-800 text-[#71717A] dark:text-zinc-400 hover:bg-[#E4E4E7] dark:hover:bg-gray-700'
+                      ? 'bg-[#18181B] text-white'
+                      : 'bg-[#F4F4F5] text-[#71717A] hover:bg-[#E4E4E7]:bg-gray-700'
                   }`}
                 >
                   {FONT_SIZES[size].label}
@@ -716,26 +716,26 @@ function ArticleDetailPanel({
             {/* Copy link */}
             <button
               onClick={handleCopyLink}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-[#F4F4F5] dark:bg-gray-800 text-[#71717A] dark:text-zinc-400 hover:bg-[#E4E4E7] dark:hover:bg-gray-700 transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-[#F4F4F5] text-[#71717A] hover:bg-[#E4E4E7]:bg-gray-700 transition-colors"
             >
               {copied ? (
                 <>
                   <CheckCircle size={12} weight="fill" className="text-[#059669]" />
-                  Đã sao chép
+                  Copied
                 </>
               ) : (
                 <>
                   <LinkIcon size={12} />
-                  Sao chép link
+                  Copy link
                 </>
               )}
             </button>
           </div>
         </div>
 
-        {/* ─── Article Title & Meta ─── */}
-        <div className="px-5 pt-5 pb-4 border-b border-[#E4E4E7]/50 dark:border-gray-700/50">
-          <h2 className={`${fs.heading} font-bold text-[#18181B] dark:text-white leading-snug mb-3`}>
+        {/* â”€â”€â”€ Article Title & Meta â”€â”€â”€ */}
+        <div className="px-5 pt-5 pb-4 border-b border-[#E4E4E7]/50">
+          <h2 className={`${fs.heading} font-bold text-[#18181B] leading-snug mb-3`}>
             {article.title}
           </h2>
           <div className="flex flex-wrap items-center gap-2">
@@ -745,14 +745,14 @@ function ArticleDetailPanel({
               {sc.label}
             </span>
             {/* Reading time */}
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#EFF6FF] dark:bg-blue-500/10 text-[#2563EB]">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#EFF6FF] text-[#2563EB]">
               <ClockCountdown size={12} weight="duotone" />
-              {readTime} phút đọc
+              {readTime} min read
             </span>
             {/* Word count */}
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#F4F4F5] dark:bg-gray-800 text-[#71717A]">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#F4F4F5] text-[#71717A]">
               <TextAlignLeft size={12} weight="duotone" />
-              {wordCount.toLocaleString('vi-VN')} từ
+              {wordCount.toLocaleString('en-US')} words
             </span>
             {/* Publish date */}
             <span className="text-[10px] text-[#A1A1AA] ml-auto">
@@ -761,13 +761,13 @@ function ArticleDetailPanel({
           </div>
         </div>
 
-        {/* ─── Reading Aid Tabs ─── */}
+        {/* â”€â”€â”€ Reading Aid Tabs â”€â”€â”€ */}
         <div className="px-5 pt-4 pb-0">
-          <div className="flex items-center gap-1 border-b border-[#E4E4E7] dark:border-gray-700">
+          <div className="flex items-center gap-1 border-b border-[#E4E4E7]">
             {[
-              { key: 'summary' as const, label: 'Tóm tắt', icon: Quotes },
-              { key: 'keypoints' as const, label: 'Điểm chính', icon: ListBullets },
-              { key: 'full' as const, label: 'Nội dung', icon: BookOpen },
+              { key: 'summary' as const, label: 'Summary', icon: Quotes },
+              { key: 'keypoints' as const, label: 'Key Points', icon: ListBullets },
+              { key: 'full' as const, label: 'Full Content', icon: BookOpen },
             ].map(tab => {
               const TabIcon = tab.icon;
               return (
@@ -777,7 +777,7 @@ function ArticleDetailPanel({
                   className={`inline-flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-colors -mb-px ${
                     activeSection === tab.key
                       ? 'border-[#E11D48] text-[#E11D48]'
-                      : 'border-transparent text-[#71717A] dark:text-zinc-400 hover:text-[#18181B] dark:hover:text-white'
+                      : 'border-transparent text-[#71717A] hover:text-[#18181B]:text-white'
                   }`}
                 >
                   <TabIcon size={14} weight={activeSection === tab.key ? 'fill' : 'duotone'} />
@@ -788,7 +788,7 @@ function ArticleDetailPanel({
           </div>
         </div>
 
-        {/* ─── Tab Content ─── */}
+        {/* â”€â”€â”€ Tab Content â”€â”€â”€ */}
         <div className="px-5 py-4 space-y-4">
           {/* SUMMARY TAB */}
           {activeSection === 'summary' && (
@@ -796,10 +796,10 @@ function ArticleDetailPanel({
               <div className={`${tw.card} ${tw.cardPadding} border-l-4 border-l-[#E11D48]`}>
                 <div className="flex items-center gap-2 mb-2.5">
                   <Quotes size={iconSize.sm} weight="duotone" className="text-[#E11D48]" />
-                  <span className="text-xs font-bold text-[#18181B] dark:text-white">Tóm tắt nhanh</span>
+                  <span className="text-xs font-bold text-[#18181B]">Quick Summary</span>
                 </div>
-                <p className={`${fs.body} text-[#3F3F46] dark:text-zinc-300`}>
-                  {summary || 'Không đủ nội dung để tóm tắt.'}
+                <p className={`${fs.body} text-[#3F3F46]`}>
+                  {summary || 'Not enough content to generate a summary.'}
                 </p>
               </div>
 
@@ -807,15 +807,15 @@ function ArticleDetailPanel({
               <div className={`${tw.card} ${tw.cardPadding}`}>
                 <div className="flex items-center gap-2 mb-2.5">
                   <SIcon size={iconSize.sm} weight="duotone" className={sc.text} />
-                  <span className="text-xs font-bold text-[#18181B] dark:text-white">Phân tích tâm lý</span>
+                  <span className="text-xs font-bold text-[#18181B]">Sentiment Analysis</span>
                 </div>
-                <p className={`text-xs text-[#71717A] dark:text-zinc-400 leading-relaxed`}>
-                  {article.sentiment === 'positive' && 'Bài viết có xu hướng tích cực — chứa các tín hiệu tăng trưởng, thành công hoặc phát triển. Đây có thể là tin tốt cho doanh nghiệp hoặc ngành.'}
-                  {article.sentiment === 'negative' && 'Bài viết có xu hướng tiêu cực — chứa các tín hiệu sụt giảm, rủi ro hoặc khó khăn. Cần theo dõi sát tác động tiềm ẩn.'}
-                  {article.sentiment === 'neutral' && 'Bài viết có tông trung tính — đưa tin khách quan, không thiên về tích cực hay tiêu cực rõ rệt.'}
+                <p className={`text-xs text-[#71717A] leading-relaxed`}>
+                  {article.sentiment === 'positive' && 'This article has a positive tone â€” it contains signals of growth, success, or development. This could be good news for the business or industry.'}
+                  {article.sentiment === 'negative' && 'This article has a negative tone â€” it contains signals of decline, risk, or difficulty. Potential impact should be closely monitored.'}
+                  {article.sentiment === 'neutral' && 'This article has a neutral tone â€” reporting is objective, without a clear positive or negative bias.'}
                 </p>
                 <div className="mt-2.5 flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-[#F4F4F5] dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1.5 bg-[#F4F4F5] rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${
                         article.sentiment === 'positive' ? 'bg-[#059669]' :
@@ -837,15 +837,15 @@ function ArticleDetailPanel({
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { label: 'Thời gian đọc', value: `${readTime} phút`, icon: Clock },
-                  { label: 'Độ dài', value: `${wordCount} từ`, icon: TextAlignLeft },
-                  { label: 'Nguồn tin', value: article.source, icon: Globe },
+                  { label: 'Read Time', value: `${readTime} min`, icon: Clock },
+                  { label: 'Length', value: `${wordCount} words`, icon: TextAlignLeft },
+                  { label: 'Source', value: article.source, icon: Globe },
                 ].map((item, i) => {
                   const ItemIcon = item.icon;
                   return (
                     <div key={i} className={`${tw.card} p-3 text-center`}>
                       <ItemIcon size={18} weight="duotone" className="text-[#E11D48] mx-auto mb-1" />
-                      <p className="text-xs font-bold text-[#18181B] dark:text-white">{item.value}</p>
+                      <p className="text-xs font-bold text-[#18181B]">{item.value}</p>
                       <p className="text-[9px] text-[#A1A1AA] uppercase tracking-wider mt-0.5">{item.label}</p>
                     </div>
                   );
@@ -860,17 +860,17 @@ function ArticleDetailPanel({
               {keyPoints.length > 0 ? (
                 <>
                   <p className="text-[11px] text-[#A1A1AA] font-medium">
-                    {keyPoints.length} điểm chính được trích xuất từ nội dung
+                    {keyPoints.length} key points extracted from content
                   </p>
                   {keyPoints.map((point, idx) => (
                     <div
                       key={idx}
                       className={`${tw.card} ${tw.cardPadding} flex items-start gap-3`}
                     >
-                      <div className="w-6 h-6 rounded-full bg-[#FFF1F2] dark:bg-[#E11D48]/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-6 h-6 rounded-full bg-[#FFF1F2] flex items-center justify-center shrink-0 mt-0.5">
                         <span className="text-[10px] font-bold text-[#E11D48]">{idx + 1}</span>
                       </div>
-                      <p className={`${fs.body} text-[#3F3F46] dark:text-zinc-300 flex-1`}>
+                      <p className={`${fs.body} text-[#3F3F46] flex-1`}>
                         {point}
                       </p>
                     </div>
@@ -879,7 +879,7 @@ function ArticleDetailPanel({
               ) : (
                 <div className="text-center py-8">
                   <ListBullets size={32} weight="duotone" className="text-[#A1A1AA] mx-auto mb-2" />
-                  <p className="text-xs text-[#A1A1AA]">Không đủ nội dung để trích xuất điểm chính</p>
+                  <p className="text-xs text-[#A1A1AA]">Not enough content to extract key points</p>
                 </div>
               )}
 
@@ -888,7 +888,7 @@ function ArticleDetailPanel({
                 <div className={`${tw.card} ${tw.cardPadding}`}>
                   <div className="flex items-center gap-2 mb-2">
                     <Tag size={14} weight="duotone" className="text-[#E11D48]" />
-                    <span className="text-xs font-bold text-[#18181B] dark:text-white">Từ khóa</span>
+                    <span className="text-xs font-bold text-[#18181B]">Keywords</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {article.keywords.map((kw, i) => (
@@ -907,25 +907,25 @@ function ArticleDetailPanel({
             <div className="space-y-4">
               {/* Full content */}
               <div className={`${tw.card} ${tw.cardPadding}`}>
-                <p className={`${fs.body} text-[#3F3F46] dark:text-zinc-300 whitespace-pre-line`}>
-                  {article.content || 'Không có nội dung chi tiết. Vui lòng đọc bài gốc.'}
+                <p className={`${fs.body} text-[#3F3F46] whitespace-pre-line`}>
+                  {article.content || 'No detailed content available. Please read the original article.'}
                 </p>
               </div>
 
               {/* Source info */}
               <div className="flex items-center gap-2 text-[10px] text-[#A1A1AA]">
                 <Database size={12} weight="duotone" />
-                <span>Nội dung từ nguồn RSS — có thể bị rút gọn. Đọc bài gốc để xem đầy đủ.</span>
+                <span>Content from RSS source â€” may be truncated. Read the original article for full content.</span>
               </div>
             </div>
           )}
 
-          {/* ─── Related Articles ─── */}
+          {/* â”€â”€â”€ Related Articles â”€â”€â”€ */}
           {related.length > 0 && (
             <div className="pt-2">
               <div className="flex items-center gap-2 mb-3">
                 <Newspaper size={iconSize.sm} weight="duotone" className="text-[#E11D48]" />
-                <span className="text-xs font-bold text-[#18181B] dark:text-white">Bài viết liên quan</span>
+                <span className="text-xs font-bold text-[#18181B]">Related Articles</span>
                 <span className={tw.badge('neutral')}>{related.length}</span>
               </div>
               <div className="space-y-2">
@@ -943,12 +943,12 @@ function ArticleDetailPanel({
                         style={{ backgroundColor: relC1 }}
                       />
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-semibold text-[#18181B] dark:text-white line-clamp-2 group-hover:text-[#E11D48] transition-colors leading-snug">
+                        <h4 className="text-xs font-semibold text-[#18181B] line-clamp-2 group-hover:text-[#E11D48] transition-colors leading-snug">
                           {rel.title}
                         </h4>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span className="text-[9px] text-[#A1A1AA]">{rel.source}</span>
-                          <span className="text-[9px] text-[#A1A1AA]">·</span>
+                          <span className="text-[9px] text-[#A1A1AA]">Â·</span>
                           <span className="text-[9px] text-[#A1A1AA]">{timeAgo(rel.pubDate)}</span>
                           <span className={`w-1.5 h-1.5 rounded-full ${relSc.dot} ml-auto shrink-0`} />
                         </div>
@@ -961,8 +961,8 @@ function ArticleDetailPanel({
           )}
         </div>
 
-        {/* ─── Panel Footer: Open Original ─── */}
-        <div className="sticky bottom-0 bg-white/95 dark:bg-[#18181B]/95 backdrop-blur-md border-t border-[#E4E4E7] dark:border-gray-700 px-5 py-3.5">
+        {/* â”€â”€â”€ Panel Footer: Open Original â”€â”€â”€ */}
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur-md border-t border-[#E4E4E7] px-5 py-3.5">
           <a
             href={article.link}
             target="_blank"
@@ -970,10 +970,10 @@ function ArticleDetailPanel({
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#E11D48] hover:bg-[#BE123C] text-white text-sm font-semibold transition-colors"
           >
             <ArrowUpRight size={16} weight="bold" />
-            Đọc bài gốc — {article.source}
+            Read Original â€” {article.source}
           </a>
           <p className="text-[9px] text-center text-[#A1A1AA] mt-2">
-            Nhấn Esc để đóng · Tóm tắt & phân tích tự động từ nội dung RSS
+            Press Esc to close Â· Auto-summary & analysis from RSS content
           </p>
         </div>
       </div>
@@ -1171,7 +1171,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
 
   return (
     <div className="space-y-6 pb-10">
-      {/* ─── Page Header ─── */}
+      {/* â”€â”€â”€ Page Header â”€â”€â”€ */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-3 mb-1.5">
@@ -1181,28 +1181,28 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
             </span>
           </div>
           <p className={`${tw.body} max-w-xl`}>
-            Theo dõi, phân tích & khám phá tin tức liên quan đến doanh nghiệp, đối thủ và ngành — dữ liệu cập nhật theo thời gian thực
+            Track, analyze & discover news about your business, competitors, and industry â€” real-time data updates
           </p>
         </div>
       </div>
 
-      {/* ─── Stat Cards ─── */}
+      {/* â”€â”€â”€ Stat Cards â”€â”€â”€ */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
-          { label: 'Tổng bài viết', value: stats.total, icon: Newspaper, color: 'text-[#E11D48]' },
-          { label: 'Tích cực', value: stats.positive, icon: TrendUp, color: 'text-[#059669]' },
-          { label: 'Trung tính', value: stats.neutral, icon: Minus, color: 'text-[#71717A]' },
-          { label: 'Tiêu cực', value: stats.negative, icon: TrendDown, color: 'text-[#991B1B]' },
-          { label: 'Nguồn tin', value: stats.sources, icon: Globe, color: 'text-[#0284C7]' },
+          { label: 'Total Articles', value: stats.total, icon: Newspaper, color: 'text-[#E11D48]' },
+          { label: 'Positive', value: stats.positive, icon: TrendUp, color: 'text-[#059669]' },
+          { label: 'Neutral', value: stats.neutral, icon: Minus, color: 'text-[#71717A]' },
+          { label: 'Negative', value: stats.negative, icon: TrendDown, color: 'text-[#991B1B]' },
+          { label: 'Sources', value: stats.sources, icon: Globe, color: 'text-[#0284C7]' },
         ].map((s, i) => {
           const Icon = s.icon;
           return (
             <div key={i} className={`${tw.card} ${tw.cardPadding} flex items-center gap-3`}>
-              <div className={`w-9 h-9 rounded-lg bg-[#FFF1F2] dark:bg-[#E11D48]/10 flex items-center justify-center ${s.color} shrink-0`}>
+              <div className={`w-9 h-9 rounded-lg bg-[#FFF1F2] flex items-center justify-center ${s.color} shrink-0`}>
                 <Icon size={iconSize.sm} weight="duotone" />
               </div>
               <div>
-                <p className={tw.metric + ' text-lg lg:text-xl text-[#18181B] dark:text-white'}>{isLoading ? '—' : s.value}</p>
+                <p className={tw.metric + ' text-lg lg:text-xl text-[#18181B]'}>{isLoading ? 'â€”' : s.value}</p>
                 <p className="text-[9px] font-semibold uppercase tracking-wider text-[#A1A1AA]">{s.label}</p>
               </div>
             </div>
@@ -1210,14 +1210,14 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
         })}
       </div>
 
-      {/* ─── Search & Filters ─── */}
+      {/* â”€â”€â”€ Search & Filters â”€â”€â”€ */}
       <div className={`${tw.card} ${tw.cardPadding} space-y-3`}>
         {/* Search */}
         <div className="relative">
           <MagnifyingGlass size={iconSize.sm} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1AA]" />
           <input
             type="text"
-            placeholder="Tìm kiếm bài viết, từ khóa, công ty..."
+            placeholder="Search articles, keywords, companies..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`${tw.input} !pl-10`}
@@ -1230,10 +1230,10 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
           <div className="flex items-center gap-1.5 mr-2">
             <Funnel size={iconSize.sm} className="text-[#A1A1AA]" weight="duotone" />
             {[
-              { key: 'all' as const, label: 'Tất cả', icon: Newspaper },
-              { key: 'company' as const, label: 'Công ty', icon: Buildings },
-              { key: 'competitors' as const, label: 'Đối thủ', icon: ChartLineUp },
-              { key: 'industry' as const, label: 'Ngành', icon: Globe },
+              { key: 'all' as const, label: 'All', icon: Newspaper },
+              { key: 'company' as const, label: 'Company', icon: Buildings },
+              { key: 'competitors' as const, label: 'Competitors', icon: ChartLineUp },
+              { key: 'industry' as const, label: 'Industry', icon: Globe },
             ].map((tab) => {
               const TabIcon = tab.icon;
               return (
@@ -1243,7 +1243,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
                   className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                     activeTab === tab.key
                       ? 'bg-[#E11D48] text-white'
-                      : 'bg-[#FAFAFA] dark:bg-gray-800 text-[#3F3F46] dark:text-zinc-300 hover:bg-[#F4F4F5] dark:hover:bg-gray-700 border border-[#E4E4E7] dark:border-gray-700'
+                      : 'bg-[#FAFAFA] text-[#3F3F46] hover:bg-[#F4F4F5]:bg-gray-700 border border-[#E4E4E7]'
                   }`}
                 >
                   <TabIcon size={12} weight={activeTab === tab.key ? 'fill' : 'duotone'} />
@@ -1254,23 +1254,23 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
           </div>
 
           {/* Divider */}
-          <div className="w-px h-6 bg-[#E4E4E7] dark:bg-gray-700 hidden sm:block" />
+          <div className="w-px h-6 bg-[#E4E4E7] hidden sm:block" />
 
           {/* Sentiment pills */}
           <div className="flex items-center gap-1.5">
             {[
-              { key: 'all' as const, label: 'Tất cả', dot: 'bg-[#A1A1AA]' },
-              { key: 'positive' as const, label: 'Tích cực', dot: 'bg-[#059669]' },
-              { key: 'neutral' as const, label: 'Trung tính', dot: 'bg-[#71717A]' },
-              { key: 'negative' as const, label: 'Tiêu cực', dot: 'bg-[#991B1B]' },
+              { key: 'all' as const, label: 'All', dot: 'bg-[#A1A1AA]' },
+              { key: 'positive' as const, label: 'Positive', dot: 'bg-[#059669]' },
+              { key: 'neutral' as const, label: 'Neutral', dot: 'bg-[#71717A]' },
+              { key: 'negative' as const, label: 'Negative', dot: 'bg-[#991B1B]' },
             ].map((s) => (
               <button
                 key={s.key}
                 onClick={() => setSentimentFilter(s.key)}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors ${
                   sentimentFilter === s.key
-                    ? 'bg-[#18181B] dark:bg-white text-white dark:text-[#18181B]'
-                    : 'bg-[#FAFAFA] dark:bg-gray-800 text-[#3F3F46] dark:text-zinc-300 hover:bg-[#F4F4F5] dark:hover:bg-gray-700 border border-[#E4E4E7] dark:border-gray-700'
+                    ? 'bg-[#18181B] text-white'
+                    : 'bg-[#FAFAFA] text-[#3F3F46] hover:bg-[#F4F4F5]:bg-gray-700 border border-[#E4E4E7]'
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${s.dot}`} />
@@ -1281,18 +1281,18 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
         </div>
       </div>
 
-      {/* ─── Loading State ─── */}
+      {/* â”€â”€â”€ Loading State â”€â”€â”€ */}
       {isLoading && (
         <div className="space-y-6">
           {/* Hero skeleton */}
           <div className={`${tw.card} overflow-hidden`}>
             <div className="grid grid-cols-1 lg:grid-cols-5">
-              <div className="lg:col-span-2 h-56 bg-[#E4E4E7] dark:bg-gray-700 animate-pulse" />
+              <div className="lg:col-span-2 h-56 bg-[#E4E4E7] animate-pulse" />
               <div className="lg:col-span-3 p-6 space-y-4">
-                <div className="h-5 bg-[#E4E4E7] dark:bg-gray-700 rounded-lg w-20 animate-pulse" />
-                <div className="h-6 bg-[#E4E4E7] dark:bg-gray-700 rounded-lg w-3/4 animate-pulse" />
-                <div className="h-4 bg-[#E4E4E7] dark:bg-gray-700 rounded-lg w-full animate-pulse" />
-                <div className="h-4 bg-[#E4E4E7] dark:bg-gray-700 rounded-lg w-2/3 animate-pulse" />
+                <div className="h-5 bg-[#E4E4E7] rounded-lg w-20 animate-pulse" />
+                <div className="h-6 bg-[#E4E4E7] rounded-lg w-3/4 animate-pulse" />
+                <div className="h-4 bg-[#E4E4E7] rounded-lg w-full animate-pulse" />
+                <div className="h-4 bg-[#E4E4E7] rounded-lg w-2/3 animate-pulse" />
               </div>
             </div>
           </div>
@@ -1300,11 +1300,11 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className={`${tw.card} overflow-hidden`}>
-                <div className="h-36 bg-[#E4E4E7] dark:bg-gray-700 animate-pulse" />
+                <div className="h-36 bg-[#E4E4E7] animate-pulse" />
                 <div className="p-4 space-y-3">
-                  <div className="h-4 bg-[#E4E4E7] dark:bg-gray-700 rounded w-3/4 animate-pulse" />
-                  <div className="h-3 bg-[#E4E4E7] dark:bg-gray-700 rounded w-full animate-pulse" />
-                  <div className="h-3 bg-[#E4E4E7] dark:bg-gray-700 rounded w-1/2 animate-pulse" />
+                  <div className="h-4 bg-[#E4E4E7] rounded w-3/4 animate-pulse" />
+                  <div className="h-3 bg-[#E4E4E7] rounded w-full animate-pulse" />
+                  <div className="h-3 bg-[#E4E4E7] rounded w-1/2 animate-pulse" />
                 </div>
               </div>
             ))}
@@ -1312,33 +1312,33 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
         </div>
       )}
 
-      {/* ─── Content ─── */}
+      {/* â”€â”€â”€ Content â”€â”€â”€ */}
       {!isLoading && filteredNews.length === 0 && (
         <div className={`${tw.card} ${tw.cardPadding} text-center py-16`}>
           <Newspaper size={48} weight="duotone" className="text-[#A1A1AA] mx-auto mb-4" />
-          <p className="text-sm font-semibold text-[#18181B] dark:text-white mb-1">Không tìm thấy bài viết</p>
-          <p className="text-xs text-[#A1A1AA]">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+          <p className="text-sm font-semibold text-[#18181B] mb-1">No articles found</p>
+          <p className="text-xs text-[#A1A1AA]">Try changing your filters or search keywords</p>
         </div>
       )}
 
       {!isLoading && filteredNews.length > 0 && (
         <FadeIn duration={400}>
           <div className="space-y-6">
-            {/* ─── Hero Article ─── */}
+            {/* â”€â”€â”€ Hero Article â”€â”€â”€ */}
             {heroArticle && (
               <HeroArticle article={heroArticle} onClick={() => openArticle(heroArticle)} />
             )}
 
-            {/* ─── Trending Topics ─── */}
+            {/* â”€â”€â”€ Trending Topics â”€â”€â”€ */}
             <TrendingTopics articles={filteredNews} />
 
-            {/* ─── Grid News Cards ─── */}
+            {/* â”€â”€â”€ Grid News Cards â”€â”€â”€ */}
             {gridArticles.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <Newspaper size={iconSize.md} weight="duotone" className="text-[#E11D48]" />
-                  <h2 className={tw.h2}>Tin mới nhất</h2>
-                  <span className={tw.badge('neutral')}>{filteredNews.length} bài viết</span>
+                  <h2 className={tw.h2}>Latest News</h2>
+                  <span className={tw.badge('neutral')}>{filteredNews.length} articles</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {gridArticles.map((article) => (
@@ -1352,12 +1352,12 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
               </div>
             )}
 
-            {/* ─── List Articles (remaining) ─── */}
+            {/* â”€â”€â”€ List Articles (remaining) â”€â”€â”€ */}
             {listArticles.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <ChartLineUp size={iconSize.md} weight="duotone" className="text-[#E11D48]" />
-                  <h3 className={tw.h3}>Tin tức khác</h3>
+                  <h3 className={tw.h3}>More News</h3>
                   <span className={tw.badge('neutral')}>{listArticles.length}</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1372,7 +1372,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
               </div>
             )}
 
-            {/* ─── Data Sources & Methodology Footer ─── */}
+            {/* â”€â”€â”€ Data Sources & Methodology Footer â”€â”€â”€ */}
             <div className={`${tw.card} ${tw.cardPadding}`}>
               <div className="flex items-center gap-2 mb-3">
                 <Database size={iconSize.md} weight="duotone" className="text-[#E11D48]" />
@@ -1380,14 +1380,14 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {DATA_SOURCES.map((source, i) => (
-                  <div key={i} className="flex items-center gap-2 text-xs text-[#71717A] dark:text-zinc-400">
+                  <div key={i} className="flex items-center gap-2 text-xs text-[#71717A]">
                     <CheckCircle size={14} weight="fill" className="text-[#059669] shrink-0" />
                     <span>{source}</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-3 pt-3 border-t border-[#E4E4E7] dark:border-gray-700 flex items-center justify-between">
-                <span className="text-[10px] text-[#A1A1AA]">Cập nhật theo thời gian thực</span>
+              <div className="mt-3 pt-3 border-t border-[#E4E4E7] flex items-center justify-between">
+                <span className="text-[10px] text-[#A1A1AA]">Real-time updates</span>
                 <span className="text-[10px] font-semibold text-[#A1A1AA]">VICO Intelligence</span>
               </div>
             </div>
@@ -1395,7 +1395,7 @@ export const NewsIntelligencePage: React.FC<NewsIntelligencePageProps> = ({
         </FadeIn>
       )}
 
-      {/* ─── Article Detail Slide-Over Panel ─── */}
+      {/* â”€â”€â”€ Article Detail Slide-Over Panel â”€â”€â”€ */}
       {selectedArticle && (
         <ArticleDetailPanel
           article={selectedArticle}

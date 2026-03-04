@@ -52,7 +52,7 @@ const SectionNote: React.FC<{ sectionId: string }> = ({ sectionId }) => {
     const clear = () => { setText(''); localStorage.removeItem(storageKey); };
 
     if (!open) return (
-        <button onClick={() => setOpen(true)} title="Ghi chú" className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-[#71717A] hover:text-[#E11D48] hover:bg-[#FFF1F2] transition-colors border border-transparent hover:border-[#FFE4E6]">
+        <button onClick={() => setOpen(true)} title="Notes" className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-[#71717A] hover:text-[#E11D48] hover:bg-[#FFF1F2] transition-colors border border-transparent hover:border-[#FFE4E6]">
             <StickyNote size={12} />
             {text ? <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> : null}
         </button>
@@ -61,17 +61,17 @@ const SectionNote: React.FC<{ sectionId: string }> = ({ sectionId }) => {
     return (
         <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3 animate-fade-in">
             <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1"><StickyNote size={10} /> Ghi chú</span>
+                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1"><StickyNote size={10} /> Notes</span>
                 <div className="flex gap-1">
-                    <button onClick={save} className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-800 hover:bg-amber-300">Lưu</button>
-                    <button onClick={clear} className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-600 hover:bg-amber-200">Xoá</button>
+                    <button onClick={save} className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-800 hover:bg-amber-300">Save</button>
+                    <button onClick={clear} className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-600 hover:bg-amber-200">Clear</button>
                     <button onClick={() => setOpen(false)} className="px-1.5 py-0.5 rounded text-[10px] text-amber-500 hover:bg-amber-100"><X size={10} /></button>
                 </div>
             </div>
             <textarea
                 value={text}
                 onChange={e => setText(e.target.value)}
-                placeholder="Nhập ghi chú cho mục này..."
+                placeholder="Enter a note for this section..."
                 className="w-full h-20 text-xs bg-white border border-amber-200 rounded-lg p-2 resize-none focus:outline-none focus:ring-1 focus:ring-amber-300"
             />
         </div>
@@ -107,15 +107,15 @@ const ExportModal: React.FC<{
                         <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
                             <Check className="text-emerald-600" size={32} />
                         </div>
-                        <p className="text-lg font-bold text-[#18181B]">Xuất báo cáo thành công!</p>
-                        <p className="text-sm text-[#71717A] mt-1">File đã được tải xuống.</p>
+                        <p className="text-lg font-bold text-[#18181B]">Report exported successfully!</p>
+                        <p className="text-sm text-[#71717A] mt-1">File has been downloaded.</p>
                     </div>
                 ) : (
                     <>
                         <div className="flex items-center justify-between mb-5">
                             <div>
-                                <h3 className="text-lg font-bold text-[#18181B]">Xuất Báo Cáo Đối Thủ</h3>
-                                <p className="text-xs text-[#71717A]">Chọn định dạng để tải xuống</p>
+                                <h3 className="text-lg font-bold text-[#18181B]">Export Competitor Report</h3>
+                                <p className="text-xs text-[#71717A]">Choose a format to download</p>
                             </div>
                             <button onClick={onClose} className="p-2 rounded-xl hover:bg-[#FAFAFA]"><X size={18} className="text-[#A1A1AA]" /></button>
                         </div>
@@ -123,7 +123,7 @@ const ExportModal: React.FC<{
                         {loading ? (
                             <div className="flex flex-col items-center py-10">
                                 <div className="w-10 h-10 border-4 border-[#E11D48] border-t-transparent rounded-full animate-spin mb-4" />
-                                <p className="text-sm text-[#71717A]">Đang tạo báo cáo...</p>
+                                <p className="text-sm text-[#71717A]">Generating report...</p>
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -131,7 +131,7 @@ const ExportModal: React.FC<{
                                     <div className="w-10 h-10 rounded-xl bg-[#E11D48] flex items-center justify-center"><Eye className="text-white" size={18} /></div>
                                     <div className="flex-1">
                                         <div className="text-sm font-bold text-[#18181B]">HTML Premium Report</div>
-                                        <div className="text-[10px] text-[#71717A]">Báo cáo đẹp, in được, có biểu đồ & bảng</div>
+                                        <div className="text-[10px] text-[#71717A]">Beautiful report with charts & tables, ready to print</div>
                                     </div>
                                     <span className="px-2 py-0.5 rounded-full bg-[#E11D48] text-white text-[9px] font-bold">RECOMMENDED</span>
                                 </button>
@@ -139,14 +139,14 @@ const ExportModal: React.FC<{
                                     <div className="w-10 h-10 rounded-xl bg-[#FAFAFA] border border-[#E4E4E7] flex items-center justify-center"><FileText className="text-[#71717A]" size={18} /></div>
                                     <div className="flex-1">
                                         <div className="text-sm font-bold text-[#18181B]">Plain Text (.txt)</div>
-                                        <div className="text-[10px] text-[#71717A]">Dạng văn bản đơn giản</div>
+                                        <div className="text-[10px] text-[#71717A]">Simple plain text format</div>
                                     </div>
                                 </button>
                                 <button onClick={() => handleExport('json')} className="w-full flex items-center gap-4 p-4 rounded-xl border border-[#E4E4E7] bg-white hover:bg-[#FAFAFA] transition-colors text-left">
                                     <div className="w-10 h-10 rounded-xl bg-[#FAFAFA] border border-[#E4E4E7] flex items-center justify-center"><FileJson className="text-[#71717A]" size={18} /></div>
                                     <div className="flex-1">
                                         <div className="text-sm font-bold text-[#18181B]">JSON Data</div>
-                                        <div className="text-[10px] text-[#71717A]">Dữ liệu có cấu trúc, dùng cho tích hợp</div>
+                                        <div className="text-[10px] text-[#71717A]">Structured data for integrations</div>
                                     </div>
                                 </button>
                             </div>
@@ -829,7 +829,7 @@ const SectionWrapper: React.FC<{
         <div className="absolute -top-2 right-3 z-10 flex items-center gap-1">
             <button
                 onClick={onToggleBookmark}
-                title={bookmarked ? 'Bỏ đánh dấu' : 'Đánh dấu mục này'}
+                title={bookmarked ? 'Remove bookmark' : 'Bookmark this section'}
                 className={`p-1.5 rounded-lg border shadow-sm transition-colors ${
                     bookmarked
                         ? 'bg-amber-50 border-amber-300 text-amber-600 hover:bg-amber-100'
@@ -986,7 +986,7 @@ export const CompetitorAnalysisPage: React.FC<CompetitorAnalysisPageProps> = ({ 
                     onClick={() => setShowExportModal(true)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#E11D48] text-white hover:bg-[#BE123C] transition-colors shadow-sm"
                 >
-                    <Download size={13} /> Xuất Báo Cáo
+                    <Download size={13} /> Export Report
                 </button>
 
                 {/* Highlight Mode */}
@@ -998,7 +998,7 @@ export const CompetitorAnalysisPage: React.FC<CompetitorAnalysisPageProps> = ({ 
                             : 'bg-white text-[#71717A] border-[#E4E4E7] hover:text-amber-600 hover:border-amber-300'
                     }`}
                 >
-                    <Highlighter size={13} /> {highlightMode ? 'Tắt Highlight' : 'Highlight'}
+                    <Highlighter size={13} /> {highlightMode ? 'Highlight Off' : 'Highlight'}
                 </button>
 
                 {/* Print */}
@@ -1006,7 +1006,7 @@ export const CompetitorAnalysisPage: React.FC<CompetitorAnalysisPageProps> = ({ 
                     onClick={() => window.print()}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-[#71717A] border border-[#E4E4E7] hover:text-[#18181B] hover:border-[#A1A1AA] transition-colors"
                 >
-                    <Printer size={13} /> In
+                    <Printer size={13} /> Print
                 </button>
 
                 {/* Divider */}

@@ -1,5 +1,5 @@
-/**
- * 📂 Executive Workspace — Phase 14, Step 3
+﻿/**
+ * ðŸ“‚ Executive Workspace â€” Phase 14, Step 3
  *
  * Centralized hub for all saved intelligence: ICPs, Playbooks, PESTELs,
  * Market Reports, Competitor Analyses, and GTM Strategies.
@@ -9,7 +9,7 @@
  *   GET  /api/workspace/documents(?type=...)
  *   DELETE /api/workspace/documents/:id
  *
- * Design: Executive Crimson — config/designSystem.ts
+ * Design: Executive Crimson â€” config/designSystem.ts
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -70,7 +70,7 @@ interface StatItem {
 // CONSTANTS
 // ============================================================================
 
-/** Filter tabs — "ALL" plus each document type */
+/** Filter tabs â€” "ALL" plus each document type */
 const FILTER_TABS: Array<{ key: DocumentType | 'ALL'; label: string }> = [
   { key: 'ALL',                  label: 'All' },
   { key: 'ICP',                  label: 'ICP Profiles' },
@@ -111,7 +111,7 @@ const STAT_ICONS: Record<string, React.ReactNode> = {
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString('vi-VN', {
+  return d.toLocaleDateString('en-US', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -120,7 +120,7 @@ function formatDate(iso: string): string {
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
 function timeAgo(iso: string): string {
@@ -216,7 +216,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
       }
     } catch (err: any) {
       console.error('Delete error:', err);
-      setActionError('Failed to delete document — please try again');
+      setActionError('Failed to delete document â€” please try again');
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
@@ -237,7 +237,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
       setViewDoc(data.document ?? null);
     } catch (err: any) {
       console.error('View error:', err);
-      setActionError('Failed to load document — please try again');
+      setActionError('Failed to load document â€” please try again');
       setViewLoading(false);
     } finally {
       setViewLoading(false);
@@ -322,17 +322,17 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
   return (
     <FadeIn duration={400}>
       <div className="space-y-6 pb-10">
-        {/* ─── Page Header ──────────────────────────────────── */}
+        {/* â”€â”€â”€ Page Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <h1 className={tw.h1}>
             <span className={tw.aiGradientText}>Executive Workspace</span>
           </h1>
           <p className={`${tw.body} mt-1.5`}>
-            Your saved intelligence vault — ICPs, Playbooks, Market Reports & more
+            Your saved intelligence vault â€” ICPs, Playbooks, Market Reports & more
           </p>
         </div>
 
-        {/* ─── Stats Bento Row ──────────────────────────────── */}
+        {/* â”€â”€â”€ Stats Bento Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className={`${tw.bentoGrid} grid-cols-2 md:grid-cols-4`}>
           {/* Total */}
           <div className={`${tw.card} ${tw.cardPadding} group`}>
@@ -368,7 +368,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
                   <div className="w-8 h-8 rounded-lg bg-[#FAFAFA] flex items-center justify-center text-[#A1A1AA]">
                     <Cube size={iconSize.md} weight="duotone" />
                   </div>
-                  <span className={tw.label}>—</span>
+                  <span className={tw.label}>â€”</span>
                 </div>
                 <p className={`${tw.metric} text-[#A1A1AA]`}>0</p>
               </div>
@@ -376,7 +376,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
           }
         </div>
 
-        {/* ─── Filter Tabs + Search ─────────────────────────── */}
+        {/* â”€â”€â”€ Filter Tabs + Search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           {/* Tabs */}
           <div className="flex gap-0.5 overflow-x-auto no-scrollbar border-b border-[#E4E4E7] -mb-px pb-0">
@@ -415,7 +415,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
           <div className="relative w-full sm:w-64">
             <input
               type="text"
-              placeholder="Search documents…"
+              placeholder="Search documentsâ€¦"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={`${tw.input} pl-9 py-2 text-xs`}
@@ -428,13 +428,13 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
           </div>
         </div>
 
-        {/* ─── Document List OR Empty State ──────────────────── */}
+        {/* â”€â”€â”€ Document List OR Empty State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {/* Action error toast */}
         {actionError && (
           <div className={tw.callout('error')}>
             <Warning size={iconSize.sm} weight="duotone" className="shrink-0" />
             <span className="flex-1 text-sm">{actionError}</span>
-            <button onClick={() => setActionError(null)} className="text-xs font-bold opacity-70 hover:opacity-100 ml-2">✕</button>
+            <button onClick={() => setActionError(null)} className="text-xs font-bold opacity-70 hover:opacity-100 ml-2">âœ•</button>
           </div>
         )}
 
@@ -499,7 +499,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
                         {/* Industry */}
                         <td className={`${tw.td} hidden md:table-cell`}>
                           <span className="text-xs text-[#71717A]">
-                            {doc.industry || '—'}
+                            {doc.industry || 'â€”'}
                           </span>
                         </td>
 
@@ -564,7 +564,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
           </div>
         )}
 
-        {/* ─── Delete Confirmation Modal ────────────────────── */}
+        {/* â”€â”€â”€ Delete Confirmation Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {deleteTarget && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setDeleteTarget(null)}>
             <div
@@ -599,7 +599,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
                   {deleting ? (
                     <>
                       <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Deleting…
+                      Deletingâ€¦
                     </>
                   ) : (
                     <>
@@ -612,7 +612,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
           </div>
         )}
 
-        {/* ─── View Document Modal ──────────────────────────── */}
+        {/* â”€â”€â”€ View Document Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {(viewDoc || viewLoading) && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setViewDoc(null)}>
             <div
@@ -645,7 +645,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
                   onClick={() => setViewDoc(null)}
                   className="p-1.5 rounded-lg text-[#71717A] hover:text-[#18181B] hover:bg-[#FAFAFA] transition-colors shrink-0"
                 >
-                  ✕
+                  âœ•
                 </button>
               </div>
 
@@ -692,7 +692,7 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
 
                     <div className={tw.divider} />
 
-                    {/* Raw content — pretty-printed JSON */}
+                    {/* Raw content â€” pretty-printed JSON */}
                     <div className="mt-4">
                       <p className={`${tw.label} mb-2`}>Report Content</p>
                       <pre className="bg-[#FAFAFA] border border-[#E4E4E7] rounded-xl p-4 text-xs font-mono text-[#18181B] overflow-x-auto max-h-[50vh] leading-relaxed">
@@ -708,9 +708,9 @@ export default function ExecutiveWorkspace({ onNavigateToICP, onNavigateToPlaybo
           </div>
         )}
 
-        {/* ─── Footer ───────────────────────────────────────── */}
+        {/* â”€â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <p className="text-xs text-[#A1A1AA] text-center">
-          VICO Executive Workspace · {totalCount} document{totalCount !== 1 ? 's' : ''} stored
+          VICO Executive Workspace Â· {totalCount} document{totalCount !== 1 ? 's' : ''} stored
         </p>
       </div>
     </FadeIn>

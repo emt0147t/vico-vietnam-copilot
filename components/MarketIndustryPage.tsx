@@ -1,5 +1,5 @@
-/**
- * 🌍 Market & Industry Page - Dynamic Enterprise Market Intelligence
+﻿/**
+ * ðŸŒ Market & Industry Page - Dynamic Enterprise Market Intelligence
  * 
  * NOW USES REAL DATA from:
  * - User's company profile
@@ -115,7 +115,7 @@ interface MarketIntelligenceReport {
 
 // ==================== SECTION COMPONENTS ====================
 
-// Loading Skeleton — Executive Crimson
+// Loading Skeleton â€” Executive Crimson
 const LoadingSkeleton = () => (
     <div className="space-y-8 animate-fade-in">
         {/* Premium branded loader */}
@@ -126,7 +126,7 @@ const LoadingSkeleton = () => (
                 <div className="absolute inset-3 rounded-full bg-gradient-to-br from-[#E11D48] to-[#F97316] animate-pulse" />
             </div>
             <div className="text-center space-y-1.5">
-                <p className="text-sm font-semibold text-[#18181B]">Crunching real-time market data…</p>
+                <p className="text-sm font-semibold text-[#18181B]">Crunching real-time market dataâ€¦</p>
                 <p className="text-xs text-[#A1A1AA]">Analyzing 10,000+ companies across Vietnam</p>
             </div>
         </div>
@@ -206,7 +206,7 @@ const RevenueChart = ({ data, years }: { data: number[]; years: string[] }) => {
                     <span className="text-[#71717A]">Historical</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded bg-[#FFF1F2]0"></div>
+                    <div className="w-3 h-3 rounded bg-blue-500"></div>
                     <span className="text-[#71717A]">Current</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -283,7 +283,7 @@ const PortersFiveForces = ({ forces }: { forces: MarketIntelligenceReport['porte
     return (
         <div className="relative">
             <div className="flex justify-center mb-8">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#FFF1F2]0 to-purple-600 flex items-center justify-center shadow-xl">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#E11D48] to-[#7C3AED] flex items-center justify-center shadow-xl">
                     <div className="text-center text-white">
                         <Activity size={28} className="mx-auto mb-1" />
                         <p className="text-xs font-bold">Rivalry<br/>{forces.rivalry.score}/5</p>
@@ -323,18 +323,18 @@ const PortersFiveForces = ({ forces }: { forces: MarketIntelligenceReport['porte
 const CompetitorMatrix = ({ companies }: { companies: MarketIntelligenceReport['competitiveLandscape']['marketShare'] }) => {
     const typeColors = {
         Leader: 'bg-green-500',
-        Challenger: 'bg-[#FFF1F2]0', 
+        Challenger: 'bg-blue-500', 
         Follower: 'bg-amber-500',
-        Niche: 'bg-[#FFF1F2]0'
+        Niche: 'bg-purple-500'
     };
     
     return (
         <div className="relative h-80 bg-[#FAFAFA] rounded-2xl p-6">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-medium text-[#A1A1AA] whitespace-nowrap">
-                Market Growth Rate →
+                Market Growth Rate â†’
             </div>
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs font-medium text-[#A1A1AA]">
-                Relative Market Share →
+                Relative Market Share â†’
             </div>
             
             <div className="absolute inset-8 grid grid-cols-2 grid-rows-2 gap-1">
@@ -428,7 +428,7 @@ const ConcentrationGauge = ({ level, hhi }: { level: string; hhi: number }) => {
     );
 };
 
-// PESTLE data — varies by industry and includes company context
+// PESTLE data â€” varies by industry and includes company context
 const getPESTLEData = (industry: string) => {
     const industrySpecific: Record<string, { pDetails: string[]; eDetails: string[]; sDetails: string[]; tDetails: string[]; lDetails: string[]; envDetails: string[] }> = {
         'Technology': {
@@ -571,7 +571,7 @@ const ExportModal: React.FC<{
         {
             key: 'html' as const,
             title: 'Premium HTML Report',
-            desc: 'Báo cáo đẹp, có thương hiệu VICO — mở bằng trình duyệt hoặc in PDF',
+            desc: 'Beautiful branded VICO report â€” open in browser or print to PDF',
             icon: FileText,
             color: 'bg-gradient-to-br from-[#E11D48] to-[#BE123C]',
             recommended: true,
@@ -579,7 +579,7 @@ const ExportModal: React.FC<{
         {
             key: 'txt' as const,
             title: 'Plain Text Report',
-            desc: 'Định dạng văn bản thuần — dễ copy/paste vào email hoặc tài liệu',
+            desc: 'Plain text format â€” easy to copy/paste into email or documents',
             icon: FileText,
             color: 'bg-gradient-to-br from-[#3F3F46] to-[#18181B]',
             recommended: false,
@@ -587,7 +587,7 @@ const ExportModal: React.FC<{
         {
             key: 'json' as const,
             title: 'JSON (Machine-Readable)',
-            desc: 'Dữ liệu thô — dùng cho tích hợp hệ thống hoặc phân tích nâng cao',
+            desc: 'Raw data â€” for system integrations or advanced analysis',
             icon: FileJson,
             color: 'bg-gradient-to-br from-[#7C3AED] to-[#6D28D9]',
             recommended: false,
@@ -598,19 +598,19 @@ const ExportModal: React.FC<{
         <>
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={onClose} />
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-[#E4E4E7] dark:border-gray-700">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-[#E4E4E7]">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] dark:bg-[#E11D48]/10 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] flex items-center justify-center">
                                 <Download size={20} className="text-[#E11D48]" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-[#18181B] dark:text-white">Export Report</h3>
-                                <p className="text-xs text-[#A1A1AA]">Chọn định dạng xuất báo cáo</p>
+                                <h3 className="font-bold text-[#18181B]">Export Report</h3>
+                                <p className="text-xs text-[#A1A1AA]">Choose export format</p>
                             </div>
                         </div>
-                        <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA] hover:text-[#18181B] transition-colors">
+                        <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F4F4F5]:bg-gray-800 text-[#A1A1AA] hover:text-[#18181B] transition-colors">
                             <X size={18} />
                         </button>
                     </div>
@@ -628,8 +628,8 @@ const ExportModal: React.FC<{
                                     disabled={!!exporting}
                                     className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left group ${
                                         isDone
-                                            ? 'border-green-300 bg-green-50 dark:bg-green-500/10 dark:border-green-500/30'
-                                            : 'border-[#E4E4E7] dark:border-gray-700 hover:border-[#E11D48]/30 hover:bg-[#FFF1F2]/50 dark:hover:bg-[#E11D48]/5'
+                                            ? 'border-green-300 bg-green-50'
+                                            : 'border-[#E4E4E7] hover:border-[#E11D48]/30 hover:bg-[#FFF1F2]/50:bg-[#E11D48]/5'
                                     } disabled:opacity-50`}
                                 >
                                     <div className={`w-12 h-12 rounded-xl ${fmt.color} flex items-center justify-center shrink-0`}>
@@ -643,12 +643,12 @@ const ExportModal: React.FC<{
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-bold text-sm text-[#18181B] dark:text-white">{fmt.title}</span>
+                                            <span className="font-bold text-sm text-[#18181B]">{fmt.title}</span>
                                             {fmt.recommended && (
-                                                <span className="px-2 py-0.5 rounded-full bg-[#FFF1F2] dark:bg-[#E11D48]/10 text-[#E11D48] text-[9px] font-bold">Khuyên dùng</span>
+                                                <span className="px-2 py-0.5 rounded-full bg-[#FFF1F2] text-[#E11D48] text-[9px] font-bold">Recommended</span>
                                             )}
                                         </div>
-                                        <p className="text-xs text-[#71717A] dark:text-zinc-400 mt-0.5">{fmt.desc}</p>
+                                        <p className="text-xs text-[#71717A] mt-0.5">{fmt.desc}</p>
                                     </div>
                                     {isDone && (
                                         <Check size={16} className="text-green-600 shrink-0" />
@@ -659,10 +659,10 @@ const ExportModal: React.FC<{
                     </div>
 
                     {/* Footer */}
-                    <div className="px-6 py-3 bg-[#FAFAFA] dark:bg-gray-800/50 border-t border-[#E4E4E7] dark:border-gray-700 flex items-center justify-between">
-                        <span className="text-[10px] text-[#A1A1AA]">VICO Intelligence · {report.industry} · {report.market}</span>
-                        <button onClick={onClose} className="text-xs font-semibold text-[#71717A] hover:text-[#18181B] dark:hover:text-white transition-colors">
-                            Đóng
+                    <div className="px-6 py-3 bg-[#FAFAFA] border-t border-[#E4E4E7] flex items-center justify-between">
+                        <span className="text-[10px] text-[#A1A1AA]">VICO Intelligence Â· {report.industry} Â· {report.market}</span>
+                        <button onClick={onClose} className="text-xs font-semibold text-[#71717A] hover:text-[#18181B] transition-colors">
+                            Close
                         </button>
                     </div>
                 </div>
@@ -690,8 +690,8 @@ const CopyMetricBtn: React.FC<{ value: string; label?: string }> = ({ value, lab
     return (
         <button
             onClick={handleCopy}
-            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA] hover:text-[#E11D48] transition-all ml-1"
-            title="Sao chép"
+            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#F4F4F5]:bg-gray-800 text-[#A1A1AA] hover:text-[#E11D48] transition-all ml-1"
+            title="Copy"
         >
             {copied ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
         </button>
@@ -730,21 +730,21 @@ const SectionNote: React.FC<{ sectionId: string }> = ({ sectionId }) => {
                 onClick={() => setIsOpen(!isOpen)}
                 className={`p-1.5 rounded-lg transition-colors ${
                     note
-                        ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500'
-                        : 'hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA] hover:text-[#71717A]'
+                        ? 'bg-amber-50 text-amber-500'
+                        : 'hover:bg-[#F4F4F5]:bg-gray-800 text-[#A1A1AA] hover:text-[#71717A]'
                 }`}
-                title={note ? 'Xem ghi chú' : 'Thêm ghi chú'}
+                title={note ? 'View notes' : 'Add note'}
             >
                 <StickyNote size={14} />
             </button>
 
             {isOpen && (
-                <div className="absolute z-40 mt-1 right-0 top-full w-72 bg-white dark:bg-gray-900 rounded-xl border border-[#E4E4E7] dark:border-gray-700 shadow-lg p-3 space-y-2">
+                <div className="absolute z-40 mt-1 right-0 top-full w-72 bg-white rounded-xl border border-[#E4E4E7] shadow-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#18181B] dark:text-white flex items-center gap-1.5">
-                            <StickyNote size={12} className="text-amber-500" /> Ghi chú cá nhân
+                        <span className="text-xs font-bold text-[#18181B] flex items-center gap-1.5">
+                            <StickyNote size={12} className="text-amber-500" /> Personal Notes
                         </span>
-                        <button onClick={() => setIsOpen(false)} className="p-1 rounded hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA]">
+                        <button onClick={() => setIsOpen(false)} className="p-1 rounded hover:bg-[#F4F4F5]:bg-gray-800 text-[#A1A1AA]">
                             <X size={12} />
                         </button>
                     </div>
@@ -752,18 +752,18 @@ const SectionNote: React.FC<{ sectionId: string }> = ({ sectionId }) => {
                         ref={textareaRef}
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        placeholder="Ghi chú riêng cho phần này..."
-                        className="w-full h-20 text-xs text-[#18181B] dark:text-white bg-[#FAFAFA] dark:bg-gray-800 rounded-lg border border-[#E4E4E7] dark:border-gray-700 p-2.5 resize-none focus:outline-none focus:ring-1 focus:ring-[#E11D48]/30 placeholder:text-[#A1A1AA]"
+                        placeholder="Write a note for this section..."
+                        className="w-full h-20 text-xs text-[#18181B] bg-[#FAFAFA] rounded-lg border border-[#E4E4E7] p-2.5 resize-none focus:outline-none focus:ring-1 focus:ring-[#E11D48]/30 placeholder:text-[#A1A1AA]"
                     />
                     <div className="flex items-center justify-between">
                         <button onClick={handleClear} className="text-[10px] text-[#A1A1AA] hover:text-[#991B1B] transition-colors">
-                            Xóa
+                            Clear
                         </button>
                         <button
                             onClick={handleSave}
                             className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#E11D48] text-white text-[10px] font-semibold hover:bg-[#BE123C] transition-colors"
                         >
-                            {saved ? <><Check size={10} /> Đã lưu</> : 'Lưu ghi chú'}
+                            {saved ? <><Check size={10} /> Saved</> : 'Save Note'}
                         </button>
                     </div>
                 </div>
@@ -805,7 +805,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
         });
     }, []);
     
-    // Artificial minimum load time — "crunching data" feel
+    // Artificial minimum load time â€” "crunching data" feel
     useEffect(() => {
         const t = setTimeout(() => setIsPageReady(true), 1800);
         return () => clearTimeout(t);
@@ -877,14 +877,14 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             {/* Header with Actions */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-[#18181B] dark:text-white uppercase tracking-tight">
+                    <h1 className="text-3xl font-black text-[#18181B] uppercase tracking-tight">
                         Market & Industry
                     </h1>
-                    <p className="text-[#71717A] dark:text-zinc-400 text-sm mt-1">
+                    <p className="text-[#71717A] text-sm mt-1">
                         Dynamic analysis for {report?.industry || industry} in {market}
                         {report && (
                             <span className="ml-2 text-green-600">
-                                • {report.sources.industryPeersFound.toLocaleString()} companies analyzed
+                                â€¢ {report.sources.industryPeersFound.toLocaleString()} companies analyzed
                             </span>
                         )}
                     </p>
@@ -896,10 +896,10 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                         onClick={() => setHighlightMode(!highlightMode)}
                         className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                             highlightMode
-                                ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 shadow-sm'
-                                : 'bg-[#F4F4F5] dark:bg-gray-800 text-[#71717A] dark:text-zinc-400 hover:bg-[#E4E4E7] dark:hover:bg-gray-700 border border-transparent'
+                                ? 'bg-amber-100 text-amber-700 border border-amber-300 shadow-sm'
+                                : 'bg-[#F4F4F5] text-[#71717A] hover:bg-[#E4E4E7]:bg-gray-700 border border-transparent'
                         }`}
-                        title={highlightMode ? 'Tắt highlight' : 'Bật highlight số liệu quan trọng'}
+                        title={highlightMode ? 'Turn off highlighting' : 'Highlight key metrics'}
                     >
                         <Highlighter size={14} />
                         {highlightMode ? 'Highlight ON' : 'Highlight'}
@@ -908,11 +908,11 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     {/* Print button */}
                     <button
                         onClick={() => window.print()}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-[#F4F4F5] dark:bg-gray-800 rounded-xl text-xs font-semibold text-[#71717A] dark:text-zinc-400 hover:bg-[#E4E4E7] dark:hover:bg-gray-700 transition-colors"
-                        title="In trang"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-[#F4F4F5] rounded-xl text-xs font-semibold text-[#71717A] hover:bg-[#E4E4E7]:bg-gray-700 transition-colors"
+                        title="Print page"
                     >
                         <Printer size={14} />
-                        In
+                        Print
                     </button>
 
                     {/* Refresh */}
@@ -925,7 +925,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                         Refresh
                     </button>
 
-                    {/* Export — opens modal */}
+                    {/* Export â€” opens modal */}
                     <button
                         onClick={() => setShowExportModal(true)}
                         disabled={!report}
@@ -939,18 +939,18 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             
             {/* Data Source Badge */}
             {report && (
-                <div className="flex flex-col gap-1.5 text-xs text-[#71717A] bg-[#FAFAFA] dark:bg-gray-900 p-3 rounded-xl">
+                <div className="flex flex-col gap-1.5 text-xs text-[#71717A] bg-[#FAFAFA] p-3 rounded-xl">
                     <div className="flex items-center gap-2">
                         <Database size={14} className="text-[#E11D48]" />
                         <span>
-                            Data from <strong>{report.sources.competitorsAnalyzed}</strong> selected competitors and <strong>{report.sources.industryPeersFound.toLocaleString()}</strong> industry peers • 
-                            Similarity threshold: {(report.sources.similarityThreshold * 100).toFixed(0)}% • 
-                            Generated: {new Date(report.generatedAt).toLocaleString('vi-VN')}
+                            Data from <strong>{report.sources.competitorsAnalyzed}</strong> selected competitors and <strong>{report.sources.industryPeersFound.toLocaleString()}</strong> industry peers â€¢ 
+                            Similarity threshold: {(report.sources.similarityThreshold * 100).toFixed(0)}% â€¢ 
+                            Generated: {new Date(report.generatedAt).toLocaleString('en-US')}
                         </span>
                     </div>
                     {report.sources.selectedCompetitorNames && report.sources.selectedCompetitorNames.length > 0 && (
                         <div className="flex items-center gap-2 pl-6">
-                            <span className="text-[#18181B] dark:text-white font-medium">
+                            <span className="text-[#18181B] font-medium">
                                 Analyzing: {report.sources.selectedCompetitorNames.join(', ')}
                             </span>
                         </div>
@@ -960,7 +960,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             
             {/* Section Navigation */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-                <span className="text-sm text-[#71717A] dark:text-zinc-400 mr-2 flex-shrink-0">≡ Table of Contents</span>
+                <span className="text-sm text-[#71717A] mr-2 flex-shrink-0">â‰¡ Table of Contents</span>
                 {sections.map(section => (
                     <button
                         key={section.id}
@@ -968,11 +968,11 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                         className={`relative px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
                             activeSection === section.id 
                                 ? 'bg-[#E11D48] text-white' 
-                                : 'bg-[#F4F4F5] dark:bg-gray-800 text-[#71717A] dark:text-zinc-400 hover:bg-[#E4E4E7] dark:hover:bg-gray-700'
+                                : 'bg-[#F4F4F5] text-[#71717A] hover:bg-[#E4E4E7]:bg-gray-700'
                         }`}
                     >
                         {bookmarkedSections.has(section.id) && (
-                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full border border-white dark:border-gray-900" />
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full border border-white" />
                         )}
                         {section.label}
                     </button>
@@ -1005,21 +1005,21 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     {/* EXECUTIVE SUMMARY */}
                     {activeSection === 'overview' && (
                         <div className="space-y-6">
-                            <div className="bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6">
+                            <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
                                 <div className="flex items-center justify-between mb-6">
                                     <div className="flex items-center gap-3">
                                         <div className="w-1 h-8 bg-[#E11D48] rounded-full"></div>
-                                        <h3 className="font-bold text-[#18181B] dark:text-white text-lg">Market & Industry: Executive Summary</h3>
+                                        <h3 className="font-bold text-[#18181B] text-lg">Market & Industry: Executive Summary</h3>
                                     </div>
                                     <div className="flex items-center gap-1 relative">
                                         <button
                                             onClick={() => toggleBookmarkSection('overview')}
                                             className={`p-1.5 rounded-lg transition-colors ${
                                                 bookmarkedSections.has('overview')
-                                                    ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500'
-                                                    : 'hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA]'
+                                                    ? 'bg-amber-50 text-amber-500'
+                                                    : 'hover:bg-[#F4F4F5]:bg-gray-800 text-[#A1A1AA]'
                                             }`}
-                                            title={bookmarkedSections.has('overview') ? 'Bỏ bookmark' : 'Bookmark phần này'}
+                                            title={bookmarkedSections.has('overview') ? 'Bá» bookmark' : 'Bookmark pháº§n nÃ y'}
                                         >
                                             {bookmarkedSections.has('overview') ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
                                         </button>
@@ -1027,39 +1027,39 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                     </div>
                                 </div>
                                 
-                                <p className="text-[#71717A] dark:text-zinc-300 leading-relaxed mb-6">
+                                <p className="text-[#71717A] leading-relaxed mb-6">
                                     {parseSimpleMarkdown(report.executiveSummary.overview)}
                                 </p>
                                 
-                                {/* Key Metrics — with highlight mode & copy buttons */}
+                                {/* Key Metrics â€” with highlight mode & copy buttons */}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                                     <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-[#FFF1F2] ring-2 ring-[#E11D48]/30 shadow-md scale-[1.02]' : 'bg-gradient-to-br from-[#FFF1F2] to-[#FFF1F2]'}`}>
                                         <div className="flex items-center justify-between">
                                             <p className="text-xs text-[#E11D48] font-medium mb-1">Market Size (2024)</p>
                                             <CopyMetricBtn value={report.marketSize.sam} label="Market Size" />
                                         </div>
-                                        <p className={`text-2xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.marketSize.sam}</p>
+                                        <p className={`text-2xl font-black text-[#18181B] ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>{report.marketSize.sam}</p>
                                     </div>
                                     <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-green-50 ring-2 ring-green-500/30 shadow-md scale-[1.02]' : 'bg-gradient-to-br from-green-50 to-green-100'}`}>
                                         <div className="flex items-center justify-between">
                                             <p className="text-xs text-green-600 font-medium mb-1">CAGR</p>
                                             <CopyMetricBtn value={`${report.marketSize.cagr}%`} label="CAGR" />
                                         </div>
-                                        <p className={`text-2xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.marketSize.cagr}%</p>
+                                        <p className={`text-2xl font-black text-[#18181B] ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>{report.marketSize.cagr}%</p>
                                     </div>
                                     <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-purple-50 ring-2 ring-purple-500/30 shadow-md scale-[1.02]' : 'bg-gradient-to-br from-purple-50 to-[#FFF1F2]'}`}>
                                         <div className="flex items-center justify-between">
                                             <p className="text-xs text-[#E11D48] font-medium mb-1">Total Funding (2024)</p>
                                             <CopyMetricBtn value={report.funding.totalValue} label="Total Funding" />
                                         </div>
-                                        <p className={`text-2xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.funding.totalValue}</p>
+                                        <p className={`text-2xl font-black text-[#18181B] ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>{report.funding.totalValue}</p>
                                     </div>
                                     <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-amber-50 ring-2 ring-amber-500/30 shadow-md scale-[1.02]' : 'bg-gradient-to-br from-amber-50 to-amber-100'}`}>
                                         <div className="flex items-center justify-between">
                                             <p className="text-xs text-amber-600 font-medium mb-1">Industry Players</p>
                                             <CopyMetricBtn value={report.companyCount.toLocaleString()} label="Industry Players" />
                                         </div>
-                                        <p className={`text-2xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.companyCount.toLocaleString()}</p>
+                                        <p className={`text-2xl font-black text-[#18181B] ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>{report.companyCount.toLocaleString()}</p>
                                     </div>
                                 </div>
                                 
@@ -1103,15 +1103,15 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     {/* MARKET SIZE */}
                     {activeSection === 'market-size' && (
                         <div className="space-y-6">
-                            <div className="bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6">
+                            <div className="bg-white border border-[#E4E4E7] rounded-2xl p-6">
                                 <div className="flex items-center justify-between mb-6">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] dark:bg-[#E11D48]/10 flex items-center justify-center">
+                                        <div className="w-10 h-10 rounded-xl bg-[#FFF1F2] flex items-center justify-center">
                                             <Target className="text-[#E11D48]" size={20} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-[#18181B] dark:text-white">TAM / SAM / SOM Analysis</h3>
-                                            <p className="text-xs text-[#71717A] dark:text-zinc-400">{report.marketSize.methodology}</p>
+                                            <h3 className="font-bold text-[#18181B]">TAM / SAM / SOM Analysis</h3>
+                                            <p className="text-xs text-[#71717A]">{report.marketSize.methodology}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1 relative">
@@ -1119,8 +1119,8 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                             onClick={() => toggleBookmarkSection('market-size')}
                                             className={`p-1.5 rounded-lg transition-colors ${
                                                 bookmarkedSections.has('market-size')
-                                                    ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500'
-                                                    : 'hover:bg-[#F4F4F5] dark:hover:bg-gray-800 text-[#A1A1AA]'
+                                                    ? 'bg-amber-50 text-amber-500'
+                                                    : 'hover:bg-[#F4F4F5]:bg-gray-800 text-[#A1A1AA]'
                                             }`}
                                         >
                                             {bookmarkedSections.has('market-size') ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
@@ -1189,22 +1189,22 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                     <div className="space-y-4">
                                         <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-[#FAFAFA] ring-2 ring-green-500/30 shadow-md' : 'bg-[#FAFAFA]'}`}>
                                             <div className="flex justify-between items-center mb-2">
-                                                <span className="text-sm text-[#71717A] dark:text-zinc-400">CAGR ({report.marketSize.cagrPeriod})</span>
+                                                <span className="text-sm text-[#71717A]">CAGR ({report.marketSize.cagrPeriod})</span>
                                                 <div className="flex items-center gap-1">
-                                                    <span className={`text-xl font-black text-green-600 ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.marketSize.cagr}%</span>
+                                                    <span className={`text-xl font-black text-green-600 ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>{report.marketSize.cagr}%</span>
                                                     <CopyMetricBtn value={`${report.marketSize.cagr}%`} label="CAGR" />
                                                 </div>
                                             </div>
-                                            <div className="h-2 bg-[#E4E4E7] dark:bg-gray-700 rounded-full overflow-hidden">
+                                            <div className="h-2 bg-[#E4E4E7] rounded-full overflow-hidden">
                                                 <div className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full" style={{ width: `${report.marketSize.cagr * 3}%` }} />
                                             </div>
                                         </div>
                                         
                                         <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-[#FAFAFA] ring-2 ring-[#E11D48]/30 shadow-md' : 'bg-[#FAFAFA]'}`}>
                                             <div className="flex justify-between items-center">
-                                                <span className="text-sm text-[#71717A] dark:text-zinc-400">Current Size</span>
+                                                <span className="text-sm text-[#71717A]">Current Size</span>
                                                 <div className="flex items-center gap-1">
-                                                    <span className={`text-xl font-black text-[#E11D48] ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>${report.marketSize.currentSize.toFixed(1)}B</span>
+                                                    <span className={`text-xl font-black text-[#E11D48] ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>${report.marketSize.currentSize.toFixed(1)}B</span>
                                                     <CopyMetricBtn value={`$${report.marketSize.currentSize.toFixed(1)}B`} label="Current Size" />
                                                 </div>
                                             </div>
@@ -1212,9 +1212,9 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                         
                                         <div className={`group p-4 rounded-xl transition-all ${highlightMode ? 'bg-[#FAFAFA] ring-2 ring-purple-500/30 shadow-md' : 'bg-[#FAFAFA]'}`}>
                                             <div className="flex justify-between items-center">
-                                                <span className="text-sm text-[#71717A] dark:text-zinc-400">Forecast (5Y)</span>
+                                                <span className="text-sm text-[#71717A]">Forecast (5Y)</span>
                                                 <div className="flex items-center gap-1">
-                                                    <span className={`text-xl font-black text-[#E11D48] ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>${report.marketSize.forecastSize.toFixed(1)}B</span>
+                                                    <span className={`text-xl font-black text-[#E11D48] ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>${report.marketSize.forecastSize.toFixed(1)}B</span>
                                                     <CopyMetricBtn value={`$${report.marketSize.forecastSize.toFixed(1)}B`} label="Forecast 5Y" />
                                                 </div>
                                             </div>
@@ -1417,37 +1417,37 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     {activeSection === 'deals' && (
                         <div className="space-y-6">
                             <div className="grid lg:grid-cols-4 gap-4">
-                                <div className={`group bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-green-500/30 shadow-md' : ''}`}>
+                                <div className={`group bg-white border border-[#E4E4E7] rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-green-500/30 shadow-md' : ''}`}>
                                     <DollarSign className="mx-auto text-green-600 mb-2" size={28} />
                                     <div className="flex items-center justify-center gap-1">
-                                        <p className={`text-3xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.funding.totalValue}</p>
+                                        <p className={`text-3xl font-black text-[#18181B] ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>{report.funding.totalValue}</p>
                                         <CopyMetricBtn value={report.funding.totalValue} label="Total Funding" />
                                     </div>
-                                    <p className="text-xs text-[#71717A] dark:text-zinc-400">Total Funding (2024)</p>
+                                    <p className="text-xs text-[#71717A]">Total Funding (2024)</p>
                                 </div>
-                                <div className={`group bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-[#E11D48]/30 shadow-md' : ''}`}>
+                                <div className={`group bg-white border border-[#E4E4E7] rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-[#E11D48]/30 shadow-md' : ''}`}>
                                     <Handshake className="mx-auto text-[#E11D48] mb-2" size={28} />
                                     <div className="flex items-center justify-center gap-1">
-                                        <p className={`text-3xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.funding.totalDeals}</p>
+                                        <p className={`text-3xl font-black text-[#18181B] ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>{report.funding.totalDeals}</p>
                                         <CopyMetricBtn value={String(report.funding.totalDeals)} label="Total Deals" />
                                     </div>
-                                    <p className="text-xs text-[#71717A] dark:text-zinc-400">Total Deals</p>
+                                    <p className="text-xs text-[#71717A]">Total Deals</p>
                                 </div>
-                                <div className={`group bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-green-500/30 shadow-md' : ''}`}>
+                                <div className={`group bg-white border border-[#E4E4E7] rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-green-500/30 shadow-md' : ''}`}>
                                     <TrendingUp className="mx-auto text-green-600 mb-2" size={28} />
                                     <div className="flex items-center justify-center gap-1">
-                                        <p className={`text-3xl font-black text-green-600 ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>+{report.funding.yoyGrowth}%</p>
+                                        <p className={`text-3xl font-black text-green-600 ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>+{report.funding.yoyGrowth}%</p>
                                         <CopyMetricBtn value={`+${report.funding.yoyGrowth}%`} label="YoY Growth" />
                                     </div>
-                                    <p className="text-xs text-[#71717A] dark:text-zinc-400">YoY Growth</p>
+                                    <p className="text-xs text-[#71717A]">YoY Growth</p>
                                 </div>
-                                <div className={`group bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-amber-500/30 shadow-md' : ''}`}>
+                                <div className={`group bg-white border border-[#E4E4E7] rounded-2xl p-6 text-center transition-all ${highlightMode ? 'ring-2 ring-amber-500/30 shadow-md' : ''}`}>
                                     <BarChart2 className="mx-auto text-[#E11D48] mb-2" size={28} />
                                     <div className="flex items-center justify-center gap-1">
-                                        <p className={`text-3xl font-black text-[#18181B] dark:text-white ${highlightMode ? 'bg-yellow-200/60 dark:bg-yellow-400/20 px-1 rounded' : ''}`}>{report.funding.avgDealSize}</p>
+                                        <p className={`text-3xl font-black text-[#18181B] ${highlightMode ? 'bg-yellow-200/60 px-1 rounded' : ''}`}>{report.funding.avgDealSize}</p>
                                         <CopyMetricBtn value={report.funding.avgDealSize} label="Avg Deal Size" />
                                     </div>
-                                    <p className="text-xs text-[#71717A] dark:text-zinc-400">Avg Deal Size</p>
+                                    <p className="text-xs text-[#71717A]">Avg Deal Size</p>
                                 </div>
                             </div>
                             
@@ -1503,12 +1503,12 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                     )}
 
                     {/* Data Sources & Methodology Footer */}
-                    <div className="bg-white dark:bg-gray-900 border border-[#E4E4E7] dark:border-gray-800 rounded-2xl p-5 mt-6">
+                    <div className="bg-white border border-[#E4E4E7] rounded-2xl p-5 mt-6">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
                                 <div className="flex items-center gap-2 mb-2">
                                     <Database className="w-4 h-4 text-[#A1A1AA]" />
-                                    <span className="text-xs font-semibold text-[#18181B] dark:text-white">Data Sources &amp; Methodology</span>
+                                    <span className="text-xs font-semibold text-[#18181B]">Data Sources &amp; Methodology</span>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     {[
@@ -1519,7 +1519,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                         'Statista & IDC Vietnam Market Data',
                                         'CafeF & VnExpress Financial Data',
                                     ].map((src, idx) => (
-                                        <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FAFAFA] dark:bg-gray-800 border border-[#E4E4E7] dark:border-gray-700 text-[10px] text-[#71717A] dark:text-zinc-400">
+                                        <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FAFAFA] border border-[#E4E4E7] text-[10px] text-[#71717A]">
                                             <CheckCircle className="w-2.5 h-2.5 text-emerald-500" />
                                             {src}
                                         </span>
@@ -1550,12 +1550,12 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
 
             {/* Highlight Mode indicator */}
             {highlightMode && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-5 py-2.5 bg-amber-100 dark:bg-amber-900/80 border border-amber-300 dark:border-amber-500/30 rounded-full shadow-lg backdrop-blur-sm">
-                    <Eye size={14} className="text-amber-700 dark:text-amber-400" />
-                    <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">Highlight Mode — Số liệu quan trọng được đánh dấu</span>
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-5 py-2.5 bg-amber-100 border border-amber-300 rounded-full shadow-lg backdrop-blur-sm">
+                    <Eye size={14} className="text-amber-700" />
+                    <span className="text-xs font-semibold text-amber-800">Highlight Mode â€” Key metrics are highlighted</span>
                     <button
                         onClick={() => setHighlightMode(false)}
-                        className="p-1 rounded-full hover:bg-amber-200 dark:hover:bg-amber-800 text-amber-700 dark:text-amber-400 transition-colors"
+                        className="p-1 rounded-full hover:bg-amber-200:bg-amber-800 text-amber-700 transition-colors"
                     >
                         <X size={12} />
                     </button>

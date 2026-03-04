@@ -366,21 +366,21 @@ const SectionNote: React.FC<{ sectionId: string }> = ({ sectionId }) => {
         className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${value ? 'text-amber-600' : 'text-[#A1A1AA] hover:text-[#71717A]'}`}
       >
         <StickyNote size={13} />
-        {value ? 'Ghi chú đã lưu' : 'Thêm ghi chú'}
+        {value ? 'Note saved' : 'Add note'}
       </button>
       {open && (
         <div className="mt-2 bg-amber-50/50 border border-amber-200 rounded-xl p-3">
           <textarea
             value={value}
             onChange={e => save(e.target.value)}
-            placeholder="Viết ghi chú cho mục này..."
+            placeholder="Write a note for this section..."
             className="w-full bg-transparent text-sm text-[#18181B] placeholder:text-amber-300 resize-none focus:outline-none min-h-[56px]"
             rows={2}
           />
           <div className="flex items-center justify-between mt-1">
-            <span className="text-[10px] text-amber-400">{value.length > 0 ? 'Tự động lưu' : ''}</span>
+            <span className="text-[10px] text-amber-400">{value.length > 0 ? 'Auto-saved' : ''}</span>
             {value && (
-              <button onClick={() => save('')} className="text-[10px] text-red-400 hover:text-red-600 transition-colors">Xóa</button>
+              <button onClick={() => save('')} className="text-[10px] text-red-400 hover:text-red-600 transition-colors">Clear</button>
             )}
           </div>
         </div>
@@ -397,17 +397,17 @@ const ExportModal: React.FC<{
 }> = ({ onClose, companyName, insights }) => {
   const formats: { id: string; label: string; desc: string; icon: React.ReactNode; action: () => void }[] = [
     {
-      id: 'html', label: 'HTML Report', desc: 'Báo cáo chuyên nghiệp với VICO branding',
+      id: 'html', label: 'HTML Report', desc: 'Professional report with VICO branding',
       icon: <Eye size={18} className="text-[#E11D48]" />,
       action: () => exportCustomerInsightsHTML(companyName, insights as unknown as CustomerExportInsights),
     },
     {
-      id: 'json', label: 'JSON Data', desc: 'Dữ liệu thô cho phân tích kỹ thuật',
+      id: 'json', label: 'JSON Data', desc: 'Raw data for technical analysis',
       icon: <FileJson size={18} className="text-blue-500" />,
       action: () => exportCustomerInsightsJSON(companyName, insights as unknown as CustomerExportInsights),
     },
     {
-      id: 'txt', label: 'Plain Text', desc: 'Văn bản thuần — chia sẻ nhanh qua email / Slack',
+      id: 'txt', label: 'Plain Text', desc: 'Plain text — quick sharing via email / Slack',
       icon: <FileText size={18} className="text-zinc-500" />,
       action: () => exportCustomerInsightsTXT(companyName, insights as unknown as CustomerExportInsights),
     },
@@ -425,7 +425,7 @@ const ExportModal: React.FC<{
               <Download size={16} className="text-[#E11D48]" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-[#18181B]">Xuất báo cáo Customer Insights</h3>
+              <h3 className="text-sm font-bold text-[#18181B]">Export Customer Insights Report</h3>
               <p className="text-[10px] text-[#A1A1AA]">{companyName}</p>
             </div>
           </div>
@@ -667,13 +667,13 @@ export const CustomerInsightsPage: React.FC<CustomerInsightsPageProps> = () => {
             </div>
             <div className="w-px h-7 bg-[#E4E4E7]" />
             <button onClick={() => setShowExportModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E11D48] text-white text-xs font-semibold hover:bg-[#BE123C] transition-colors">
-              <Download size={13} /> Xuất báo cáo
+              <Download size={13} /> Export Report
             </button>
             <button onClick={() => setHighlightMode(h => !h)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${highlightMode ? 'bg-yellow-100 text-yellow-700 ring-1 ring-yellow-300' : 'text-[#71717A] hover:bg-[#F4F4F5]'}`}>
               <Highlighter size={13} /> Highlight
             </button>
             <button onClick={handlePrint} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#71717A] hover:bg-[#F4F4F5] transition-colors">
-              <Printer size={13} /> In
+              <Printer size={13} /> Print
             </button>
           </div>
 

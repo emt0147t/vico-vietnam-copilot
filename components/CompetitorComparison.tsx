@@ -1,5 +1,5 @@
-/**
- * 🎯 GlobalCopilot-Style Competitor Comparison Dashboard
+﻿/**
+ * ðŸŽ¯ GlobalCopilot-Style Competitor Comparison Dashboard
  * Displays:
  * - List of competitors with news
  * - Strategy comparison
@@ -37,8 +37,8 @@ export const CompetitorComparisonDashboard = ({ companyName }: CompetitorCompari
                 setError(null);
                 
                 const finalCompanyName = companyName || 'Vingroup';
-                console.log(`📊 Loading competitor comparison for: "${finalCompanyName}"`);
-                console.log(`🔧 Props received: companyName="${companyName}"`);
+                console.log(`ðŸ“Š Loading competitor comparison for: "${finalCompanyName}"`);
+                console.log(`ðŸ”§ Props received: companyName="${companyName}"`);
                 
                 if (!finalCompanyName || finalCompanyName.trim() === '') {
                     throw new Error('Company name is required');
@@ -47,7 +47,7 @@ export const CompetitorComparisonDashboard = ({ companyName }: CompetitorCompari
                 const data = await generateCompetitorComparison(finalCompanyName);
                 setComparison(data);
             } catch (err) {
-                console.error('❌ Error loading competitor comparison:', err);
+                console.error('âŒ Error loading competitor comparison:', err);
                 setError(`Unable to load competitor comparison: ${err instanceof Error ? err.message : 'unknown error'}`);
             } finally {
                 setLoading(false);
@@ -83,13 +83,13 @@ export const CompetitorComparisonDashboard = ({ companyName }: CompetitorCompari
 
     return (
         <div className="space-y-8">
-            {/* 📊 Header */}
+            {/* ðŸ“Š Header */}
             <div className="bg-gradient-to-r from-[#E11D48] to-red-700 text-white rounded-2xl p-8">
                 <h1 className="text-3xl font-black uppercase mb-2">Competitor Intelligence Report</h1>
                 <p className="text-sm opacity-90">Comprehensive market analysis for {companyName}</p>
             </div>
 
-            {/* 🔀 Tabs */}
+            {/* ðŸ”€ Tabs */}
             <div className="flex gap-4 border-b">
                 {(['overview', 'intelligence', 'comparison'] as const).map(tab => (
                     <button
@@ -108,7 +108,7 @@ export const CompetitorComparisonDashboard = ({ companyName }: CompetitorCompari
                 ))}
             </div>
 
-            {/* 📈 Overview Tab - Overall Analysis & Insights */}
+            {/* ðŸ“ˆ Overview Tab - Overall Analysis & Insights */}
             {activeTab === 'overview' && (
                 <div className="space-y-8 animate-fade-in">
                     {/* Overall Analysis */}
@@ -196,7 +196,7 @@ export const CompetitorComparisonDashboard = ({ companyName }: CompetitorCompari
                 </div>
             )}
 
-            {/* 🔍 Intelligence Tab - Per Competitor Details */}
+            {/* ðŸ” Intelligence Tab - Per Competitor Details */}
             {activeTab === 'intelligence' && (
                 <div className="space-y-8 animate-fade-in">
                     {comparison.competitors.map((comp: CompetitorIntelligence, idx: number) => (
@@ -207,7 +207,7 @@ export const CompetitorComparisonDashboard = ({ companyName }: CompetitorCompari
                 </div>
             )}
 
-            {/* ⚔️ Comparison Tab - Side-by-Side Matrix */}
+            {/* âš”ï¸ Comparison Tab - Side-by-Side Matrix */}
             {activeTab === 'comparison' && (
                 <div className="space-y-8 animate-fade-in">
                     <ComparisonMatrix competitors={comparison.competitors} primaryCompany={companyName} />
@@ -217,7 +217,7 @@ export const CompetitorComparisonDashboard = ({ companyName }: CompetitorCompari
     );
 };
 
-// 🏢 Individual Competitor Card with News
+// ðŸ¢ Individual Competitor Card with News
 interface CompetitorCardProps {
     intelligence: CompetitorIntelligence;
 }
@@ -235,7 +235,7 @@ function CompetitorCard({ intelligence }: CompetitorCardProps) {
                 <div className="flex-1">
                     <h3 className="text-lg font-black uppercase">{competitor.name}</h3>
                     <p className="text-xs text-[#71717A] uppercase tracking-widest">
-                        {competitor.industry} • {competitor.location || 'Vietnam'}
+                        {competitor.industry} â€¢ {competitor.location || 'Vietnam'}
                     </p>
                 </div>
             </div>
@@ -292,7 +292,7 @@ function CompetitorCard({ intelligence }: CompetitorCardProps) {
                                     {item.title}
                                 </p>
                                 <p className="text-[10px] text-[#71717A] mt-1">
-                                    {new Date(item.pubDate).toLocaleDateString('vi-VN')}
+                                    {new Date(item.pubDate).toLocaleDateString('en-US')}
                                 </p>
                             </div>
                             <ExternalLink size={12} className="text-[#A1A1AA] flex-shrink-0 mt-0.5 group-hover:text-[#E11D48]" />
@@ -304,7 +304,7 @@ function CompetitorCard({ intelligence }: CompetitorCardProps) {
     );
 };
 
-// ⚔️ Comparison Matrix
+// âš”ï¸ Comparison Matrix
 const ComparisonMatrix = ({ competitors, primaryCompany }: { competitors: CompetitorIntelligence[], primaryCompany: string }) => {
     const metrics = [
         { key: 'marketShare', label: 'Market Share', unit: '%' },

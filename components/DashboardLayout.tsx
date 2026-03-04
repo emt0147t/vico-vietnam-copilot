@@ -14,7 +14,7 @@ import React, { useState, useEffect, useCallback, createContext, useContext, Rea
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard, Search, Command, Settings, LogOut,
-    ChevronLeft, ChevronRight, User, Moon, Sun,
+    ChevronLeft, ChevronRight, User,
     Building2, Newspaper, Target, Database, Zap, X,
     ArrowRight, Clock, TrendingUp, FileText, Globe
 } from 'lucide-react';
@@ -56,8 +56,6 @@ interface CommandCenterProps {
 interface DashboardContextType {
     isSidebarCollapsed: boolean;
     toggleSidebar: () => void;
-    isDarkMode: boolean;
-    toggleDarkMode: () => void;
     openCommandCenter: () => void;
 }
 
@@ -297,9 +295,21 @@ export const DashboardLayout = ({
     onLogout
 }: DashboardLayoutProps) => {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isSidebarPinned, setIsSidebarPinned] = useState(true);
     const [isCommandCenterOpen, setIsCommandCenterOpen] = useState(false);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+    // Sidebar hover auto-expand
+    const handleSidebarMouseEnter = () => {
+        if (!isSidebarPinned && isSidebarCollapsed) {
+            setIsSidebarCollapsed(false);
+        }
+    };
+    const handleSidebarMouseLeave = () => {
+        if (!isSidebarPinned) {
+            setIsSidebarCollapsed(true);
+        }
+    };
 
     // 🔔 Notification system
     const {
@@ -327,22 +337,17 @@ export const DashboardLayout = ({
             // Cmd+B to toggle sidebar
             if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
                 e.preventDefault();
-                setIsSidebarCollapsed(prev => !prev);
+                setIsSidebarCollapsed(prev => {
+                    const willCollapse = !prev;
+                    setIsSidebarPinned(!willCollapse);
+                    return willCollapse;
+                });
             }
         };
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, []);
-
-    // Dark mode effect
-    useEffect(() => {
-        if (isDarkMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }, [isDarkMode]);
 
     const handleSearch = (query: string, type: 'company' | 'news' | 'all') => {
         setRecentSearches(prev => [query, ...prev.filter(s => s !== query)].slice(0, 5));
@@ -353,8 +358,6 @@ export const DashboardLayout = ({
     const contextValue: DashboardContextType = {
         isSidebarCollapsed,
         toggleSidebar: () => setIsSidebarCollapsed(prev => !prev),
-        isDarkMode,
-        toggleDarkMode: () => setIsDarkMode(prev => !prev),
         openCommandCenter: () => setIsCommandCenterOpen(true),
     };
 
@@ -366,6 +369,8 @@ export const DashboardLayout = ({
                     animate={{ width: isSidebarCollapsed ? 80 : 280 }}
                     transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                     className="bg-white border-r border-[#E4E4E7] flex flex-col z-30"
+                    onMouseEnter={handleSidebarMouseEnter}
+                    onMouseLeave={handleSidebarMouseLeave}
                 >
                     {/* Logo */}
                     <div className="h-16 flex items-center justify-between px-4 border-b border-[#E4E4E7]">
@@ -398,8 +403,14 @@ export const DashboardLayout = ({
                         </AnimatePresence>
                         
                         <button
-                            onClick={() => setIsSidebarCollapsed(prev => !prev)}
+                            onClick={() => {
+                                const willCollapse = !isSidebarCollapsed;
+                                setIsSidebarCollapsed(willCollapse);
+                                // If user manually expands, pin it; if manually collapses, unpin for hover mode
+                                setIsSidebarPinned(!willCollapse);
+                            }}
                             className="p-1.5 hover:bg-[#F4F4F5] rounded-lg transition-colors"
+                            title={isSidebarCollapsed ? 'Expand sidebar (hover to preview)' : 'Collapse sidebar'}
                         >
                             {isSidebarCollapsed ? (
                                 <ChevronRight className="w-4 h-4 text-[#A1A1AA]" />
@@ -458,17 +469,6 @@ export const DashboardLayout = ({
 
                     {/* Footer */}
                     <div className="p-3 border-t border-[#E4E4E7] space-y-2">
-                        {/* Theme Toggle */}
-                        <button
-                            onClick={() => setIsDarkMode(prev => !prev)}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#71717A] hover:bg-[#FAFAFA] transition-colors ${
-                                isSidebarCollapsed ? 'justify-center' : ''
-                            }`}
-                        >
-                            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                            {!isSidebarCollapsed && <span className="font-medium text-sm">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>}
-                        </button>
-
                         {/* User Profile */}
                         <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#FAFAFA] ${
                             isSidebarCollapsed ? 'justify-center' : ''

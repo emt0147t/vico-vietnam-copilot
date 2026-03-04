@@ -1,5 +1,5 @@
-/**
- * 🔔 Notification Center Component
+﻿/**
+ * ðŸ”” Notification Center Component
  * Bell icon with badge + dropdown panel showing real-time alerts.
  * Breaking news, competitor moves, market alerts from Google News RSS.
  */
@@ -50,7 +50,7 @@ function timeAgo(iso: string): string {
   if (hours < 24) return `${hours} hours ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days} days ago`;
-  return new Date(iso).toLocaleDateString('vi-VN');
+  return new Date(iso).toLocaleDateString('en-US');
 }
 
 function priorityBorder(priority: 'high' | 'medium' | 'low'): string {

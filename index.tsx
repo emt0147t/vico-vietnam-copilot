@@ -3,7 +3,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
-import { ThemeProvider } from './context/ThemeContext';
 import { ClerkProvider } from '@clerk/clerk-react';
 
 const CLERK_PUBLISHABLE_KEY = (process.env as any).VITE_CLERK_PUBLISHABLE_KEY || '';
@@ -18,9 +17,7 @@ const root = ReactDOM.createRoot(rootElement);
 // Wrap with ClerkProvider only when publishableKey is available
 const AppTree = (
   <BrowserRouter>
-    <ThemeProvider>
       <App />
-    </ThemeProvider>
   </BrowserRouter>
 );
 
