@@ -15,7 +15,7 @@
  * 5. Deals & Investments (M&A, VC/PE Funding)
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
     ChevronDown, ChevronUp, TrendingUp, Globe, Building2,
     Scale, Leaf, Cpu, Shield, BarChart3, PieChart, Users,
@@ -108,6 +108,7 @@ interface MarketIntelligenceReport {
         competitorsAnalyzed: number;
         industryPeersFound: number;
         similarityThreshold: number;
+        selectedCompetitorNames?: string[];
         dataSources?: string[];
     };
 }
@@ -427,15 +428,61 @@ const ConcentrationGauge = ({ level, hhi }: { level: string; hhi: number }) => {
     );
 };
 
-// PESTLE data (static for now, could be dynamic based on industry)
-const getPESTLEData = (_industry: string) => [
-    { letter: 'P', title: 'Political', icon: Scale, color: 'bg-rose-600', score: 4, impact: 'Positive' as const, details: ['Government supports digital transformation', 'Tax incentives for high-tech industries', 'Stable political environment', 'FTA: RCEP, CPTPP'] },
-    { letter: 'E', title: 'Economic', icon: DollarSign, color: 'bg-green-600', score: 4, impact: 'Positive' as const, details: ['GDP growth 6.5%', 'Middle class of 45 million', 'FDI up 32% YoY', 'Inflation controlled at 3.5%'] },
-    { letter: 'S', title: 'Social', icon: Users, color: 'bg-orange-600', score: 5, impact: 'Positive' as const, details: ['70% population under 35', 'Internet 78%, Smartphone 85%', 'Social commerce up 65%', 'E-learning up 150%'] },
-    { letter: 'T', title: 'Technological', icon: Cpu, color: 'bg-orange-600', score: 4, impact: 'Positive' as const, details: ['5G coverage across 63 provinces', '3,800+ tech startups', 'AI adoption 45%', 'Cloud migration 78%'] },
-    { letter: 'L', title: 'Legal', icon: Shield, color: 'bg-red-600', score: 3, impact: 'Neutral' as const, details: ['Cybersecurity Law 2018', 'PDPD effective 2024', 'Fintech sandbox', 'IP protection needs improvement'] },
-    { letter: 'E', title: 'Environmental', icon: Leaf, color: 'bg-emerald-600', score: 3, impact: 'Neutral' as const, details: ['Net Zero 2050', 'Green financing $15B', 'ESG requirements rising', 'Renewable 30% by 2030'] }
-];
+// PESTLE data — varies by industry and includes company context
+const getPESTLEData = (industry: string) => {
+    const industrySpecific: Record<string, { pDetails: string[]; eDetails: string[]; sDetails: string[]; tDetails: string[]; lDetails: string[]; envDetails: string[] }> = {
+        'Technology': {
+            pDetails: ['QD 749: Chuyen doi so quoc gia 2025-2030', 'Uu dai thue cho DN cong nghe cao', 'Chinh tri on dinh, FTA: RCEP, CPTPP, EVFTA', 'Ngan sach $2B cho digital infrastructure'],
+            eDetails: ['GDP tang 6.5%, kinh te so 16.5% GDP', 'FDI dang ky $36.6B (2024)', 'Tang lop trung luu 33 trieu', 'Outsourcing hub top 6 toan cau'],
+            sDetails: ['79.1M nguoi dung internet (78.4%)', '72.7M smartphone users', 'Median age 31.9 tuoi', '530,000+ lap trinh vien'],
+            tDetails: ['5G phu song 63 tinh', 'AI market uoc $700M (2025)', '3,800+ tech startups', 'Cloud migration tang 78%'],
+            lDetails: ['Luat An ninh mang 2018', 'ND 13/2023: Data localization', 'Sandbox fintech', 'PDPD co hieu luc 2024'],
+            envDetails: ['Net Zero 2050', 'Green IT chiem 12% ngan sach CNTT', 'ESG compliance bat buoc', 'Renewable 30% den 2030']
+        },
+        'Finance': {
+            pDetails: ['NHNN khuyen khich so hoa (QD 810)', '69% chua su dung ngan hang day du', 'Sandbox fintech regulation', 'Chinh sach tien te on dinh'],
+            eDetails: ['85 trieu tai khoan mobile banking', 'E-wallet GMV tang 65% YoY', 'NPL ratio 4.55% (Q3/2024)', 'FDI nganh tai chinh tang'],
+            sDetails: ['48M vi dien tu', 'Gen Z/Millennial digital-first', 'BNPL tang 180% GMV', 'Financial literacy dang tang'],
+            tDetails: ['Open Banking pilot voi NAPAS', 'AI credit scoring pho bien', 'Blockchain/DeFi thi nghiem', 'eKYC bat buoc'],
+            lDetails: ['ND 101/2024 that chat P2P', 'Cap phep e-wallet 12-18 thang', 'AML/CFT nang cao', 'Basel III trien khai'],
+            envDetails: ['Green bond thi truong $15B', 'ESG cho ngan hang 2025', 'Sustainable finance framework', 'Carbon credit trading']
+        },
+        'Retail': {
+            pDetails: ['VECOM ho tro e-commerce', 'FTA giam thue xuat nhap khau 0-5%', 'Chinh sach bao ve nguoi tieu dung', 'Uu dai DN vua va nho'],
+            eDetails: ['E-commerce GMV $20.5B (2024)', 'Tang lop trung luu 33 trieu -> 50 trieu', 'Bien loi nhuan ban le 2-5%', 'Social commerce tang 300%'],
+            sDetails: ['55% mua hang qua social media', 'Livestream selling bung no', 'Quick commerce 30 phut', '75% ung ho hang Viet chat luong'],
+            tDetails: ['Shopee, Lazada, TikTok Shop chiem 90%', 'Omnichannel retail mo rong', 'AI personalization', 'Dark store logistics'],
+            lDetails: ['Bao ve quyen nguoi tieu dung', 'Quy dinh e-commerce moi', 'Thue san thuong mai dien tu', 'IP enforcement'],
+            envDetails: ['Bao bi xanh bat buoc', 'Circular economy', 'Tieu dung ben vung tang', 'Carbon footprint labeling']
+        },
+        'Healthcare': {
+            pDetails: ['Chi tieu y te tang 12% YoY', 'Ho so suc khoe dien tu 2025', 'Bao hiem y te pho cap', 'Chinh sach telehealth'],
+            eDetails: ['Tong chi y te $20B (5.5% GDP)', 'Healthtech market $1.2B', '120+ healthtech startups', 'Medical tourism tang'],
+            sDetails: ['12.8% dan so tren 60 tuoi', 'Nhu cau cham soc man tinh tang', '50,000+ benh nhan quoc te/nam', 'Nhan thuc suc khoe tang'],
+            tDetails: ['Telehealth post-COVID tang 35%', '45% benh vien da so hoa', 'AI diagnostics', 'Wearable health devices'],
+            lDetails: ['Quy dinh thiet bi y te', 'Data privacy y te', 'Sandbox healthtech', 'Quy dinh duoc pham'],
+            envDetails: ['Xu ly chat thai y te', 'Green hospital', 'Sustainable pharma', 'Vaccine cold chain green']
+        }
+    };
+
+    const data = industrySpecific[industry] || {
+        pDetails: ['Chinh phu ho tro nganh ' + industry, 'On dinh chinh tri', 'FTA: RCEP, CPTPP, EVFTA', 'Quy hoach nganh 2025-2030'],
+        eDetails: ['GDP tang 6.5%', 'Tang lop trung luu 33 trieu', 'FDI tang 32% YoY', 'Lam phat kiem soat 3.5%'],
+        sDetails: ['70% dan so duoi 35 tuoi', 'Internet 78%, Smartphone 85%', 'Thi truong 100M dan', 'Digital adoption cao'],
+        tDetails: ['5G phu song 63 tinh', 'AI adoption tang', 'Cloud migration 78%', 'Startup ecosystem phat trien'],
+        lDetails: ['Luat An ninh mang 2018', 'PDPD co hieu luc 2024', 'IP protection can cai thien', 'Quy dinh nganh cap nhat'],
+        envDetails: ['Net Zero 2050', 'Green financing $15B', 'ESG requirements tang', 'Renewable 30% den 2030']
+    };
+
+    return [
+        { letter: 'P', title: 'Political', icon: Scale, color: 'bg-rose-600', score: 4, impact: 'Positive' as const, details: data.pDetails },
+        { letter: 'E', title: 'Economic', icon: DollarSign, color: 'bg-green-600', score: 4, impact: 'Positive' as const, details: data.eDetails },
+        { letter: 'S', title: 'Social', icon: Users, color: 'bg-orange-600', score: 5, impact: 'Positive' as const, details: data.sDetails },
+        { letter: 'T', title: 'Technological', icon: Cpu, color: 'bg-orange-600', score: 4, impact: 'Positive' as const, details: data.tDetails },
+        { letter: 'L', title: 'Legal', icon: Shield, color: 'bg-red-600', score: 3, impact: 'Neutral' as const, details: data.lDetails },
+        { letter: 'E', title: 'Environmental', icon: Leaf, color: 'bg-emerald-600', score: 3, impact: 'Neutral' as const, details: data.envDetails }
+    ];
+};
 
 // PESTLE Item Component
 const PESTLEItem: React.FC<{ 
@@ -728,9 +775,15 @@ const SectionNote: React.FC<{ sectionId: string }> = ({ sectionId }) => {
 // ==================== MAIN COMPONENT ====================
 
 export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData, industry = 'Technology', market = 'Vietnam' }) => {
+    // Build a cache key based on user's company + selected competitors to avoid stale data
+    const cacheKey = useMemo(() => {
+        const compNames = (userData?.competitors?.filter((c: any) => c.selected)?.map((c: any) => c.name) || []).sort().join(',');
+        return `market_report_${userData?.orgName || ''}_${compNames}`;
+    }, [userData]);
+
     const [activeSection, setActiveSection] = useState('overview');
-    const [report, setReport] = useState<MarketIntelligenceReport | null>(() => sessionCacheGet<MarketIntelligenceReport>('market_report'));
-    const [isLoading, setIsLoading] = useState(!sessionCacheGet('market_report'));
+    const [report, setReport] = useState<MarketIntelligenceReport | null>(() => sessionCacheGet<MarketIntelligenceReport>(cacheKey));
+    const [isLoading, setIsLoading] = useState(!sessionCacheGet(cacheKey));
     const [error, setError] = useState<string | null>(null);
     const [isPageReady, setIsPageReady] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
@@ -790,7 +843,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             
             const data = await response.json();
             setReport(data);
-            sessionCacheSet('market_report', data);
+            sessionCacheSet(cacheKey, data);
         } catch (err) {
             console.error('Market Intelligence fetch error:', err);
             if (err instanceof DOMException && err.name === 'AbortError') {
@@ -802,7 +855,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             clearTimeout(timeoutId);
             setIsLoading(false);
         }
-    }, [userData, industry]);
+    }, [userData, industry, cacheKey]);
     
     useEffect(() => {
         // Skip fetch if we already have cached data
@@ -886,13 +939,22 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
             
             {/* Data Source Badge */}
             {report && (
-                <div className="flex items-center gap-2 text-xs text-[#71717A] bg-[#FAFAFA] p-3 rounded-xl">
-                    <Database size={14} className="text-[#E11D48]" />
-                    <span>
-                        Data from <strong>{report.sources.competitorsAnalyzed}</strong> selected competitors and <strong>{report.sources.industryPeersFound.toLocaleString()}</strong> industry peers • 
-                        Similarity threshold: {(report.sources.similarityThreshold * 100).toFixed(0)}% • 
-                        Generated: {new Date(report.generatedAt).toLocaleString('vi-VN')}
-                    </span>
+                <div className="flex flex-col gap-1.5 text-xs text-[#71717A] bg-[#FAFAFA] dark:bg-gray-900 p-3 rounded-xl">
+                    <div className="flex items-center gap-2">
+                        <Database size={14} className="text-[#E11D48]" />
+                        <span>
+                            Data from <strong>{report.sources.competitorsAnalyzed}</strong> selected competitors and <strong>{report.sources.industryPeersFound.toLocaleString()}</strong> industry peers • 
+                            Similarity threshold: {(report.sources.similarityThreshold * 100).toFixed(0)}% • 
+                            Generated: {new Date(report.generatedAt).toLocaleString('vi-VN')}
+                        </span>
+                    </div>
+                    {report.sources.selectedCompetitorNames && report.sources.selectedCompetitorNames.length > 0 && (
+                        <div className="flex items-center gap-2 pl-6">
+                            <span className="text-[#18181B] dark:text-white font-medium">
+                                Analyzing: {report.sources.selectedCompetitorNames.join(', ')}
+                            </span>
+                        </div>
+                    )}
                 </div>
             )}
             
