@@ -106,7 +106,7 @@ export function MarketIndustryPageRealData() {
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-4xl font-black text-[#18181B] mb-2">
-                        📊 Market & Industry Intelligence
+                        Market & Industry Intelligence
                     </h1>
                     <p className="text-[#71717A]">
                         Real data from official sources • Updated regularly • {data.dataQuality.realDataPercent}% genuine data
@@ -168,7 +168,7 @@ export function MarketIndustryPageRealData() {
 
                 {/* Market Size Section */}
                 <Section 
-                    title="💰 Market Size & Forecast"
+                    title="Market Size & Forecast"
                     expanded={expanded.marketSize}
                     onToggle={() => setExpanded({
                         ...expanded, 
@@ -204,7 +204,7 @@ export function MarketIndustryPageRealData() {
 
                 {/* Market Trends Section */}
                 <Section 
-                    title="📈 Market Trends & Signals"
+                    title="Market Trends & Signals"
                     expanded={expanded.trends}
                     onToggle={() => setExpanded({
                         ...expanded, 
@@ -220,7 +220,7 @@ export function MarketIndustryPageRealData() {
 
                 {/* Competitive Landscape */}
                 <Section 
-                    title="🏆 Competitive Landscape"
+                    title="Competitive Landscape"
                     expanded={expanded.competitive}
                     onToggle={() => setExpanded({
                         ...expanded, 
@@ -359,14 +359,14 @@ function TrendCard({ trend }: { trend: any }) {
 function SourcesAttribution({ sources }: { sources: string[] }) {
     return (
         <div className="bg-[#FAFAFA] p-4 rounded-lg mt-4 border-l-4 border-[#E11D48]">
-            <p className="text-sm font-semibold text-[#18181B] mb-2">📚 Data Sources:</p>
+            <p className="text-sm font-semibold text-[#18181B] mb-2">Data Sources:</p>
             <div className="flex flex-wrap gap-2">
                 {sources.map((source) => (
                     <span
                         key={source}
                         className="inline-flex items-center px-3 py-1 bg-[#FFF1F2] text-[#BE123C] text-xs font-medium rounded-full"
                     >
-                        ✓ {source}
+                        {source}
                     </span>
                 ))}
             </div>

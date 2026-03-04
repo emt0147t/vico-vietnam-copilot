@@ -265,7 +265,7 @@ const ICPSection: React.FC<{ icp: CustomerInsightsReport['idealCustomerProfile']
                             {expandedDM === idx && (
                                 <div className="px-4 pb-4 pt-2 border-t border-[#E4E4E7] grid lg:grid-cols-2 gap-4">
                                     <div>
-                                        <p className="text-xs font-bold text-[#71717A] uppercase mb-2">🎯 Key Concerns</p>
+                                        <p className="text-xs font-bold text-[#71717A] uppercase mb-2">Key Concerns</p>
                                         <ul className="space-y-1">
                                             {dm.concerns.map((c, i) => (
                                                 <li key={i} className="text-sm text-[#71717A] flex items-center gap-2">
@@ -275,7 +275,7 @@ const ICPSection: React.FC<{ icp: CustomerInsightsReport['idealCustomerProfile']
                                         </ul>
                                     </div>
                                     <div>
-                                        <p className="text-xs font-bold text-[#71717A] uppercase mb-2">📊 Success Metrics</p>
+                                        <p className="text-xs font-bold text-[#71717A] uppercase mb-2">Success Metrics</p>
                                         <ul className="space-y-1">
                                             {dm.successMetrics.map((m, i) => (
                                                 <li key={i} className="text-sm text-[#71717A] flex items-center gap-2">
@@ -366,7 +366,7 @@ const PersonaCard: React.FC<{ persona: CustomerInsightsReport['userPersonas'][0]
                     </div>
                     
                     <div>
-                        <p className="text-xs font-bold text-[#71717A] uppercase mb-2">📅 A Day in Life</p>
+                        <p className="text-xs font-bold text-[#71717A] uppercase mb-2">A Day in Life</p>
                         <div className="flex flex-wrap gap-2">
                             {persona.dayInLife.map((activity, idx) => (
                                 <span key={idx} className="px-3 py-1 bg-[#F4F4F5] rounded-lg text-sm text-[#71717A]">
@@ -378,7 +378,7 @@ const PersonaCard: React.FC<{ persona: CustomerInsightsReport['userPersonas'][0]
                     
                     <div className="grid lg:grid-cols-2 gap-4">
                         <div>
-                            <p className="text-xs font-bold text-[#71717A] uppercase mb-2">📱 Preferred Channels</p>
+                            <p className="text-xs font-bold text-[#71717A] uppercase mb-2">Preferred Channels</p>
                             <div className="flex flex-wrap gap-2">
                                 {persona.preferredChannels.map((ch, idx) => (
                                     <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
@@ -388,7 +388,7 @@ const PersonaCard: React.FC<{ persona: CustomerInsightsReport['userPersonas'][0]
                             </div>
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-[#71717A] uppercase mb-2">🔧 Tech Stack</p>
+                            <p className="text-xs font-bold text-[#71717A] uppercase mb-2">Tech Stack</p>
                             <div className="flex flex-wrap gap-2">
                                 {persona.techStack.map((tech, idx) => (
                                     <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">
@@ -626,7 +626,7 @@ const BuyingJourneySection: React.FC<{
                         
                         <div className="grid lg:grid-cols-2 gap-4">
                             <div className="p-4 bg-[#FAFAFA] rounded-xl">
-                                <p className="text-xs font-bold text-[#71717A] uppercase mb-3">📋 Activities</p>
+                                <p className="text-xs font-bold text-[#71717A] uppercase mb-3">Activities</p>
                                 <ul className="space-y-2">
                                     {buyingProcess[activeStage].activities.map((act, idx) => (
                                         <li key={idx} className="text-sm text-[#71717A] flex items-center gap-2">
@@ -636,7 +636,7 @@ const BuyingJourneySection: React.FC<{
                                 </ul>
                             </div>
                             <div className="p-4 bg-[#FAFAFA] rounded-xl">
-                                <p className="text-xs font-bold text-[#71717A] uppercase mb-3">📚 Content Needed</p>
+                                <p className="text-xs font-bold text-[#71717A] uppercase mb-3">Content Needed</p>
                                 <div className="flex flex-wrap gap-2">
                                     {buyingProcess[activeStage].contentNeeded.map((c, idx) => (
                                         <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm">{c}</span>
@@ -646,7 +646,7 @@ const BuyingJourneySection: React.FC<{
                         </div>
                         
                         <div className="p-4 bg-amber-50 rounded-xl">
-                            <p className="text-xs font-bold text-amber-600 uppercase mb-3">⚠️ Common Objections</p>
+                            <p className="text-xs font-bold text-amber-600 uppercase mb-3">Common Objections</p>
                             <ul className="space-y-2">
                                 {buyingProcess[activeStage].objections.map((obj, idx) => (
                                     <li key={idx} className="text-sm text-[#71717A]">"{obj}"</li>
@@ -680,7 +680,7 @@ const BuyingJourneySection: React.FC<{
                                 <span className={`text-xs font-bold ${b.severity === 'High' ? 'text-red-600' : 'text-amber-600'}`}>{b.severity}</span>
                             </div>
                             <div className="p-3 bg-white rounded-lg mt-2">
-                                <p className="text-xs font-bold text-green-600 mb-1">💡 How to Overcome:</p>
+                                <p className="text-xs font-bold text-green-600 mb-1">How to Overcome:</p>
                                 <p className="text-sm text-[#71717A]">{b.overcomingStrategy}</p>
                             </div>
                         </div>
@@ -752,7 +752,7 @@ const VoiceOfCustomerSection: React.FC<{
                             {expandedObj === idx && (
                                 <div className="px-4 pb-4 border-t border-[#E4E4E7] pt-3">
                                     <div className="p-3 bg-green-50 rounded-xl">
-                                        <p className="text-xs font-bold text-green-600 mb-1">✅ Response:</p>
+                                        <p className="text-xs font-bold text-green-600 mb-1">Response:</p>
                                         <p className="text-sm text-[#18181B]">{obj.response}</p>
                                     </div>
                                 </div>
@@ -948,7 +948,7 @@ export const CustomerInsightsPanel: React.FC<CustomerInsightsPanelProps> = ({
             
             {!isLoading && !error && !report && (
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl border border-blue-200 p-8 text-center">
-                    <div className="text-5xl mb-4">🎯</div>
+                    <div className="w-16 h-16 rounded-2xl bg-[#FFF1F2] flex items-center justify-center mb-4"><span className="text-2xl font-black text-[#E11D48]">ICP</span></div>
                     <h3 className="text-lg font-bold text-[#18181B] mb-2">Customer Insights Engine</h3>
                     <p className="text-[#71717A] mb-4">Enter a company name to generate 4-layer customer analysis</p>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 max-w-2xl mx-auto text-sm">

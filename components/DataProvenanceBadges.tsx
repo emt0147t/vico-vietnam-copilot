@@ -87,22 +87,22 @@ const SOURCE_LABELS: Record<DataSourceType, string> = {
 };
 
 const SOURCE_ICONS: Partial<Record<DataSourceType, string>> = {
-  company_website: '🌐',
-  hose_filing: '📊',
-  hnx_filing: '📊',
-  upcom_filing: '📊',
-  cafef: '📈',
-  dkkd_gov: '🏛️',
-  press_release: '📰',
-  investor_disclosure: '💰',
-  dealstreetasia: '📰',
-  techinasia: '📰',
-  crunchbase: '💼',
-  linkedin_company: '💼',
-  topcv_jobs: '👔',
-  google_news_rss: '📰',
-  ai_generated: '⚠️',
-  manual_research: '🔍',
+  company_website: '○',
+  hose_filing: '▣',
+  hnx_filing: '▣',
+  upcom_filing: '▣',
+  cafef: '▲',
+  dkkd_gov: '□',
+  press_release: '◇',
+  investor_disclosure: '$',
+  dealstreetasia: '◇',
+  techinasia: '◇',
+  crunchbase: '◎',
+  linkedin_company: '◎',
+  topcv_jobs: '◉',
+  google_news_rss: '◇',
+  ai_generated: '△',
+  manual_research: '◆',
 };
 
 function getConfidenceConfig(confidence: number) {
@@ -194,7 +194,7 @@ export const SourceTag: React.FC<SourceTagProps> = ({
   showUrl = false,
   className = '',
 }) => {
-  const icon = SOURCE_ICONS[provenance.source] || '📄';
+  const icon = SOURCE_ICONS[provenance.source] || '○';
   const label = SOURCE_LABELS[provenance.source] || provenance.source;
   const config = getConfidenceConfig(provenance.confidence);
 
@@ -239,7 +239,7 @@ export const ProvenanceTooltip: React.FC<ProvenanceTooltipProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const config = getConfidenceConfig(provenance.confidence);
   const sourceLabel = SOURCE_LABELS[provenance.source] || provenance.source;
-  const icon = SOURCE_ICONS[provenance.source] || '📄';
+  const icon = SOURCE_ICONS[provenance.source] || '○';
 
   return (
     <span className="relative inline-block group">
@@ -293,7 +293,7 @@ export const ProvenanceTooltip: React.FC<ProvenanceTooltipProps> = ({
                   className="text-blue-600 hover:underline truncate block"
                   title={provenance.url}
                 >
-                  🔗 Verify source
+                  Verify source
                 </a>
               </div>
             )}
@@ -348,7 +348,7 @@ export const DataSourcesPanel: React.FC<DataSourcesPanelProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
-                🏆 Data Sources — {companyName}
+                Data Sources — {companyName}
               </h3>
               <p className="text-[11px] text-zinc-500 mt-0.5">
                 Verified-first data policy
@@ -409,7 +409,7 @@ export const DataSourcesPanel: React.FC<DataSourcesPanelProps> = ({
               {topSources.map((ts, i) => (
                 <div key={i} className="flex items-center justify-between text-[11px]">
                   <span className="flex items-center gap-1.5">
-                    <span>{SOURCE_ICONS[ts.source] || '📄'}</span>
+                    <span>{SOURCE_ICONS[ts.source] || '○'}</span>
                     <span className="text-zinc-700 dark:text-zinc-300">{ts.label}</span>
                   </span>
                   <span className="text-zinc-400 font-mono">{ts.count} fields</span>
@@ -509,7 +509,7 @@ export const AIGeneratedWarning: React.FC<AIGeneratedWarningProps> = ({
 }) => {
   return (
     <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-[10px] text-amber-700 dark:text-amber-400 ${className}`}>
-      <span>⚠️</span>
+      <span>△</span>
       <span>
         <strong>{section}</strong> is AI-generated analysis, not verified data
       </span>

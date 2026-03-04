@@ -54,14 +54,14 @@ export const NewsFeed = ({ query, limit = 6 }: { query: string, limit?: number }
 
     if (loading) return <div className="flex items-center gap-3 p-8 text-[#A1A1AA] font-bold uppercase text-[10px] tracking-widest"><Loader2 className="animate-spin" size={16}/> Scanning latest news...</div>;
     
-    if (error) return <div className="flex items-center gap-3 p-8 text-amber-600 font-bold uppercase text-[10px] tracking-widest" role="alert">⚠️ {error}</div>;
+    if (error) return <div className="flex items-center gap-3 p-8 text-amber-600 font-bold uppercase text-[10px] tracking-widest" role="alert">{error}</div>;
     
     if (news.length === 0) return null;
 
     return (
         <div className="space-y-4">
             <h4 className="text-[10px] font-black uppercase text-[#E11D48] tracking-[0.2em] flex items-center gap-2 mb-4">
-                <Newspaper size={14}/> 📰 Latest News from Google News (Real-time Updates)
+                <Newspaper size={14}/> Latest News from Google News (Real-time Updates)
             </h4>
             <div className="grid gap-4">
                 {news.map((item, i) => (

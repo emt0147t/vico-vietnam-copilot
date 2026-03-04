@@ -446,28 +446,28 @@ const AnalysisSection = ({ comparison }: { comparison: CompetitorComparison }) =
             {[
                 {
                     id: 'insights',
-                    title: '💡 Strategic Insights',
+                    title: 'Strategic Insights',
                     icon: Brain,
                     items: comparison.strategicInsights,
                     color: 'blue'
                 },
                 {
                     id: 'opportunities',
-                    title: '🎯 Growth Opportunities',
+                    title: 'Growth Opportunities',
                     icon: Target,
                     items: comparison.opportunities,
                     color: 'green'
                 },
                 {
                     id: 'threats',
-                    title: '⚠️ Competitive Threats',
+                    title: 'Competitive Threats',
                     icon: AlertCircle,
                     items: comparison.threats,
                     color: 'orange'
                 },
                 {
                     id: 'recommendations',
-                    title: '✅ Recommended Actions',
+                    title: 'Recommended Actions',
                     icon: Shield,
                     items: comparison.recommendations,
                     color: 'purple'

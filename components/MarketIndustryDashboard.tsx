@@ -159,7 +159,7 @@ export default function MarketIndustryDashboard({ industry }: MarketReportProps)
         {/* Pillar 5: PESTEL Macro-Environment Analysis */}
         <div className="bg-white rounded-lg shadow p-6 border border-[#E4E4E7]">
           <h2 className="text-2xl font-bold text-[#18181B] mb-4">
-            🧠 Pillar 5: Macro-Environment (PESTEL)
+            Pillar 5: Macro-Environment (PESTEL)
           </h2>
           <PESTELAnalysis industry={industry} />
         </div>
@@ -191,7 +191,7 @@ function ExecutiveSummary({ summary }: any) {
       <div className="space-y-4">
         {/* Key Insights */}
         <div>
-          <h3 className="font-semibold text-blue-800 mb-2">📊 Key Insights</h3>
+          <h3 className="font-semibold text-blue-800 mb-2">Key Insights</h3>
           <ul className="space-y-1">
             {summary.keyInsights.map((insight: string, idx: number) => (
               <li key={idx} className="text-blue-700 flex items-start">
@@ -205,7 +205,7 @@ function ExecutiveSummary({ summary }: any) {
         {/* Opportunities */}
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <h3 className="font-semibold text-green-700 mb-2">✓ Opportunities</h3>
+            <h3 className="font-semibold text-green-700 mb-2">Opportunities</h3>
             <ul className="space-y-1">
               {summary.opportunities.map((opp: string, idx: number) => (
                 <li key={idx} className="text-green-700 text-sm">
@@ -217,7 +217,7 @@ function ExecutiveSummary({ summary }: any) {
 
           {/* Risks */}
           <div>
-            <h3 className="font-semibold text-red-700 mb-2">⚠ Risks</h3>
+            <h3 className="font-semibold text-red-700 mb-2">Risks</h3>
             <ul className="space-y-1">
               {summary.risks.map((risk: string, idx: number) => (
                 <li key={idx} className="text-red-700 text-sm">
@@ -271,7 +271,7 @@ function MacroEconomicSection({ macro }: any) {
   return (
     <div className="bg-white rounded-lg shadow p-6 border border-[#E4E4E7]">
       <h2 className="text-2xl font-bold text-[#18181B] mb-4">
-        🌍 Pillar 1: Macro-Economic Indicators
+        Pillar 1: Macro-Economic Indicators
       </h2>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -314,7 +314,7 @@ function IndustryDataSection({ industry }: any) {
   return (
     <div className="bg-white rounded-lg shadow p-6 border border-[#E4E4E7]">
       <h2 className="text-2xl font-bold text-[#18181B] mb-4">
-        📈 Pillar 2: Industry-Specific Data
+        Pillar 2: Industry-Specific Data
       </h2>
 
       <div className="grid md:grid-cols-3 gap-4 mb-6">
@@ -337,7 +337,7 @@ function IndustryDataSection({ industry }: any) {
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <h3 className="font-semibold text-[#18181B] mb-2">🚢 Key Exports</h3>
+          <h3 className="font-semibold text-[#18181B] mb-2">Key Exports</h3>
           <ul className="space-y-1">
             {industry.keyExports.map((exp: string, idx: number) => (
               <li key={idx} className="text-sm text-[#18181B] flex items-start">
@@ -349,7 +349,7 @@ function IndustryDataSection({ industry }: any) {
         </div>
 
         <div>
-          <h3 className="font-semibold text-[#18181B] mb-2">📦 Key Imports</h3>
+          <h3 className="font-semibold text-[#18181B] mb-2">Key Imports</h3>
           <ul className="space-y-1">
             {industry.keyImports.map((imp: string, idx: number) => (
               <li key={idx} className="text-sm text-[#18181B] flex items-start">
@@ -362,7 +362,7 @@ function IndustryDataSection({ industry }: any) {
       </div>
 
       <div className="mt-4 pt-4 border-t">
-        <h3 className="font-semibold text-[#18181B] mb-2">🌐 Major Trading Partners</h3>
+        <h3 className="font-semibold text-[#18181B] mb-2">Major Trading Partners</h3>
         <p className="text-sm text-[#18181B]">
           {industry.majorPartners?.join(', ') || 'Data not available'}
         </p>
@@ -370,7 +370,7 @@ function IndustryDataSection({ industry }: any) {
 
       {industry.association && (
         <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
-          <h3 className="font-semibold text-blue-900 mb-1">📋 Industry Association</h3>
+          <h3 className="font-semibold text-blue-900 mb-1">Industry Association</h3>
           <p className="text-sm text-blue-800 mb-1">{industry.association.name}</p>
           <p className="text-xs text-blue-700">
             Website: {industry.association.website}
@@ -382,7 +382,7 @@ function IndustryDataSection({ industry }: any) {
       )}
 
       <div className="mt-4">
-        <h3 className="font-semibold text-[#18181B] mb-2">📰 Recent Trends</h3>
+        <h3 className="font-semibold text-[#18181B] mb-2">Recent Trends</h3>
         <ul className="space-y-1">
           {industry.recentTrends?.map((trend: string, idx: number) => (
             <li key={idx} className="text-sm text-[#18181B] flex items-start">
@@ -403,7 +403,7 @@ function FinancialPulseSection({ financial }: any) {
   return (
     <div className="bg-white rounded-lg shadow p-6 border border-[#E4E4E7]">
       <h2 className="text-2xl font-bold text-[#18181B] mb-4">
-        💰 Pillar 3: Financial Pulse
+        Pillar 3: Financial Pulse
       </h2>
 
       <div className="grid md:grid-cols-3 gap-4 mb-6">
@@ -424,7 +424,7 @@ function FinancialPulseSection({ financial }: any) {
         />
       </div>
 
-      <h3 className="font-semibold text-[#18181B] mb-3">🏆 Top Growth Leaders</h3>
+      <h3 className="font-semibold text-[#18181B] mb-3">Top Growth Leaders</h3>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-[#F4F4F5] border-b">
@@ -480,7 +480,7 @@ function VicoInsightsSection({ insights }: any) {
 
       {/* Market Index */}
       <div className="mb-6 bg-white rounded p-4 border border-purple-200">
-        <h3 className="font-semibold text-purple-800 mb-3">🎯 VICO Market Index</h3>
+        <h3 className="font-semibold text-purple-800 mb-3">VICO Market Index</h3>
         <div className="grid md:grid-cols-3 gap-4">
           <IndicatorCard
             label="Total Companies"
@@ -502,7 +502,7 @@ function VicoInsightsSection({ insights }: any) {
 
       {/* Competitive Analysis */}
       <div className="mb-6 bg-white rounded p-4 border border-purple-200">
-        <h3 className="font-semibold text-purple-800 mb-3">🏪 Competitive Analysis</h3>
+        <h3 className="font-semibold text-purple-800 mb-3">Competitive Analysis</h3>
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="text-[#18181B]">Market Concentration:</span>
@@ -530,7 +530,7 @@ function VicoInsightsSection({ insights }: any) {
 
       {/* Growth Leaders */}
       <div className="mb-6 bg-white rounded p-4 border border-purple-200">
-        <h3 className="font-semibold text-purple-800 mb-3">📈 Growth Leaders</h3>
+        <h3 className="font-semibold text-purple-800 mb-3">Growth Leaders</h3>
         <div className="space-y-2">
           {insights.growthLeaders.slice(0, 5).map((leader: any, idx: number) => (
             <div key={idx} className="flex items-start justify-between border-b pb-2 last:border-0">
@@ -554,7 +554,7 @@ function VicoInsightsSection({ insights }: any) {
 
       {/* Hiring Signals */}
       <div className="bg-white rounded p-4 border border-purple-200">
-        <h3 className="font-semibold text-purple-800 mb-3">👥 Hiring Signals</h3>
+        <h3 className="font-semibold text-purple-800 mb-3">Hiring Signals</h3>
         <div className="space-y-2">
           <div className="flex justify-between">
             <span className="text-[#18181B]">Hiring Trend:</span>
@@ -589,7 +589,7 @@ function VicoInsightsSection({ insights }: any) {
 function DataQualitySection({ quality }: any) {
   return (
     <div className="bg-[#FAFAFA] rounded-lg p-6 border border-[#E4E4E7]">
-      <h2 className="text-lg font-bold text-[#18181B] mb-4">📊 Data Quality & Sources</h2>
+      <h2 className="text-lg font-bold text-[#18181B] mb-4">Data Quality & Sources</h2>
 
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
@@ -606,11 +606,11 @@ function DataQualitySection({ quality }: any) {
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <h3 className="font-semibold text-[#18181B] mb-2">📍 Data Sources</h3>
+          <h3 className="font-semibold text-[#18181B] mb-2">Data Sources</h3>
           <ul className="space-y-1">
             {quality.sources.map((source: string, idx: number) => (
               <li key={idx} className="text-sm text-[#18181B] flex items-start">
-                <span className="mr-2">✓</span>
+                <span className="mr-2 text-emerald-600 font-bold">•</span>
                 <span>{source}</span>
               </li>
             ))}
@@ -618,7 +618,7 @@ function DataQualitySection({ quality }: any) {
         </div>
 
         <div>
-          <h3 className="font-semibold text-[#18181B] mb-2">ℹ️ Update Frequency</h3>
+          <h3 className="font-semibold text-[#18181B] mb-2">Update Frequency</h3>
           <p className="text-sm text-[#18181B] mb-2">
             • Macro indicators: Monthly (from World Bank)
           </p>
@@ -681,9 +681,9 @@ function VICOMarketIndexSection({ data }: { data: any }) {
 
   const trendIcon = (trend: string) => {
     switch (trend) {
-      case 'Growing': return '📈';
-      case 'Declining': return '📉';
-      default: return '➡️';
+      case 'Growing': return '▲';
+      case 'Declining': return '▼';
+      default: return '—';
     }
   };
 
@@ -697,7 +697,7 @@ function VICOMarketIndexSection({ data }: { data: any }) {
   return (
     <div className="bg-white rounded-lg shadow p-6 border border-[#E4E4E7]">
       <h2 className="text-2xl font-bold text-[#18181B] mb-1">
-        📊 Pillar 7: VICO Market Index
+        Pillar 7: VICO Market Index
       </h2>
       <p className="text-[#71717A] text-sm mb-6">
         VICO Proprietary Industry Index — {data.totalCompanies} companies • Est. {data.estimatedMarketSize} market size
@@ -754,7 +754,7 @@ function VICOMarketIndexSection({ data }: { data: any }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Concentration Ratio */}
         <div className="bg-[#FAFAFA] rounded-xl p-4 border border-[#E4E4E7]">
-          <h3 className="text-sm font-bold text-[#18181B] uppercase tracking-wider mb-3">🏪 Industry Concentration</h3>
+          <h3 className="text-sm font-bold text-[#18181B] uppercase tracking-wider mb-3">Industry Concentration</h3>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-[#71717A] text-sm">Market Structure:</span>
@@ -803,7 +803,7 @@ function VICOMarketIndexSection({ data }: { data: any }) {
 
         {/* Hiring Trend */}
         <div className="bg-[#FAFAFA] rounded-xl p-4 border border-[#E4E4E7]">
-          <h3 className="text-sm font-bold text-[#18181B] uppercase tracking-wider mb-3">👥 Hiring Trend</h3>
+          <h3 className="text-sm font-bold text-[#18181B] uppercase tracking-wider mb-3">Hiring Trend</h3>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-[#71717A] text-sm">Trend:</span>
@@ -859,7 +859,7 @@ function VICOMarketIndexSection({ data }: { data: any }) {
       {/* Top 5 Companies Table */}
       {top5.length > 0 && (
         <div>
-          <h3 className="text-sm font-bold text-[#18181B] uppercase tracking-wider mb-3">🏆 Top 5 Companies by Employee Count</h3>
+          <h3 className="text-sm font-bold text-[#18181B] uppercase tracking-wider mb-3">Top 5 Companies by Employee Count</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gradient-to-r from-[#FFF1F2] to-[#FFF1F2] border-b border-[#E4E4E7]">
@@ -924,7 +924,7 @@ function TradeIntelligenceSection({ trade }: { trade: any }) {
   return (
     <div className="bg-white rounded-lg shadow p-6 border border-[#E4E4E7]">
       <h2 className="text-2xl font-bold text-[#18181B] mb-1">
-        🚢 Pillar 6: Trade Intelligence
+        Pillar 6: Trade Intelligence
       </h2>
       <p className="text-[#71717A] text-sm mb-6">
         Import/Export data for {trade.industry} — Source: {trade.dataSource || 'General Dept. of Customs'}
@@ -960,7 +960,7 @@ function TradeIntelligenceSection({ trade }: { trade: any }) {
             {isSurplus ? '+' : ''}{formatUSD(balance)}
           </p>
           <p className={`text-sm font-bold mt-1 ${isSurplus ? 'text-emerald-600' : 'text-red-600'}`}>
-            {isSurplus ? '✅ Surplus' : '⚠️ Deficit'}
+            {isSurplus ? 'Surplus' : 'Deficit'}
           </p>
         </div>
       </div>
@@ -970,7 +970,7 @@ function TradeIntelligenceSection({ trade }: { trade: any }) {
         {/* Export commodities */}
         {trade.keyExportCommodities && (
           <div>
-            <h3 className="text-sm font-bold text-[#18181B] uppercase tracking-wider mb-3">📦 Key Export Products</h3>
+            <h3 className="text-sm font-bold text-[#18181B] uppercase tracking-wider mb-3">Key Export Products</h3>
             <div className="space-y-2">
               {trade.keyExportCommodities.map((item: string, i: number) => (
                 <div key={i} className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg px-3 py-2 border border-[#E4E4E7]">
@@ -987,7 +987,7 @@ function TradeIntelligenceSection({ trade }: { trade: any }) {
         {/* Trading partners */}
         {trade.majorTradingPartners && (
           <div>
-            <h3 className="text-sm font-bold text-[#18181B] uppercase tracking-wider mb-3">🌍 Key Trade Partners</h3>
+            <h3 className="text-sm font-bold text-[#18181B] uppercase tracking-wider mb-3">Key Trade Partners</h3>
             <div className="space-y-2">
               {trade.majorTradingPartners.map((partner: string, i: number) => {
                 const barWidth = Math.max(20, 100 - i * 15);

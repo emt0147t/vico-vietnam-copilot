@@ -45,7 +45,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
             });
             const data = await response.json();
 
-            alert('✅ CSV Enrichment started!\n\nThis will:\n1. Generate Vietnamese embeddings for 10,000+ companies\n2. Calculate similar competitors for each company\n3. Cache results for fast retrieval\n\nEstimated time: 15-30 minutes\n\nCheck backend logs for progress.');
+            alert('CSV Enrichment started!\n\nThis will:\n1. Generate Vietnamese embeddings for 10,000+ companies\n2. Calculate similar competitors for each company\n3. Cache results for fast retrieval\n\nEstimated time: 15-30 minutes\n\nCheck backend logs for progress.');
 
             // Poll status every 30 seconds
             const statusInterval = setInterval(async () => {
@@ -56,7 +56,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
             return () => clearInterval(statusInterval);
         } catch (error) {
             console.error('Failed to start enrichment:', error);
-            alert('❌ Failed to start enrichment');
+            alert('Failed to start enrichment');
             setIsEnriching(false);
         }
     };
@@ -74,7 +74,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
             setSearchResults(data.results || []);
         } catch (error) {
             console.error('Search failed:', error);
-            alert('❌ Search failed');
+            alert('Search failed');
         } finally {
             setIsSearching(false);
         }
@@ -99,7 +99,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
             borderRadius: '8px',
             marginBottom: '20px'
         }}>
-            <h2>🚀 CSV Companies Enrichment (10,000+ companies)</h2>
+            <h2>CSV Companies Enrichment (10,000+ companies)</h2>
 
             {/* Status Section */}
             <div style={{
@@ -131,7 +131,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
                         marginBottom: '20px'
                     }}
                 >
-                    {isEnriching ? '⏳ Processing...' : '🔄 Start Enrichment'}
+                    {isEnriching ? 'Processing...' : 'Start Enrichment'}
                 </button>
             )}
 
@@ -145,7 +145,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
                         border: '1px solid #ddd',
                         marginBottom: '20px'
                     }}>
-                        <h3>🔍 Semantic Search (Enriched Companies)</h3>
+                        <h3>Semantic Search (Enriched Companies)</h3>
                         <p style={{ fontSize: '12px', color: '#666' }}>
                             Enter company description to find similar companies using Vietnamese embeddings
                         </p>
@@ -188,7 +188,7 @@ export const CsvEnrichmentPanel: React.FC = () => {
                                 backgroundColor: '#f9f9f9',
                                 borderRadius: '5px'
                             }}>
-                                <h4>📊 Search results ({searchResults.length} companies)</h4>
+                                <h4>Search results ({searchResults.length} companies)</h4>
                                 {searchResults.map((result, idx) => (
                                     <div
                                         key={idx}
@@ -229,12 +229,12 @@ export const CsvEnrichmentPanel: React.FC = () => {
                         borderRadius: '5px',
                         border: '1px solid #90CAF9'
                     }}>
-                        <h4>📌 What has been Enriched?</h4>
+                        <h4>What has been Enriched?</h4>
                         <ul style={{ fontSize: '14px' }}>
-                            <li>✅ <strong>Vietnamese Embeddings:</strong> All 10,000+ companies vectorized using dangvantuan/vietnamese-embedding</li>
-                            <li>✅ <strong>Strategic Context:</strong> Each company has auto-generated strategic context</li>
-                            <li>✅ <strong>Similar Competitors:</strong> Top 10 similar competitors for each company based on semantic similarity</li>
-                            <li>✅ <strong>Fast Search:</strong> Fast semantic search across 10,000+ companies</li>
+                            <li><strong>Vietnamese Embeddings:</strong> All 10,000+ companies vectorized using dangvantuan/vietnamese-embedding</li>
+                            <li><strong>Strategic Context:</strong> Each company has auto-generated strategic context</li>
+                            <li><strong>Similar Competitors:</strong> Top 10 similar competitors for each company based on semantic similarity</li>
+                            <li><strong>Fast Search:</strong> Fast semantic search across 10,000+ companies</li>
                         </ul>
                     </div>
                 </>

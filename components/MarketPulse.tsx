@@ -117,7 +117,7 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
       {/* Header */}
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-[#18181B] mb-2">
-          📊 Market Pulse
+          Market Pulse
         </h2>
         <p className="text-[#71717A]">
           {companyName
@@ -192,10 +192,10 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
                     className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${getSentimentBadgeColor(item.sentiment)}`}
                   >
                     {item.sentiment === SentimentType.POSITIVE
-                      ? "📈 Positive"
+                      ? "Positive"
                       : item.sentiment === SentimentType.NEGATIVE
-                        ? "📉 Negative"
-                        : "➖ Neutral"}
+                        ? "Negative"
+                        : "Neutral"}
                   </span>
                 )}
               </div>
@@ -237,7 +237,7 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
                       key={mention.companyId}
                       className="bg-[#FFF1F2] text-[#18181B] px-2 py-1 rounded text-xs font-medium"
                     >
-                      🏢 {mention.companyName}
+                      {mention.companyName}
                     </span>
                   ))}
                 </div>
@@ -246,7 +246,7 @@ export const MarketPulse: React.FC<MarketPulseProps> = ({
               {/* Metadata */}
               <div className="flex justify-between items-center text-xs text-[#71717A] border-t pt-2">
                 <span>
-                  📰 {item.sourceName || "Unknown"}
+                  {item.sourceName || "Unknown"}
                 </span>
                 <span>
                   {item.fetchedDate

@@ -15,21 +15,21 @@ interface GTMStrategyViewerProps {
 }
 
 const TAB_CONFIG: { key: TabKey; icon: string; label: string }[] = [
-  { key: "segmentation", icon: "🎯", label: "Customer Segmentation" },
-  { key: "competitive", icon: "🔍", label: "Competitive Tracker" },
-  { key: "reports", icon: "📊", label: "Market Reports" },
-  { key: "scenarios", icon: "🧪", label: "Scenario Modeling" },
-  { key: "swot", icon: "⚡", label: "SWOT Analysis" },
-  { key: "validation", icon: "🛡️", label: "Validation & Trust" },
+  { key: "segmentation", icon: "◎", label: "Customer Segmentation" },
+  { key: "competitive", icon: "◉", label: "Competitive Tracker" },
+  { key: "reports", icon: "▣", label: "Market Reports" },
+  { key: "scenarios", icon: "◇", label: "Scenario Modeling" },
+  { key: "swot", icon: "○", label: "SWOT Analysis" },
+  { key: "validation", icon: "□", label: "Validation & Trust" },
 ];
 
 const STRATEGY_LABELS: Record<string, string> = {
-  direct_sales: "🎯 Direct Sales",
-  channel_partner: "🤝 Channel Partners",
-  online_marketplace: "🌐 Online Marketplace",
-  licensing: "📜 Licensing",
-  joint_venture: "🏢 Joint Venture",
-  acquisition: "📊 Acquisition",
+  direct_sales: "Direct Sales",
+  channel_partner: "Channel Partners",
+  online_marketplace: "Online Marketplace",
+  licensing: "Licensing",
+  joint_venture: "Joint Venture",
+  acquisition: "Acquisition",
 };
 
 /**
@@ -104,20 +104,20 @@ export const GTMStrategyViewer: React.FC<GTMStrategyViewerProps> = ({ playbook }
           </div>
           <p className="text-[#71717A] text-xs mt-1">
             {feasibilityScore >= 80
-              ? "✅ High feasibility — Proceed with implementation"
+              ? "High feasibility — Proceed with implementation"
               : feasibilityScore >= 60
-                ? "⚠️ Medium feasibility — Must address key risks"
-                : "❌ High risk — Consider alternative approaches"}
+                ? "Medium feasibility — Must address key risks"
+                : "High risk — Consider alternative approaches"}
           </p>
         </div>
       </div>
 
       {/* ═══ SWOT MINI STRIP ═══ */}
       <div className="grid grid-cols-4 border-b border-[#E4E4E7]/50">
-        <SWOTMiniCell icon="💪" label="Strengths" items={swot.strengths} color="text-emerald-400" bg="bg-emerald-500/5" />
-        <SWOTMiniCell icon="⚠️" label="Weaknesses" items={swot.weaknesses} color="text-red-400" bg="bg-red-500/5" />
-        <SWOTMiniCell icon="🚀" label="Opportunities" items={swot.opportunities} color="text-blue-400" bg="bg-blue-500/5" />
-        <SWOTMiniCell icon="⚡" label="Threats" items={swot.threats} color="text-amber-400" bg="bg-amber-500/5" />
+        <SWOTMiniCell icon="S" label="Strengths" items={swot.strengths} color="text-emerald-400" bg="bg-emerald-500/5" />
+        <SWOTMiniCell icon="W" label="Weaknesses" items={swot.weaknesses} color="text-red-400" bg="bg-red-500/5" />
+        <SWOTMiniCell icon="O" label="Opportunities" items={swot.opportunities} color="text-blue-400" bg="bg-blue-500/5" />
+        <SWOTMiniCell icon="T" label="Threats" items={swot.threats} color="text-amber-400" bg="bg-amber-500/5" />
       </div>
 
       {/* ═══ TABS ═══ */}
@@ -640,7 +640,7 @@ function ScenariosTab({ data }: { data: ScenarioModel[] }) {
               <ul className="space-y-1.5">
                 {scenario.risks.map((r, i) => (
                   <li key={i} className="text-[#A1A1AA] text-sm flex gap-2">
-                    <span className="text-red-500">⚠</span>{r}
+                    <span className="text-red-500">•</span>{r}
                   </li>
                 ))}
               </ul>
@@ -748,7 +748,7 @@ function ValidationTab({
                     src.type === "expert" ? "bg-[#F97316]/20 text-[#F97316]" :
                       "bg-[#A1A1AA] text-[#A1A1AA]"
                 }`}>
-                {src.country === "Vietnam" ? "🇻🇳" : "🌍"}
+                {src.country === "Vietnam" ? "VN" : "○"}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white font-medium text-sm">{src.source}</p>
@@ -785,7 +785,7 @@ function ValidationTab({
                   <ul className="space-y-1">
                     {log.keyInsights.map((ins, i) => (
                       <li key={i} className="text-[#A1A1AA] text-sm flex gap-1.5">
-                        <span className="text-blue-500">💡</span>{ins}
+                        <span className="text-blue-500">•</span>{ins}
                       </li>
                     ))}
                   </ul>
@@ -817,7 +817,7 @@ function SWOTTab({ data }: { data: LivingPlaybook["swotAnalysis"] }) {
     {
       title: "Strengths",
       titleVi: "Strengths",
-      icon: "💪",
+      icon: "S",
       items: data.strengths,
       gradient: "from-emerald-500/10 to-emerald-500/5",
       border: "border-emerald-500/30",
@@ -827,7 +827,7 @@ function SWOTTab({ data }: { data: LivingPlaybook["swotAnalysis"] }) {
     {
       title: "Weaknesses",
       titleVi: "Weaknesses",
-      icon: "⚠️",
+      icon: "W",
       items: data.weaknesses,
       gradient: "from-red-500/10 to-red-500/5",
       border: "border-red-500/30",
@@ -837,7 +837,7 @@ function SWOTTab({ data }: { data: LivingPlaybook["swotAnalysis"] }) {
     {
       title: "Opportunities",
       titleVi: "Opportunities",
-      icon: "🚀",
+      icon: "O",
       items: data.opportunities,
       gradient: "from-blue-500/10 to-blue-500/5",
       border: "border-blue-500/30",
@@ -847,7 +847,7 @@ function SWOTTab({ data }: { data: LivingPlaybook["swotAnalysis"] }) {
     {
       title: "Threats",
       titleVi: "Threats",
-      icon: "🛡️",
+      icon: "T",
       items: data.threats,
       gradient: "from-amber-500/10 to-amber-500/5",
       border: "border-amber-500/30",
@@ -859,7 +859,6 @@ function SWOTTab({ data }: { data: LivingPlaybook["swotAnalysis"] }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-xl">⚡</span>
         <h3 className="text-lg font-bold text-[#18181B]">SWOT Analysis</h3>
         <span className="px-2 py-0.5 bg-[#F4F4F5] text-[#71717A] text-xs rounded-full">
           {data.strengths.length + data.weaknesses.length + data.opportunities.length + data.threats.length} factors

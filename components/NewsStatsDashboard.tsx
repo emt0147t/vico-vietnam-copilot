@@ -81,7 +81,7 @@ export const NewsStatsDashboard: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="text-3xl font-bold text-[#18181B]">📊 News Intelligence</h2>
+          <h2 className="text-3xl font-bold text-[#18181B]">News Intelligence</h2>
           <p className="text-[#71717A] text-sm mt-1">Market signal distribution and sentiment analysis</p>
         </div>
         <button

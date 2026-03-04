@@ -101,9 +101,9 @@ export const CompetitorComparisonDashboard = ({ companyName }: CompetitorCompari
                                 : 'border-transparent text-[#A1A1AA] hover:text-[#71717A]'
                         }`}
                     >
-                        {tab === 'overview' && '📈 Overview'}
-                        {tab === 'intelligence' && '🔍 Intelligence'}
-                        {tab === 'comparison' && '⚔️ Comparison'}
+                        {tab === 'overview' && 'Overview'}
+                        {tab === 'intelligence' && 'Intelligence'}
+                        {tab === 'comparison' && 'Comparison'}
                     </button>
                 ))}
             </div>

@@ -289,7 +289,7 @@ const DimensionCard: React.FC<{
 
                             {/* Data source */}
                             <div className="mt-2 text-xs text-[#71717A] flex items-center gap-1">
-                                📊 {factor.dataSource}
+                                ▣ {factor.dataSource}
                             </div>
                         </div>
                     ))}
@@ -341,7 +341,7 @@ const PESTELAnalysis: React.FC<PESTELAnalysisProps> = ({
                         dimension: dim,
                         label: dim.charAt(0).toUpperCase() + dim.slice(1),
                         labelVi: dim,
-                        icon: '📊',
+                        icon: '▣',
                         overallScore: data.score,
                         overallTrend: data.trend,
                         factors: [],
@@ -398,7 +398,7 @@ const PESTELAnalysis: React.FC<PESTELAnalysisProps> = ({
     if (error) {
         return (
             <div className="rounded-2xl bg-red-900/20 border border-red-500/30 p-6">
-                <p className="text-red-400 text-sm">⚠️ {error}</p>
+                <p className="text-red-400 text-sm">{error}</p>
                 <button
                     onClick={fetchReport}
                     className="mt-3 text-xs text-[#E11D48] hover:text-[#E11D48] underline"
@@ -417,7 +417,7 @@ const PESTELAnalysis: React.FC<PESTELAnalysisProps> = ({
             <div className="flex items-center justify-between">
                 <div>
                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                        🧠 PESTEL Analysis
+                        PESTEL Analysis
                         <span className="text-sm font-normal text-[#A1A1AA]">— Vietnam</span>
                         {industry && (
                             <span className="text-sm bg-[#E11D48]/20 text-[#E11D48] px-2 py-0.5 rounded-full">
