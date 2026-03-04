@@ -200,12 +200,12 @@ ${companyName ? `3. "companySpecificInsights": string[] (3-4 insights specific t
 Focus on 2024-2025 developments. Be specific and factual. Respond in English.
 Return ONLY valid JSON, no markdown.`;
 
-            const response = await gemini.models.generateContent({
-                model: 'gemini-2.0-flash',
+            const { generateWithFallback } = await import('./geminiHelper');
+            const result = await generateWithFallback({
                 contents: prompt,
             });
 
-            const text = response.text?.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            const text = result.text?.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
             if (!text) return null;
 
             const parsed = JSON.parse(text) as AIPESTELOverlay;

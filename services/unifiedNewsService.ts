@@ -170,8 +170,7 @@ const batchAISentiment = async (
     }
 
     try {
-        const { GoogleGenAI } = await import('@google/genai');
-        const ai = new GoogleGenAI({ apiKey });
+        // ai instance managed by generateWithFallback
 
         // Build a numbered list of titles for batch analysis
         const titlesBlock = items
@@ -192,8 +191,8 @@ ${titlesBlock}
 Trả lời CHÍNH XÁC theo format JSON array (không markdown, không giải thích):
 [{"id":1,"sentiment":"positive|negative|neutral"},{"id":2,"sentiment":"..."},...]`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash',
+        const { generateWithFallback } = await import('./geminiHelper');
+        const result = await generateWithFallback({
             contents: prompt,
             config: {
                 temperature: 0.1,
@@ -201,7 +200,7 @@ Trả lời CHÍNH XÁC theo format JSON array (không markdown, không giải t
             }
         });
 
-        const responseText = response?.text?.trim();
+        const responseText = result.text?.trim();
         if (!responseText) return null;
 
         // Parse JSON from response (strip markdown fences if present)

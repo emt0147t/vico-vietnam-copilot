@@ -378,8 +378,8 @@ Be specific to ${competitor.name}'s actual business. Use Vietnamese for SWOT and
     const MAX_RETRIES = 2;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.0-flash',
+            const { generateWithFallback } = await import('./geminiHelper');
+            const result = await generateWithFallback({
                 contents: prompt,
                 config: {
                     temperature: 0.3,
@@ -388,7 +388,7 @@ Be specific to ${competitor.name}'s actual business. Use Vietnamese for SWOT and
                 }
             });
 
-            const text = response.text || '';
+            const text = result.text || '';
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (!jsonMatch) {
                 console.warn(`   ⚠️ Gemini returned non-JSON for ${competitor.name}`);
@@ -397,7 +397,7 @@ Be specific to ${competitor.name}'s actual business. Use Vietnamese for SWOT and
 
             const parsed = JSON.parse(jsonMatch[0]) as GeminiCompetitorAnalysis;
             setCache(cacheKey, parsed);
-            console.log(`   🤖 AI analysis complete: ${competitor.name} (confidence: ${parsed.confidence}%)`);
+            console.log(`   🤖 AI analysis complete: ${competitor.name} (confidence: ${parsed.confidence}%, via ${result.model})`);
             return parsed;
         } catch (err: any) {
             const is429 = err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('quota');
@@ -432,8 +432,8 @@ async function generateExecutiveSummary(
     // Retry with exponential backoff for 429 rate limits
     for (let attempt = 0; attempt <= 2; attempt++) {
         try {
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.0-flash',
+            const { generateWithFallback } = await import('./geminiHelper');
+            const result = await generateWithFallback({
                 contents: `You are a strategic analyst. Write a concise executive summary for ${userCompany.name} about their competitive landscape in ${industryContext.industry} in Vietnam.
 
 Competitors analyzed:
@@ -452,7 +452,7 @@ Use Vietnamese. Be specific and actionable.`,
                 config: { temperature: 0.4, maxOutputTokens: 1000, tools: [{ googleSearch: {} }] }
             });
 
-            const text = response.text || '';
+            const text = result.text || '';
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 return JSON.parse(jsonMatch[0]);

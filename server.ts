@@ -1187,11 +1187,11 @@ RULES:
 - Relevance dựa trên mức liên quan đến kinh doanh tại Việt Nam`;
 
         let result = null;
-        const MAX_RETRIES = 2;
-        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        const NEWS_MODELS = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite'];
+        for (const modelId of NEWS_MODELS) {
             try {
                 const response = await ai.models.generateContent({
-                    model: 'gemini-2.0-flash',
+                    model: modelId,
                     contents: prompt,
                     config: { temperature: 0.3, maxOutputTokens: 800, tools: [{ googleSearch: {} }] }
                 });
@@ -1205,13 +1205,11 @@ RULES:
                 break;
             } catch (err: any) {
                 const is429 = err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('quota');
-                if (is429 && attempt < MAX_RETRIES) {
-                    const delay = (attempt + 1) * 5000;
-                    console.warn(`   ⏳ News analyze rate-limited, retry ${attempt + 1}/${MAX_RETRIES} in ${delay / 1000}s...`);
-                    await new Promise(r => setTimeout(r, delay));
+                if (is429) {
+                    console.warn(`   ⏳ News analyze: ${modelId} quota exhausted, trying next...`);
                     continue;
                 }
-                console.error('   ❌ Gemini news analysis error:', err?.message || err);
+                console.error(`   ❌ Gemini news analysis error (${modelId}):`, err?.message || err);
                 break;
             }
         }
@@ -1257,9 +1255,18 @@ function buildFallbackAnalysis(title: string, content: string) {
 }
 
 // 🤖 Chat Proxy — keeps Gemini API key server-side (Issue #23)
+// Model fallback chain: tries multiple models when quota is exhausted
+// Each model has its own per-model quota, so fallback should help.
+const CHAT_MODEL_CHAIN = [
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+];
+
 app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
     try {
-        const { contents, systemInstruction, tools, temperature, maxOutputTokens } = req.body;
+        const { contents, systemInstruction, tools, temperature, maxOutputTokens, model } = req.body;
 
         if (!contents || !Array.isArray(contents)) {
             res.status(400).json({ error: 'contents array required' });
@@ -1276,34 +1283,64 @@ app.post('/api/chat', async (req: Request, res: Response): Promise<void> => {
 
         const ai = new GoogleGenAI({ apiKey });
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash',
-            contents,
-            config: {
-                systemInstruction: systemInstruction || undefined,
-                tools: tools || undefined,
-                temperature: temperature ?? 0.7,
-                maxOutputTokens: maxOutputTokens ?? 2048,
-            },
-        });
+        // Build model list: if client specified a model, try it first, then fallback chain
+        const modelsToTry = model
+            ? [model, ...CHAT_MODEL_CHAIN.filter(m => m !== model)]
+            : [...CHAT_MODEL_CHAIN];
 
-        // response.text THROWS when the response is a pure function-call
-        // (no text parts). Guard both accessors so we never crash.
-        let text = '';
-        let functionCalls: any[] = [];
-        try { text = response.text ?? ''; } catch { /* function-call-only response */ }
-        try { functionCalls = response.functionCalls ?? []; } catch { /* text-only response */ }
+        let lastError: any = null;
 
-        res.json({ text, functionCalls });
-    } catch (error: any) {
-        const status = error?.status ?? error?.httpStatusCode;
-        const is429 = status === 429 || error?.message?.includes('429') || error?.message?.includes('RESOURCE_EXHAUSTED');
-        if (is429) {
-            res.status(429).json({ error: 'Rate limited', text: '⚠️ Quá nhiều yêu cầu. Vui lòng đợi vài giây.' });
-            return;
+        for (const modelId of modelsToTry) {
+            try {
+                const response = await ai.models.generateContent({
+                    model: modelId,
+                    contents,
+                    config: {
+                        systemInstruction: systemInstruction || undefined,
+                        tools: tools || undefined,
+                        temperature: temperature ?? 0.7,
+                        maxOutputTokens: maxOutputTokens ?? 2048,
+                    },
+                });
+
+                // response.text THROWS when the response is a pure function-call
+                // (no text parts). Guard both accessors so we never crash.
+                let text = '';
+                let functionCalls: any[] = [];
+                try { text = response.text ?? ''; } catch { /* function-call-only response */ }
+                try { functionCalls = response.functionCalls ?? []; } catch { /* text-only response */ }
+
+                res.json({ text, functionCalls, model: modelId });
+                return; // Success — exit
+            } catch (err: any) {
+                const errStatus = err?.status ?? err?.httpStatusCode;
+                const errMsg = err?.message || String(err);
+                const is429 = errStatus === 429 || errMsg.includes('429') || errMsg.includes('RESOURCE_EXHAUSTED');
+
+                if (is429) {
+                    console.warn(`⏳ Model ${modelId} quota exhausted, trying next...`);
+                    lastError = err;
+                    continue; // Try next model
+                }
+
+                // Non-429 errors: don't try other models, fail immediately
+                console.error(`❌ Chat proxy error (${modelId}):`, errMsg);
+                res.status(500).json({ error: 'Chat request failed', text: `⚠️ Lỗi: ${errMsg.substring(0, 200)}` });
+                return;
+            }
         }
-        console.error('❌ Chat proxy error:', error?.message || error);
-        res.status(500).json({ error: 'Chat request failed', text: '⚠️ Đã xảy ra lỗi. Vui lòng thử lại.' });
+
+        // All models exhausted
+        const errMsg = lastError?.message || 'All models quota exhausted';
+        console.error('❌ Chat: all models exhausted:', errMsg.substring(0, 150));
+        res.status(429).json({
+            error: 'All models quota exhausted',
+            text: '⚠️ Tất cả model AI đang quá tải. Vui lòng đợi 30 giây rồi thử lại.\n\n💡 Nếu lỗi tiếp tục, có thể cần nâng cấp API plan tại https://ai.google.dev',
+        });
+    } catch (error: any) {
+        const errMsg = error?.message || String(error);
+        console.error('❌ Chat proxy unexpected error:', errMsg);
+        res.status(500).json({ error: 'Chat request failed', text: `⚠️ Đã xảy ra lỗi: ${errMsg.substring(0, 200)}` });
     }
 });
 

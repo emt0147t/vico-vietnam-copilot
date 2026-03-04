@@ -6,7 +6,8 @@ declare const google: any;
 const ai = typeof google !== 'undefined' ? google.generativeAI : null;
 
 // Use gemini-2.0-flash for complex strategic reasoning tasks (most capable model)
-const MODEL_NAME = 'gemini-2.0-flash'; 
+// Model fallback handled by geminiHelper.ts
+const MODEL_NAME = 'gemini-2.0-flash';
 
 export interface GlobalCopilotReport {
     meta: {

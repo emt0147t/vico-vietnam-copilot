@@ -245,13 +245,13 @@ RULES:
   const MAX_RETRIES = 2;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+      const { generateWithFallback } = await import('./geminiHelper');
+      const result = await generateWithFallback({
         contents: prompt,
         config: { temperature: 0.45, maxOutputTokens: 5000 },
       });
 
-      const text = response.text || '';
+      const text = result.text || '';
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         console.warn('⚠️ Gemini returned non-JSON for ICP report');

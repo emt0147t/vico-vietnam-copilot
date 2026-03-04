@@ -4,7 +4,8 @@ import { RagService } from './ragLayer';
 import { getCompanyNews } from './newsService';
 
 // Proxy Gemini requests through the backend to keep API key secure.
-// Includes exponential backoff on 429 (rate-limit) to prevent cascading failures.
+// Server handles model fallback chain (flash → flash-lite → 1.5-flash).
+// Client retries on transient 429 with short backoff, but defers to server for model switching.
 async function proxyGenerateContent(config: {
     contents: any[];
     systemInstruction?: string;
@@ -12,11 +13,11 @@ async function proxyGenerateContent(config: {
     temperature?: number;
     maxOutputTokens?: number;
 }): Promise<{ text: string; functionCalls: any[] }> {
-    const MAX_RETRIES = 3;
+    const MAX_RETRIES = 2;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-        // Abort after 30 s so the UI never hangs forever
+        // Abort after 25 s so the UI never hangs forever
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 30_000);
+        const timer = setTimeout(() => controller.abort(), 25_000);
 
         let res: Response;
         try {
@@ -29,14 +30,14 @@ async function proxyGenerateContent(config: {
         } catch (err: any) {
             clearTimeout(timer);
             if (err.name === 'AbortError') throw new Error('⏳ Yêu cầu quá lâu. Vui lòng thử lại.');
-            throw err;
+            throw new Error('🔌 Không thể kết nối server. Kiểm tra kết nối mạng.');
         } finally {
             clearTimeout(timer);
         }
 
-        // Retry on 429 with exponential backoff (2 s, 4 s, 8 s)
+        // Retry on 429 with short backoff (server already tried multiple models)
         if (res.status === 429 && attempt < MAX_RETRIES) {
-            const delay = Math.pow(2, attempt + 1) * 1000;
+            const delay = (attempt + 1) * 5_000; // 5s, 10s
             console.warn(`⏳ Chat rate-limited (429), retry ${attempt + 1}/${MAX_RETRIES} in ${delay / 1000}s…`);
             await new Promise(r => setTimeout(r, delay));
             continue;
@@ -48,7 +49,7 @@ async function proxyGenerateContent(config: {
         }
         return res.json();
     }
-    throw new Error('⚠️ Quá nhiều yêu cầu. Vui lòng đợi vài giây và thử lại.');
+    throw new Error('⚠️ AI đang quá tải. Vui lòng đợi 30 giây rồi thử lại.');
 }
 
 /** Run a tool with a 15-second timeout so a broken endpoint never blocks AI */
@@ -538,17 +539,19 @@ class VicoChatService {
                     }),
                 );
 
-                // Append model function-call parts then function-response parts
+                // Append model function-call turn, then ALL function-response parts in one turn
                 runningContents = [
                     ...runningContents,
                     {
                         role: 'model' as const,
                         parts: calls.map((fc: any) => ({ functionCall: { name: fc.name, args: fc.args } })),
                     },
-                    ...calls.map((fc: any, i: number) => ({
+                    {
                         role: 'function' as const,
-                        parts: [{ functionResponse: { name: fc.name, response: results[i] } }],
-                    })),
+                        parts: calls.map((fc: any, i: number) => ({
+                            functionResponse: { name: fc.name, response: results[i] },
+                        })),
+                    },
                 ];
 
                 response = await proxyGenerateContent({
@@ -564,41 +567,54 @@ class VicoChatService {
             return this.addAssistantMessage(text, toolsUsed.length > 0 ? [...new Set(toolsUsed)] : undefined);
         } catch (error) {
             console.error('[VicoChatService] Error:', error);
+            const msg = error instanceof Error ? error.message : '';
+            const isQuotaExhausted = msg.includes('429') || msg.includes('rate') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('quá tải');
 
-            // Graceful fallback: try simple chat without function calling
-            try {
-                const simpleContents = this.history
-                    .filter(m => !m.isLoading)
-                    .slice(-12)
-                    .map(m => ({
-                        role: m.role === 'assistant' ? 'model' : 'user',
-                        parts: [{ text: m.content }],
-                    }));
+            // Only try fallback if the error is NOT quota/rate-limit related
+            // (retrying with a simpler prompt won't help when all models are exhausted)
+            if (!isQuotaExhausted) {
+                try {
+                    const simpleContents = this.history
+                        .filter(m => !m.isLoading)
+                        .slice(-8)
+                        .map(m => ({
+                            role: m.role === 'assistant' ? 'model' : 'user',
+                            parts: [{ text: m.content }],
+                        }));
 
-                const fallbackResponse = await proxyGenerateContent({
-                    contents: simpleContents,
-                    systemInstruction: SYSTEM_PROMPT,
-                    temperature: 0.7,
-                    maxOutputTokens: 2048,
-                });
+                    const fallbackResponse = await proxyGenerateContent({
+                        contents: simpleContents,
+                        systemInstruction: SYSTEM_PROMPT,
+                        temperature: 0.7,
+                        maxOutputTokens: 2048,
+                    });
 
-                if (fallbackResponse.text) {
-                    return this.addAssistantMessage(fallbackResponse.text);
+                    if (fallbackResponse.text) {
+                        return this.addAssistantMessage(fallbackResponse.text);
+                    }
+                } catch (fallbackErr) {
+                    console.warn('[VicoChatService] Fallback also failed:', fallbackErr);
                 }
-            } catch (fallbackErr) {
-                console.warn('[VicoChatService] Fallback also failed:', fallbackErr);
             }
 
-            // Specific error messages
-            const msg = error instanceof Error ? error.message : '';
-            if (msg.includes('429') || msg.includes('rate') || msg.includes('RESOURCE_EXHAUSTED')) {
-                return this.addAssistantMessage('⚠️ Hệ thống đang bận. Vui lòng đợi 5–10 giây rồi thử lại.');
+            // User-friendly error messages
+            if (isQuotaExhausted) {
+                return this.addAssistantMessage(
+                    '⚠️ **AI đang quá tải** (đã hết quota tạm thời).\n\n' +
+                    '**Giải pháp:**\n' +
+                    '- Đợi 30–60 giây rồi thử lại\n' +
+                    '- Nếu lỗi tiếp tục, quota ngày có thể đã hết — thử lại vào ngày mai\n' +
+                    '- Các tính năng khác (company search, market data) vẫn hoạt động bình thường',
+                );
             }
             if (msg.includes('timeout') || msg.includes('quá lâu') || msg.includes('AbortError')) {
                 return this.addAssistantMessage('⏳ Yêu cầu mất quá lâu. Vui lòng thử câu hỏi ngắn hơn hoặc thử lại.');
             }
             if (msg.includes('503') || msg.includes('not configured')) {
                 return this.addAssistantMessage('⚠️ AI engine chưa sẵn sàng. Vui lòng thử lại sau.');
+            }
+            if (msg.includes('kết nối') || msg.includes('NetworkError') || msg.includes('Failed to fetch')) {
+                return this.addAssistantMessage('🔌 Không thể kết nối server. Vui lòng kiểm tra kết nối mạng và thử lại.');
             }
             return this.addAssistantMessage(
                 '⚠️ Đã xảy ra lỗi khi xử lý. Vui lòng thử lại hoặc đặt câu hỏi khác.\n\n💡 **Thử:** Đặt câu hỏi ngắn gọn hơn hoặc nhấn nút 🗑️ để xóa lịch sử rồi hỏi lại.',

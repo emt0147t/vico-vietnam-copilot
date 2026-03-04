@@ -21,9 +21,7 @@ import {
   NEGATIVE_KEYWORDS,
 } from "../data/newsModels";
 
-// Using Google's SDK through browser environment
-declare const google: any;
-const ai = typeof google !== 'undefined' ? google.generativeAI : null;
+// Model fallback is handled by geminiHelper
 
 export const NewsEnrichmentService = {
   /**
@@ -66,8 +64,8 @@ export const NewsEnrichmentService = {
           .join(", ")
           .toLowerCase();
 
-        const response = await ai.models.generateContent({
-          model: "gemini-2.0-flash",
+        const { generateWithFallback } = await import('./geminiHelper');
+        const resultResp = await generateWithFallback({
           contents: {
             parts: [
               {
@@ -87,7 +85,7 @@ technology_innovation,0.7`,
           },
         });
 
-        const text = (response as any).text || "";
+        const text = resultResp.text || "";
         const matches = text.match(/([a-z_]+),([0-9.]+)/gi);
 
         if (matches) {
@@ -143,8 +141,8 @@ technology_innovation,0.7`,
     // If score is ambiguous (-0.3 to 0.3), use Gemini for better accuracy
     if (Math.abs(quickScore) < 0.3 && content.length > 100) {
       try {
-        const response = await ai.models.generateContent({
-          model: "gemini-2.0-flash",
+        const { generateWithFallback } = await import('./geminiHelper');
+        const resultResp = await generateWithFallback({
           contents: {
             parts: [
               {
@@ -160,7 +158,7 @@ Format: SENTIMENT,SCORE`,
           },
         });
 
-        const responseText = (response as any).text || "";
+        const responseText = resultResp.text || '';
         const match = responseText.match(/([a-z]+),(-?[0-9.]+)/i);
 
         if (match) {
@@ -209,8 +207,8 @@ Format: SENTIMENT,SCORE`,
     content: string
   ): Promise<NewsSummary> => {
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+      const { generateWithFallback } = await import('./geminiHelper');
+      const resultResp = await generateWithFallback({
         contents: {
           parts: [
             {
@@ -231,7 +229,7 @@ Impact: high/medium/low`,
         },
       });
 
-      const responseText = (response as any).text || "";
+      const responseText = resultResp.text || "";
       const lines = responseText.split("\n").filter((l: string) => l.trim());
 
       // Extract bullets

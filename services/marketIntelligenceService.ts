@@ -106,22 +106,22 @@ RULES:
     const MAX_RETRIES = 2;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.0-flash',
+            const { generateWithFallback } = await import('./geminiHelper');
+            const result = await generateWithFallback({
                 contents: prompt,
                 config: { temperature: 0.3, maxOutputTokens: 2000, tools: [{ googleSearch: {} }] }
             });
 
-            const text = response.text || '';
+            const text = result.text || '';
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (!jsonMatch) return null;
 
             const parsed = JSON.parse(jsonMatch[0]) as AIMarketOverlay;
             setAICache(cacheKey, parsed);
-            console.log(`   🤖 AI market overlay generated for: ${industry}`);
+            console.log(`   🤖 AI market overlay generated for: ${industry} (via ${result.model})`);
             return parsed;
         } catch (err: any) {
-            const is429 = err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('quota');
+            const is429 = err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('quota') || err?.message?.includes('exhausted');
             if (is429 && attempt < MAX_RETRIES) {
                 const delay = (attempt + 1) * 5000;
                 console.warn(`   ⏳ Gemini rate-limited, retry ${attempt + 1}/${MAX_RETRIES} in ${delay / 1000}s...`);

@@ -16,9 +16,7 @@ import {
 } from "../data/gtmModels";
 import { SignalType } from "../data/newsModels";
 
-// Using Google's SDK through browser environment
-declare const google: any;
-const ai = typeof google !== 'undefined' ? google.generativeAI : null;
+// Model fallback is handled by geminiHelper
 
 interface CompanyContext {
   name: string;
@@ -62,8 +60,8 @@ Provide:
 Format as structured JSON.`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+      const { generateWithFallback } = await import('./geminiHelper');
+      const result = await generateWithFallback({
         contents: {
           parts: [
             {
@@ -73,7 +71,7 @@ Format as structured JSON.`;
         },
       });
 
-      const text = (response as any).text || "";
+      const text = result.text || '';
       const parsed = JSON.parse(text);
 
       return {

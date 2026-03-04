@@ -264,13 +264,13 @@ RULES:
     const MAX_RETRIES = 2;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.0-flash',
+            const { generateWithFallback } = await import('./geminiHelper');
+            const result = await generateWithFallback({
                 contents: prompt,
                 config: { temperature: 0.4, maxOutputTokens: 3000 }
             });
 
-            const text = response.text || '';
+            const text = result.text || '';
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (!jsonMatch) {
                 console.warn(`   ⚠️ Gemini returned non-JSON for GTM playbook`);
@@ -279,7 +279,7 @@ RULES:
 
             const parsed = JSON.parse(jsonMatch[0]) as AIPlaybookAnalysis;
             setCache(cacheKey, parsed);
-            console.log(`   🤖 AI GTM analysis complete for: ${ctx.company.name}`);
+            console.log(`   🤖 AI GTM analysis complete for: ${ctx.company.name} (via ${result.model})`);
             return parsed;
         } catch (err: any) {
             const is429 = err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('quota');

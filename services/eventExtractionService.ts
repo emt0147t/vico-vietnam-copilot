@@ -258,12 +258,12 @@ Rules:
 
 Return [] if no events found.`;
 
-        const response = await gemini.models.generateContent({
-            model: 'gemini-2.0-flash',
+        const { generateWithFallback } = await import('./geminiHelper');
+        const result = await generateWithFallback({
             contents: prompt,
         });
 
-        const text = response.text?.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const text = result.text?.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         if (!text || text === '[]') return [];
 
         const parsed = JSON.parse(text) as Array<{
