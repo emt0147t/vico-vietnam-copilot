@@ -1535,7 +1535,11 @@ export const COMPANIES: CompanyProfile[] = [
       "Strategic partnership with Vietnam Tax Authority for mandatory e-invoice compliance",
       "Opened development center in Da Nang with 500-person capacity",
       "Released AMIS Platform 4.0 with open API marketplace"
-    ]
+    ],
+    market_share_percentage: 30,
+    yoy_growth: "+28%",
+    csat_score: 85,
+    quadrant_position: "Leader"
   },
   {
     name: "Sky Mavis",
@@ -1586,7 +1590,11 @@ export const COMPANIES: CompanyProfile[] = [
       "Ronin DEX (Katana V3) integrated concentrated liquidity pools",
       "Raised $150M Series C at $3B valuation led by a16z and Accel",
       "Partnered with Samsung Galaxy Store for pre-installed Ronin Wallet"
-    ]
+    ],
+    market_share_percentage: 35,
+    yoy_growth: "+45%",
+    csat_score: 78,
+    quadrant_position: "Visionary"
   },
   {
     name: "KiotViet",
@@ -1968,7 +1976,11 @@ export const COMPANIES: CompanyProfile[] = [
       "Launched KMS AI Lab — internal R&D for LLM-assisted code review",
       "Achieved AWS Advanced Consulting Partner status",
       "Named in Clutch Top 100 Global Software Engineering Companies 2025"
-    ]
+    ],
+    market_share_percentage: 8,
+    yoy_growth: "+22%",
+    csat_score: 91,
+    quadrant_position: "Challenger"
   },
   {
     name: "Got It",
@@ -2019,7 +2031,11 @@ export const COMPANIES: CompanyProfile[] = [
       "Partnership with Salesforce AppExchange for CRM-integrated AI assistant",
       "Reached 100+ enterprise customers for AI assistant platform",
       "Named in CB Insights AI 100 list (2025)"
-    ]
+    ],
+    market_share_percentage: 8,
+    yoy_growth: "+85%",
+    csat_score: 88,
+    quadrant_position: "Visionary"
   },
   {
     name: "Teko Ventures",
@@ -2070,7 +2086,11 @@ export const COMPANIES: CompanyProfile[] = [
       "Real-time pricing engine deployed across 5,000+ Bách Hóa Xanh stores",
       "Secured first non-MWG enterprise contract with a top-3 Vietnamese conglomerate",
       "Expanded engineering team by 40% — now 800+ engineers"
-    ]
+    ],
+    market_share_percentage: 15,
+    yoy_growth: "+75%",
+    csat_score: 82,
+    quadrant_position: "Niche Player"
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
