@@ -221,7 +221,6 @@ const DimensionCard: React.FC<{
                     <div className="text-left">
                         <div className="font-semibold text-white text-sm">
                             {dimension.label}
-                            <span className="ml-2 text-[#A1A1AA] font-normal text-xs">({dimension.labelVi})</span>
                         </div>
                         <div className="text-[#A1A1AA] text-xs mt-0.5">{dimension.summary}</div>
                     </div>

@@ -92,7 +92,7 @@ export const VIETNAM_PESTEL_FACTORS: PESTELFactor[] = [
         ],
         impact: 'High',
         industryRelevance: ['Manufacturing', 'Retail', 'Agriculture', 'Technology', 'Logistics'],
-        dataSource: 'Bộ Công Thương (MoIT), WTO Vietnam Trade Profile',
+        dataSource: 'Ministry of Industry and Trade (MoIT), WTO Vietnam Trade Profile',
         lastVerified: '2025-01',
     },
     {
@@ -111,7 +111,7 @@ export const VIETNAM_PESTEL_FACTORS: PESTELFactor[] = [
         ],
         impact: 'High',
         industryRelevance: ['Manufacturing', 'Technology', 'Healthcare', 'Energy'],
-        dataSource: 'MPI (Bộ KH&ĐT), FIA Vietnam FDI Report 2024',
+        dataSource: 'MPI (Ministry of Planning & Investment), FIA Vietnam FDI Report 2024',
         lastVerified: '2025-01',
     },
     {
@@ -262,7 +262,7 @@ export const VIETNAM_PESTEL_FACTORS: PESTELFactor[] = [
         ],
         impact: 'High',
         industryRelevance: ['Technology', 'Manufacturing', 'Education', 'Healthcare'],
-        dataSource: 'Bộ GD&ĐT, OECD PISA 2022, EF EPI 2024',
+        dataSource: 'Ministry of Education & Training (MoET), OECD PISA 2022, EF EPI 2024',
         lastVerified: '2025-01',
     },
     {

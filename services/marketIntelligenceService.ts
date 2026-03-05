@@ -96,10 +96,10 @@ Return ONLY valid JSON:
 }
 
 RULES:
-- All text in Vietnamese where possible
+- All text in English
 - Be specific to ${industry} in Vietnam
 - Reference ${companyName} and its competitors (${competitorNames.join(', ') || 'none specified'}) where relevant
-- Do NOT invent specific dollar amounts or percentages — use ranges or \"ước tính\"
+- Do NOT invent specific dollar amounts or percentages — use ranges or "estimated"
 - Reference real organizations (GSO, VCCI, etc.) only if you know current data
 - 3 drivers, 2 restraints, 3 trends, 3 risks, 3 opportunities`;
 
@@ -436,116 +436,116 @@ const DEFAULT_INDUSTRY_DATA = {
 const VERIFIED_MARKET_DYNAMICS: Record<string, MarketDynamicsData> = {
     'Technology': {
         drivers: [
-            { title: 'Chương trình Chuyển đổi số Quốc gia 2025-2030', description: 'QĐ 749/QĐ-TTg: Mục tiêu kinh tế số chiếm 30% GDP vào 2030. Ngân sách $2B cho digital infrastructure (Nguồn: Thủ tướng Chính phủ)', impact: 'High' },
-            { title: 'Dân số trẻ & internet penetration', description: '79.1M người dùng internet (78.4% dân số), 72.7M smartphone users. Median age 31.9 tuổi (Nguồn: DataReportal 2024)', impact: 'High' },
-            { title: 'FDI vào công nghệ tăng mạnh', description: 'FDI đăng ký $36.6B (2024), Samsung/Intel/LG chiếm 30% FDI công nghiệp (Nguồn: MPI/FIA)', impact: 'High' },
-            { title: 'Outsourcing hub đang lên', description: 'Top 6 toàn cầu về IT outsourcing. 530,000+ lập trình viên, chi phí thấp hơn Ấn Độ 15-20% (Nguồn: Tholons, VINASA)', impact: 'Medium' }
+            { title: 'National Digital Transformation Program 2025-2030', description: 'Decision 749: Target digital economy at 30% of GDP by 2030. $2B budget for digital infrastructure (Source: Prime Minister)', impact: 'High' },
+            { title: 'Young population & internet penetration', description: '79.1M internet users (78.4% of population), 72.7M smartphone users. Median age 31.9 years (Source: DataReportal 2024)', impact: 'High' },
+            { title: 'FDI into technology growing strongly', description: 'Registered FDI $36.6B (2024), Samsung/Intel/LG account for 30% of industrial FDI (Source: MPI/FIA)', impact: 'High' },
+            { title: 'Rising outsourcing hub', description: 'Top 6 globally for IT outsourcing. 530,000+ developers, costs 15-20% lower than India (Source: Tholons, VINASA)', impact: 'Medium' }
         ],
         restraints: [
-            { title: 'Thiếu hụt nhân lực chất lượng cao', description: 'Thiếu ~150,000 kỹ sư IT/năm. Chỉ 30% sinh viên CNTT đáp ứng yêu cầu doanh nghiệp (Nguồn: VINASA Survey 2024)', impact: 'High' },
-            { title: 'Luật An ninh mạng & data localization', description: 'NĐ 13/2023/NĐ-CP yêu cầu lưu trữ dữ liệu tại Việt Nam, tăng chi phí compliance (Nguồn: Bộ Công an)', impact: 'Medium' },
-            { title: 'Hạ tầng cloud chưa đồng bộ', description: 'AWS/Azure/GCP chưa có region tại Việt Nam. Latency và chi phí cao hơn Singapore 20-40%', impact: 'Medium' }
+            { title: 'High-quality talent shortage', description: 'Shortage of ~150,000 IT engineers/year. Only 30% of CS graduates meet enterprise requirements (Source: VINASA Survey 2024)', impact: 'High' },
+            { title: 'Cybersecurity Law & data localization', description: 'Decree 13/2023 requires data storage in Vietnam, increasing compliance costs (Source: Ministry of Public Security)', impact: 'Medium' },
+            { title: 'Cloud infrastructure gaps', description: 'AWS/Azure/GCP have no region in Vietnam. Latency and costs 20-40% higher than Singapore', impact: 'Medium' }
         ],
         trends: [
-            { title: 'AI & GenAI adoption', description: 'Vietnam đứng #2 ASEAN về AI readiness. FPT, VinAI, Viettel AI đầu tư lớn. AI market ước tính $700M (2025) (Nguồn: Oxford Insights, MIC)', impact: 'High' },
-            { title: 'Fintech & digital payments', description: 'Mobile payment transactions tăng 65% YoY, 48M ví điện tử. MoMo, ZaloPay, VNPay dẫn đầu (Nguồn: SBV, Statista)', impact: 'High' },
-            { title: 'Semiconductor & chip manufacturing', description: 'Vietnam được Mỹ, Nhật, Hàn chọn là hub chip. Samsung, Intel mở rộng nhà máy (Nguồn: MOIT)', impact: 'Medium' },
-            { title: 'Green IT & sustainability', description: 'Cam kết Net Zero 2050. Renewable energy IT chiếm 12% ngân sách CNTT mới (Nguồn: MONRE COP26)', impact: 'Medium' }
+            { title: 'AI & GenAI adoption', description: 'Vietnam ranks #2 in ASEAN for AI readiness. FPT, VinAI, Viettel AI investing heavily. AI market est. $700M (2025) (Source: Oxford Insights, MIC)', impact: 'High' },
+            { title: 'Fintech & digital payments', description: 'Mobile payment transactions grew 65% YoY, 48M e-wallets. MoMo, ZaloPay, VNPay leading (Source: SBV, Statista)', impact: 'High' },
+            { title: 'Semiconductor & chip manufacturing', description: 'Vietnam chosen by US, Japan, Korea as chip hub. Samsung, Intel expanding factories (Source: MOIT)', impact: 'Medium' },
+            { title: 'Green IT & sustainability', description: 'Net Zero 2050 commitment. Renewable energy IT accounts for 12% of new IT budget (Source: MONRE COP26)', impact: 'Medium' }
         ]
     },
     'Finance': {
         drivers: [
-            { title: '69% dân số chưa sử dụng ngân hàng đầy đủ', description: 'Chỉ 31% người trưởng thành có tài khoản ngân hàng hoạt động thường xuyên (Nguồn: World Bank Findex 2024)', impact: 'High' },
-            { title: 'NHNN khuyến khích số hóa', description: 'QĐ 810/QĐ-NHNN: Đề án thanh toán không dùng tiền mặt 2021-2025, mục tiêu 80% giao dịch điện tử (Nguồn: SBV)', impact: 'High' },
-            { title: 'Mobile banking phát triển nhanh', description: '85 triệu tài khoản mobile banking. Tăng trưởng 45% YoY (Nguồn: SBV Digital Banking Report 2024)', impact: 'High' }
+            { title: '69% population underbanked', description: 'Only 31% of adults have regularly active bank accounts (Source: World Bank Findex 2024)', impact: 'High' },
+            { title: 'SBV encourages digitization', description: 'Decision 810: Cashless payment plan 2021-2025, targeting 80% electronic transactions (Source: SBV)', impact: 'High' },
+            { title: 'Mobile banking growing fast', description: '85 million mobile banking accounts. Growth of 45% YoY (Source: SBV Digital Banking Report 2024)', impact: 'High' }
         ],
         restraints: [
-            { title: 'Quy định cấp phép phức tạp', description: 'Cấp phép e-wallet, lending platform kéo dài 12-18 tháng. NĐ 101/2024 thắt chặt P2P (Nguồn: SBV)', impact: 'High' },
-            { title: 'NPL ratio tăng', description: 'Tỷ lệ nợ xấu hệ thống 4.55% (Q3/2024), gấp đôi ngưỡng an toàn 3% (Nguồn: SBV)', impact: 'Medium' }
+            { title: 'Complex licensing regulations', description: 'E-wallet and lending platform licensing takes 12-18 months. Decree 101/2024 tightened P2P (Source: SBV)', impact: 'High' },
+            { title: 'NPL ratio increasing', description: 'System NPL ratio 4.55% (Q3/2024), double the 3% safety threshold (Source: SBV)', impact: 'Medium' }
         ],
         trends: [
-            { title: 'Open Banking & API Economy', description: 'Pilot open banking với NAPAS và 15 ngân hàng thương mại (Nguồn: NAPAS, SBV)', impact: 'High' },
-            { title: 'BNPL & embedded finance', description: 'Buy Now Pay Later tăng 180% GMV. Kredivo, ShopeePayLater dẫn đầu (Nguồn: Momentum Works)', impact: 'High' },
-            { title: 'RegTech & AML compliance', description: 'NĐ 13/2023 yêu cầu eKYC, AML nâng cao. Thị trường RegTech ước $200M (Nguồn: NHNN, Deloitte)', impact: 'Medium' }
+            { title: 'Open Banking & API Economy', description: 'Open banking pilot with NAPAS and 15 commercial banks (Source: NAPAS, SBV)', impact: 'High' },
+            { title: 'BNPL & embedded finance', description: 'Buy Now Pay Later grew 180% GMV. Kredivo, ShopeePayLater leading (Source: Momentum Works)', impact: 'High' },
+            { title: 'RegTech & AML compliance', description: 'Decree 13/2023 requires eKYC, enhanced AML. RegTech market est. $200M (Source: SBV, Deloitte)', impact: 'Medium' }
         ]
     },
     'Retail': {
         drivers: [
-            { title: 'E-commerce tăng trưởng 25% YoY', description: 'GMV e-commerce $20.5B (2024). Shopee, Lazada, TikTok Shop chiếm 90% (Nguồn: VECOM, Google-Temasek)', impact: 'High' },
-            { title: 'Tầng lớp trung lưu mở rộng', description: '33 triệu người trung lưu, dự kiến 50 triệu (2030) (Nguồn: World Bank, McKinsey)', impact: 'High' },
-            { title: 'Social commerce phát triển', description: 'Livestream selling tăng 300% GMV. 55% mua hàng qua social media (Nguồn: Meta Commerce Report 2024)', impact: 'Medium' }
+            { title: 'E-commerce growing 25% YoY', description: 'E-commerce GMV $20.5B (2024). Shopee, Lazada, TikTok Shop hold 90% (Source: VECOM, Google-Temasek)', impact: 'High' },
+            { title: 'Middle class expanding', description: '33 million middle class, projected 50 million by 2030 (Source: World Bank, McKinsey)', impact: 'High' },
+            { title: 'Social commerce growth', description: 'Livestream selling grew 300% GMV. 55% buy through social media (Source: Meta Commerce Report 2024)', impact: 'Medium' }
         ],
         restraints: [
-            { title: 'Cạnh tranh giá khốc liệt', description: 'Biên lợi nhuận bán lẻ 2-5%. Cuộc chiến giá giữa các platform (Nguồn: KPMG Vietnam Retail)', impact: 'High' },
-            { title: 'Logistics cost cao', description: 'Chi phí logistics 16.8% GDP (vs 8-10% ở nước phát triển) (Nguồn: VLA, World Bank LPI)', impact: 'Medium' }
+            { title: 'Fierce price competition', description: 'Retail profit margin 2-5%. Price war between platforms (Source: KPMG Vietnam Retail)', impact: 'High' },
+            { title: 'High logistics cost', description: 'Logistics costs 16.8% of GDP (vs 8-10% in developed countries) (Source: VLA, World Bank LPI)', impact: 'Medium' }
         ],
         trends: [
-            { title: 'Omnichannel retail', description: 'WinMart, BigC, Con Cưng mở rộng app + cửa hàng (Nguồn: Deloitte Vietnam Retail)', impact: 'High' },
-            { title: 'Quick commerce & 30-min delivery', description: 'Grab, ShopeeFood cạnh tranh giao hàng nhanh. Dark store mở rộng (Nguồn: Euromonitor)', impact: 'Medium' },
-            { title: 'Vietnamese brand rising', description: '75% người tiêu dùng sẵn sàng chi nhiều hơn cho hàng Việt chất lượng (Nguồn: Nielsen Vietnam)', impact: 'Medium' }
+            { title: 'Omnichannel retail', description: 'WinMart, BigC, Con Cuong expanding app + stores (Source: Deloitte Vietnam Retail)', impact: 'High' },
+            { title: 'Quick commerce & 30-min delivery', description: 'Grab, ShopeeFood competing in fast delivery. Dark stores expanding (Source: Euromonitor)', impact: 'Medium' },
+            { title: 'Vietnamese brand rising', description: '75% consumers willing to pay more for quality Vietnamese products (Source: Nielsen Vietnam)', impact: 'Medium' }
         ]
     },
     'Healthcare': {
         drivers: [
-            { title: 'Chi tiêu y tế tăng 12% YoY', description: 'Tổng chi y tế $20B (2024), 5.5% GDP (Nguồn: WHO, GSO)', impact: 'High' },
-            { title: 'Dân số già hóa', description: '12.8% dân số trên 60 tuổi, tăng lên 25% vào 2050. Nhu cầu chăm sóc mãn tính tăng (Nguồn: UNFPA)', impact: 'High' },
-            { title: 'Telehealth & healthtech', description: 'Healthtech market $1.2B, tăng 35% post-COVID. 120+ healthtech startups (Nguồn: Tracxn, MoH)', impact: 'Medium' }
+            { title: 'Healthcare spending grew 12% YoY', description: 'Total healthcare spending $20B (2024), 5.5% of GDP (Source: WHO, GSO)', impact: 'High' },
+            { title: 'Aging population', description: '12.8% of population over 60, rising to 25% by 2050. Chronic care demand growing (Source: UNFPA)', impact: 'High' },
+            { title: 'Telehealth & healthtech', description: 'Healthtech market $1.2B, grew 35% post-COVID. 120+ healthtech startups (Source: Tracxn, MoH)', impact: 'Medium' }
         ],
         restraints: [
-            { title: 'Thiếu bác sĩ nghiêm trọng', description: '8.6 bác sĩ/10,000 dân (so với 34 ở Mỹ). Thiếu 50,000 bác sĩ (Nguồn: MoH, WHO)', impact: 'High' },
-            { title: 'Phân bổ không đều', description: '70% nguồn lực y tế tập trung tại Hà Nội và TP.HCM (Nguồn: MoH)', impact: 'Medium' }
+            { title: 'Severe doctor shortage', description: '8.6 doctors per 10,000 people (vs 34 in US). Shortage of 50,000 doctors (Source: MoH, WHO)', impact: 'High' },
+            { title: 'Uneven distribution', description: '70% of healthcare resources concentrated in Hanoi and HCMC (Source: MoH)', impact: 'Medium' }
         ],
         trends: [
-            { title: 'Digital health records', description: 'Triển khai hồ sơ sức khỏe điện tử toàn dân 2025. 45% bệnh viện đã số hóa (Nguồn: MoH, VNPT)', impact: 'High' },
-            { title: 'Medical tourism', description: 'Vietnam thu hút 50,000+ bệnh nhân quốc tế/năm. Nha khoa, thẩm mỹ dẫn đầu (Nguồn: VNAT)', impact: 'Medium' }
+            { title: 'Digital health records', description: 'Nationwide electronic health records rollout 2025. 45% of hospitals digitized (Source: MoH, VNPT)', impact: 'High' },
+            { title: 'Medical tourism', description: 'Vietnam attracts 50,000+ international patients/year. Dental and cosmetic procedures leading (Source: VNAT)', impact: 'Medium' }
         ]
     },
     'Manufacturing': {
         drivers: [
-            { title: 'China+1 strategy beneficiary', description: 'FDI sản xuất tăng 18% YoY. Samsung, Apple, Intel mở rộng. XK điện tử $132B (2024) (Nguồn: MPI, GSO)', impact: 'High' },
-            { title: '15 FTA đã ký kết', description: 'CPTPP, EVFTA, RCEP giảm thuế 0-5%. Kim ngạch XK $371B (2024) (Nguồn: MOIT)', impact: 'High' },
-            { title: 'Nhân công cạnh tranh', description: 'Lương trung bình $350/tháng. Lực lượng LĐ 52M (Nguồn: GSO, ILO)', impact: 'High' }
+            { title: 'China+1 strategy beneficiary', description: 'Manufacturing FDI grew 18% YoY. Samsung, Apple, Intel expanding. Electronics exports $132B (2024) (Source: MPI, GSO)', impact: 'High' },
+            { title: '15 signed FTAs', description: 'CPTPP, EVFTA, RCEP reduce tariffs to 0-5%. Export turnover $371B (2024) (Source: MOIT)', impact: 'High' },
+            { title: 'Competitive labor', description: 'Average wage $350/month. Workforce of 52M (Source: GSO, ILO)', impact: 'High' }
         ],
         restraints: [
-            { title: 'Phụ thuộc nguyên liệu nhập khẩu', description: 'Tỷ lệ nội địa hóa 33%. Nhập khẩu linh kiện $350B/năm (Nguồn: MOIT, GSO)', impact: 'High' },
-            { title: 'Hạ tầng công nghiệp thiếu', description: 'Tỷ lệ lấp đầy KCN 73%. Thiếu KCN chất lượng cao ở miền Trung/Bắc (Nguồn: MPI)', impact: 'Medium' }
+            { title: 'Dependent on imported materials', description: 'Localization rate 33%. Component imports $350B/year (Source: MOIT, GSO)', impact: 'High' },
+            { title: 'Insufficient industrial infrastructure', description: 'Industrial zone occupancy rate 73%. Lack of high-quality IZs in Central/North regions (Source: MPI)', impact: 'Medium' }
         ],
         trends: [
-            { title: 'Smart manufacturing & Industry 4.0', description: 'Chương trình CN 4.0 quốc gia. 25% DN lớn áp dụng tự động hóa (Nguồn: MOIT)', impact: 'High' },
-            { title: 'Green manufacturing', description: 'EU CBAM ảnh hưởng XK Việt Nam. ESG compliance bắt buộc (Nguồn: EU, MOIT)', impact: 'Medium' },
-            { title: 'Semiconductor packaging', description: 'Vietnam làm hub đóng gói chip. Amkor, Intel mở rộng $3.5B (Nguồn: MOIT, Reuters)', impact: 'Medium' }
+            { title: 'Smart manufacturing & Industry 4.0', description: 'National Industry 4.0 program. 25% of large enterprises adopting automation (Source: MOIT)', impact: 'High' },
+            { title: 'Green manufacturing', description: 'EU CBAM affects Vietnam exports. ESG compliance mandatory (Source: EU, MOIT)', impact: 'Medium' },
+            { title: 'Semiconductor packaging', description: 'Vietnam as chip packaging hub. Amkor, Intel expanding $3.5B (Source: MOIT, Reuters)', impact: 'Medium' }
         ]
     },
     'Logistics': {
         drivers: [
-            { title: 'E-commerce thúc đẩy last-mile', description: 'Đơn hàng e-commerce 2.2B đơn/năm. Giao hàng nhanh tăng 40% (Nguồn: VECOM, VLA)', impact: 'High' },
-            { title: 'Vị trí chiến lược', description: 'Bờ biển 3,260km, giáp Biển Đông. 44 cảng biển, 22 sân bay (Nguồn: MoT)', impact: 'High' }
+            { title: 'E-commerce drives last-mile', description: 'E-commerce orders 2.2B/year. Fast delivery grew 40% (Source: VECOM, VLA)', impact: 'High' },
+            { title: 'Strategic location', description: '3,260km coastline bordering South China Sea. 44 seaports, 22 airports (Source: MoT)', impact: 'High' }
         ],
         restraints: [
-            { title: 'Chi phí logistics cao', description: 'Logistics chiếm 16.8% GDP (vs 8% ở nước phát triển). Hạ tầng nông thôn yếu (Nguồn: VLA, WB)', impact: 'High' },
-            { title: 'Phân mảnh thị trường', description: '34,000+ doanh nghiệp logistics, 90% là SME. Thiếu tích hợp chuỗi (Nguồn: VLA)', impact: 'Medium' }
+            { title: 'High logistics costs', description: 'Logistics accounts for 16.8% of GDP (vs 8% in developed countries). Weak rural infrastructure (Source: VLA, WB)', impact: 'High' },
+            { title: 'Fragmented market', description: '34,000+ logistics enterprises, 90% are SMEs. Lack of supply chain integration (Source: VLA)', impact: 'Medium' }
         ],
         trends: [
-            { title: 'Cold chain logistics', description: 'Tăng 25% YoY, driven by F&B e-commerce và pharma (Nguồn: VLA)', impact: 'High' },
-            { title: 'Digital logistics platforms', description: 'Ahamove, Lalamove, GHN số hóa logistics. TMS adoption tăng 35% (Nguồn: Tracxn)', impact: 'Medium' }
+            { title: 'Cold chain logistics', description: 'Grew 25% YoY, driven by F&B e-commerce and pharma (Source: VLA)', impact: 'High' },
+            { title: 'Digital logistics platforms', description: 'Ahamove, Lalamove, GHN digitizing logistics. TMS adoption grew 35% (Source: Tracxn)', impact: 'Medium' }
         ]
     }
 };
 
 const DEFAULT_DYNAMICS: MarketDynamicsData = {
     drivers: [
-        { title: 'GDP tăng trưởng 6.5-7%', description: 'Vietnam GDP $430B (2024), top 5 ASEAN. Dự báo 6.5% (2025) (Nguồn: World Bank, IMF)', impact: 'High' },
-        { title: 'Tầng lớp trung lưu mở rộng', description: '33 triệu người trung lưu, dự kiến 50 triệu (2030) (Nguồn: World Bank)', impact: 'High' },
-        { title: 'FTA & hội nhập quốc tế', description: '15 FTA đã ký. Kim ngạch XNK $700B+ (2024), top 20 thế giới (Nguồn: MOIT)', impact: 'Medium' }
+        { title: 'GDP growth 6.5-7%', description: 'Vietnam GDP $430B (2024), top 5 ASEAN. Forecast 6.5% (2025) (Source: World Bank, IMF)', impact: 'High' },
+        { title: 'Middle class expanding', description: '33 million middle class, projected 50 million by 2030 (Source: World Bank)', impact: 'High' },
+        { title: 'FTA & international integration', description: '15 signed FTAs. Import/export turnover $700B+ (2024), world top 20 (Source: MOIT)', impact: 'Medium' }
     ],
     restraints: [
-        { title: 'Hạ tầng chưa đồng bộ', description: 'Chi phí logistics 16.8% GDP. Hạ tầng nông thôn yếu (Nguồn: World Bank LPI)', impact: 'Medium' },
-        { title: 'Môi trường pháp lý thay đổi', description: 'Nhiều nghị định mới ảnh hưởng đến planning dài hạn (Nguồn: VCCI)', impact: 'Medium' }
+        { title: 'Infrastructure gaps', description: 'Logistics costs 16.8% of GDP. Weak rural infrastructure (Source: World Bank LPI)', impact: 'Medium' },
+        { title: 'Changing legal environment', description: 'Many new decrees affecting long-term planning (Source: VCCI)', impact: 'Medium' }
     ],
     trends: [
-        { title: 'Chuyển đổi số toàn diện', description: 'Kinh tế số 16.5% GDP (2024), mục tiêu 30% (2030) (Nguồn: MIC)', impact: 'High' },
-        { title: 'ESG & phát triển bền vững', description: 'HOSE yêu cầu báo cáo ESG từ 2025. Investors ưu tiên green business (Nguồn: SSC, HOSE)', impact: 'Medium' },
-        { title: 'Local brands nổi lên', description: '75% người tiêu dùng sẵn sàng chi cho thương hiệu Việt chất lượng (Nguồn: Nielsen)', impact: 'Medium' }
+        { title: 'Comprehensive digital transformation', description: 'Digital economy 16.5% of GDP (2024), targeting 30% by 2030 (Source: MIC)', impact: 'High' },
+        { title: 'ESG & sustainable development', description: 'HOSE requires ESG reporting from 2025. Investors prioritize green business (Source: SSC, HOSE)', impact: 'Medium' },
+        { title: 'Local brands rising', description: '75% of consumers willing to pay more for quality Vietnamese brands (Source: Nielsen)', impact: 'Medium' }
     ]
 };
 
@@ -699,20 +699,20 @@ function personalizeMarketDynamics(
         drivers: dynamics.drivers.map((d, i) => ({
             ...d,
             description: i === 0 && companyName
-                ? `${d.description}. [Tac dong truc tiep den ${companyName}${compShort ? ` va doi thu ${compShort}` : ''}]`
+                ? `${d.description}. [Direct impact on ${companyName}${compShort ? ` and competitor ${compShort}` : ''}]`
                 : d.description,
             title: i === 0 ? d.title + competitorContext : d.title,
         })),
         restraints: dynamics.restraints.map((r, i) => ({
             ...r,
             description: i === 0 && companyName
-                ? `${r.description}. [${companyName} can luu y khi hoach dinh chien luoc]`
+                ? `${r.description}. [${companyName} should note for strategic planning]`
                 : r.description,
         })),
         trends: dynamics.trends.map((t, i) => ({
             ...t,
             description: i === 0 && companyName
-                ? `${t.description}. [Xu huong nay anh huong den vi the cua ${companyName}${compShort ? ` so voi ${compShort}` : ''} trong nganh ${industry}]`
+                ? `${t.description}. [This trend affects ${companyName}'s position${compShort ? ` vs ${compShort}` : ''} in ${industry}]`
                 : t.description,
         })),
     };
@@ -794,20 +794,20 @@ function calculateMarketSize(
     return {
         tam: tamValue >= 1000 ? `$${(tamValue / 1000).toFixed(1)}T` : `$${tamValue}B`,
         tamValue,
-        tamDescription: `Quy mô thị trường toàn cầu [Dữ liệu ~2024, nguồn: ${data.cagrSource}]`,
+        tamDescription: `Global market size [Data ~2024, source: ${data.cagrSource}]`,
         sam: `$${samValue.toFixed(1)}B`,
         samValue,
-        samDescription: `Thị trường khả dụng tại Việt Nam [Dữ liệu ~2024, nguồn: ${data.source}]`,
+        samDescription: `Serviceable available market in Vietnam [Data ~2024, source: ${data.source}]`,
         som: `$${somValue}B`,
         somValue,
-        somDescription: `Doanh thu mục tiêu khả thi, dựa trên ${competitorCount} đối thủ và ${industryPeerCount} doanh nghiệp cùng ngành`,
+        somDescription: `Feasible target revenue, based on ${competitorCount} competitors and ${industryPeerCount} industry peers`,
         cagr: data.cagr,
         cagrPeriod: `${currentYear}-${currentYear + 5}`,
         currentSize: samValue,
         forecastSize: forecastSize ?? samValue,
         revenueHistory,
         years,
-        methodology: `Dữ liệu biên soạn ~2024 từ ${data.cagrSource}. TAM toàn cầu và SAM Việt Nam từ báo cáo ngành. CAGR ${data.cagr}% là ước tính lịch sử. Phân tích ${industryPeerCount} doanh nghiệp cùng ngành trong database VICO.`
+        methodology: `Data compiled ~2024 from ${data.cagrSource}. Global TAM and Vietnam SAM from industry reports. CAGR ${data.cagr}% is a historical estimate. Analysis of ${industryPeerCount} industry peers in VICO database.`
     };
 }
 
@@ -907,9 +907,9 @@ function analyzeCompetitiveLandscape(
     const hhi = marketShare.reduce((sum, c) => sum + Math.pow(c.share, 2), 0);
     const cr4 = marketShare.slice(0, 4).reduce((sum, c) => sum + c.share, 0);
 
-    let level = 'Cạnh tranh cao (Phân tán)';
-    if (hhi > 2500) level = 'Tập trung cao';
-    else if (hhi > 1500) level = 'Tập trung vừa';
+    let level = 'Highly competitive (Fragmented)';
+    if (hhi > 2500) level = 'Highly concentrated';
+    else if (hhi > 1500) level = 'Moderately concentrated';
 
     const avgSimilarity = unique.length > 0
         ? unique.reduce((sum, c) => sum + c.similarity, 0) / unique.length / 100
@@ -923,7 +923,7 @@ function analyzeCompetitiveLandscape(
             level,
             hhi: Math.round(hhi),
             cr4,
-            description: `Phân tích dựa trên ${selectedCompetitors.length} đối thủ đã chọn (${selectedCompetitorNames}) và ${totalIndustryPeers.toLocaleString()} doanh nghiệp cùng ngành trong VICO DB. Top 4 share ~${data.topPlayersShare}% [ước tính ~2024, nguồn: ${data.source}]`
+            description: `Analysis based on ${selectedCompetitors.length} selected competitors (${selectedCompetitorNames}) and ${totalIndustryPeers.toLocaleString()} industry peers in VICO DB. Top 4 share ~${data.topPlayersShare}% [est. ~2024, source: ${data.source}]`
         },
         totalCompaniesInIndustry: totalIndustryPeers > 0 ? totalIndustryPeers : data.estimatedPlayers,
         avgSimilarity
@@ -942,41 +942,41 @@ function calculatePortersForces(
 ): PortersForcesData {
     const competitorNames = selectedCompetitors.map(c => c.name);
     const competitorSnippet = competitorNames.length > 0
-        ? `, bao gồm ${competitorNames.join(', ')}`
+        ? `, including ${competitorNames.join(', ')}`
         : '';
 
     const porterDescriptions: Record<string, {
         supplier: string; buyer: string; entrants: string; substitutes: string; rivalry: string;
     }> = {
         'Technology': {
-            supplier: 'Vừa phải — phụ thuộc talent pool 530K+ developers nhưng thiếu hụt 150K/năm (Nguồn: VINASA, MIC)',
-            buyer: 'Cao — nhiều lựa chọn, dễ chuyển đổi. Price sensitivity cao ở SME segment (Nguồn: VCCI)',
-            entrants: 'Cao — barrier thấp cho software/SaaS. Startup tech tăng 15% YoY (Nguồn: NIC)',
-            substitutes: 'Vừa phải — Open source, global SaaS thay thế local. AI/GenAI tạo disruption mới (Nguồn: MIC)',
-            rivalry: `Cao — ${peerCount > 0 ? peerCount.toLocaleString() : '64,000+'} doanh nghiệp CNTT cạnh tranh${competitorSnippet} (Nguồn: VINASA)`
+            supplier: 'Moderate — dependent on talent pool of 530K+ developers but 150K/year shortage (Source: VINASA, MIC)',
+            buyer: 'High — many options, easy switching. High price sensitivity in SME segment (Source: VCCI)',
+            entrants: 'High — low barrier for software/SaaS. Tech startups grew 15% YoY (Source: NIC)',
+            substitutes: 'Moderate — open source and global SaaS replacing local. AI/GenAI creating new disruption (Source: MIC)',
+            rivalry: `High — ${peerCount > 0 ? peerCount.toLocaleString() : '64,000+'} IT enterprises competing${competitorSnippet} (Source: VINASA)`
         },
         'Finance': {
-            supplier: 'Thấp — Ít nhà cung cấp core banking, chuyển đổi tốn kém (Nguồn: SBV)',
-            buyer: 'Vừa phải — 69% chưa dùng ngân hàng đầy đủ nhưng digital-savvy (Nguồn: World Bank Findex)',
-            entrants: 'Thấp — Cần license SBV, vốn pháp định cao (Nguồn: SBV NĐ 101/2024)',
-            substitutes: 'Cao — Ví MoMo, ZaloPay, crypto thay thế banking truyền thống (Nguồn: SBV)',
-            rivalry: `Cao — 31 ngân hàng TM + 50+ fintech + big tech cạnh tranh${competitorSnippet} (Nguồn: SBV)`
+            supplier: 'Low — few core banking providers, costly switching (Source: SBV)',
+            buyer: 'Moderate — 69% underbanked but digital-savvy (Source: World Bank Findex)',
+            entrants: 'Low — requires SBV license, high charter capital (Source: SBV Decree 101/2024)',
+            substitutes: 'High — MoMo, ZaloPay, crypto replacing traditional banking (Source: SBV)',
+            rivalry: `High — 31 commercial banks + 50+ fintech + big tech competing${competitorSnippet} (Source: SBV)`
         },
         'Retail': {
-            supplier: 'Vừa phải — Nhiều nhà cung cấp nhưng top brands có quyền thương lượng (Nguồn: Nielsen)',
-            buyer: 'Rất cao — Price-sensitive, so sánh giá trên Shopee/Lazada. Brand loyalty thấp (Nguồn: Kantar)',
-            entrants: 'Cao — Barrier thấp cho online selling. TikTok Shop/Facebook phổ biến (Nguồn: VECOM)',
-            substitutes: 'Vừa phải — D2C brands, social commerce thay thế truyền thống (Nguồn: Euromonitor)',
-            rivalry: `Rất cao — ${peerCount > 0 ? peerCount.toLocaleString() : '380,000+'} doanh nghiệp${competitorSnippet}. Biên LN 2-5% (Nguồn: GSO)`
+            supplier: 'Moderate — many suppliers but top brands have bargaining power (Source: Nielsen)',
+            buyer: 'Very high — price-sensitive, compare prices on Shopee/Lazada. Low brand loyalty (Source: Kantar)',
+            entrants: 'High — low barrier for online selling. TikTok Shop/Facebook popular (Source: VECOM)',
+            substitutes: 'Moderate — D2C brands, social commerce replacing traditional (Source: Euromonitor)',
+            rivalry: `Very high — ${peerCount > 0 ? peerCount.toLocaleString() : '380,000+'} enterprises${competitorSnippet}. Margin 2-5% (Source: GSO)`
         }
     };
 
     const desc = porterDescriptions[industry] || {
-        supplier: `Phân tích dựa trên đặc thù ngành ${industry} tại Việt Nam (Nguồn: GSO, VICO)`,
-        buyer: `Người tiêu dùng Việt Nam, thị trường 100M dân. Digital adoption 78% (Nguồn: DataReportal)`,
-        entrants: `Barrier gia nhập phụ thuộc vốn và quy định. CAGR ${data.cagr}% thu hút entrants mới (Nguồn: MPI)`,
-        substitutes: `Công nghệ và global players tạo alternative solutions (Nguồn: VCCI)`,
-        rivalry: `${peerCount > 0 ? peerCount.toLocaleString() : data.estimatedPlayers.toLocaleString()} doanh nghiệp cạnh tranh${competitorSnippet}. Top 4 chiếm ${data.topPlayersShare}% (Nguồn: ${data.source})`
+        supplier: `Analysis based on ${industry} sector characteristics in Vietnam (Source: GSO, VICO)`,
+        buyer: `Vietnamese consumers, 100M population market. 78% digital adoption (Source: DataReportal)`,
+        entrants: `Entry barriers depend on capital and regulations. CAGR ${data.cagr}% attracts new entrants (Source: MPI)`,
+        substitutes: `Technology and global players creating alternative solutions (Source: VCCI)`,
+        rivalry: `${peerCount > 0 ? peerCount.toLocaleString() : data.estimatedPlayers.toLocaleString()} enterprises competing${competitorSnippet}. Top 4 hold ${data.topPlayersShare}% (Source: ${data.source})`
     };
 
     return {
@@ -1001,7 +1001,7 @@ function getRealFundingData(industry: string, data: typeof DEFAULT_INDUSTRY_DATA
         if (matchedComp) {
             return {
                 ...deal,
-                description: `[Doi thu cua ban] ${deal.description}`
+                description: `[Your competitor] ${deal.description}`
             };
         }
         return deal;
@@ -1025,7 +1025,7 @@ function getSectorBreakdown(industry: string, totalValue: number): FundingData['
         'Technology': [
             { name: 'Enterprise SaaS', pct: 28 }, { name: 'Fintech', pct: 22 },
             { name: 'E-commerce', pct: 18 }, { name: 'EdTech', pct: 12 },
-            { name: 'HealthTech', pct: 10 }, { name: 'Khác', pct: 10 }
+            { name: 'HealthTech', pct: 10 }, { name: 'Other', pct: 10 }
         ],
         'Finance': [
             { name: 'Digital Banking', pct: 35 }, { name: 'Payments', pct: 25 },
@@ -1035,18 +1035,18 @@ function getSectorBreakdown(industry: string, totalValue: number): FundingData['
         'Retail': [
             { name: 'E-commerce', pct: 40 }, { name: 'F&B Tech', pct: 20 },
             { name: 'Logistics', pct: 18 }, { name: 'D2C Brands', pct: 12 },
-            { name: 'Khác', pct: 10 }
+            { name: 'Other', pct: 10 }
         ],
         'Healthcare': [
             { name: 'Digital Health', pct: 35 }, { name: 'Pharma', pct: 25 },
             { name: 'MedTech', pct: 20 }, { name: 'Wellness', pct: 12 },
-            { name: 'Khác', pct: 8 }
+            { name: 'Other', pct: 8 }
         ]
     };
 
     const sectors = breakdowns[industry] || [
         { name: industry, pct: 40 }, { name: 'Adjacent Tech', pct: 25 },
-        { name: 'Services', pct: 20 }, { name: 'Khác', pct: 15 }
+        { name: 'Services', pct: 20 }, { name: 'Other', pct: 15 }
     ];
 
     return sectors.map(s => ({
@@ -1062,40 +1062,40 @@ function getVerifiedDeals(industry: string): FundingData['recentDeals'] {
      */
     const verifiedDeals: Record<string, FundingData['recentDeals']> = {
         'Technology': [
-            { type: 'Series B', title: 'KiotViet (DKT Technology)', parties: 'KKR, Jungle Ventures', value: '$45M', date: 'Q3 2024', description: 'POS & retail management SaaS cho SMEs. Nguồn: DealStreetAsia' },
-            { type: 'Series A', title: 'Homebase.ai', parties: 'Y Combinator, Khosla Ventures', value: '$12M', date: 'Q2 2024', description: 'Construction tech. Nguồn: TechInAsia' },
-            { type: 'Series C', title: 'ELSA Speak', parties: 'SIG, Vietnam Investments Group', value: '$23M', date: 'Q1 2024', description: 'AI English learning, 50M+ users. Nguồn: CrunchBase' },
-            { type: 'Acquisition', title: 'Trusting Social by AEON Financial', parties: 'AEON Financial Service', value: '$65M', date: 'Q4 2023', description: 'AI credit scoring platform. Nguồn: Nikkei Asia' }
+            { type: 'Series B', title: 'KiotViet (DKT Technology)', parties: 'KKR, Jungle Ventures', value: '$45M', date: 'Q3 2024', description: 'POS & retail management SaaS for SMEs. Source: DealStreetAsia' },
+            { type: 'Series A', title: 'Homebase.ai', parties: 'Y Combinator, Khosla Ventures', value: '$12M', date: 'Q2 2024', description: 'Construction tech. Source: TechInAsia' },
+            { type: 'Series C', title: 'ELSA Speak', parties: 'SIG, Vietnam Investments Group', value: '$23M', date: 'Q1 2024', description: 'AI English learning, 50M+ users. Source: CrunchBase' },
+            { type: 'Acquisition', title: 'Trusting Social by AEON Financial', parties: 'AEON Financial Service', value: '$65M', date: 'Q4 2023', description: 'AI credit scoring platform. Source: Nikkei Asia' }
         ],
         'Finance': [
-            { type: 'Series D', title: 'MoMo (M_Service)', parties: 'Mizuho, Ward Ferry', value: '$100M', date: 'Q1 2024', description: 'Super-app thanh toán, 35M users. Nguồn: Bloomberg' },
-            { type: 'Series B', title: 'Timo Digital Bank', parties: 'SquarePoint Capital', value: '$20M', date: 'Q3 2024', description: 'Neobank tiên phong tại Vietnam. Nguồn: DealStreetAsia' },
-            { type: 'Series A', title: 'Finhay (Infina)', parties: 'Openspace, TVS Motor', value: '$25M', date: 'Q2 2024', description: 'Wealth management, 3M+ users. Nguồn: TechInAsia' }
+            { type: 'Series D', title: 'MoMo (M_Service)', parties: 'Mizuho, Ward Ferry', value: '$100M', date: 'Q1 2024', description: 'Payment super-app, 35M users. Source: Bloomberg' },
+            { type: 'Series B', title: 'Timo Digital Bank', parties: 'SquarePoint Capital', value: '$20M', date: 'Q3 2024', description: 'Pioneer neobank in Vietnam. Source: DealStreetAsia' },
+            { type: 'Series A', title: 'Finhay (Infina)', parties: 'Openspace, TVS Motor', value: '$25M', date: 'Q2 2024', description: 'Wealth management, 3M+ users. Source: TechInAsia' }
         ],
         'Retail': [
-            { type: 'Series C', title: 'Tiki Corporation', parties: 'AIA, STIC Investments', value: '$258M (tổng)', date: '2024', description: 'E-commerce marketplace, TikiNOW. Nguồn: CrunchBase' },
-            { type: 'Series A', title: 'Kilo Granding', parties: 'Do Ventures', value: '$5M', date: 'Q2 2024', description: 'Grocery-tech cửa hàng tạp hóa. Nguồn: TechInAsia' }
+            { type: 'Series C', title: 'Tiki Corporation', parties: 'AIA, STIC Investments', value: '$258M (total)', date: '2024', description: 'E-commerce marketplace, TikiNOW. Source: CrunchBase' },
+            { type: 'Series A', title: 'Kilo Granding', parties: 'Do Ventures', value: '$5M', date: 'Q2 2024', description: 'Grocery-tech for convenience stores. Source: TechInAsia' }
         ],
         'Healthcare': [
-            { type: 'Series B', title: 'Docosan', parties: 'Openspace, CyberAgent', value: '$8M', date: 'Q3 2024', description: 'Healthcare booking, 6,000+ doctors. Nguồn: DealStreetAsia' },
-            { type: 'Pre-Series A', title: 'Medigo', parties: 'Y Combinator', value: '$2.5M', date: 'Q1 2024', description: 'Pharmacy-tech & drug delivery. Nguồn: CrunchBase' }
+            { type: 'Series B', title: 'Docosan', parties: 'Openspace, CyberAgent', value: '$8M', date: 'Q3 2024', description: 'Healthcare booking, 6,000+ doctors. Source: DealStreetAsia' },
+            { type: 'Pre-Series A', title: 'Medigo', parties: 'Y Combinator', value: '$2.5M', date: 'Q1 2024', description: 'Pharmacy-tech & drug delivery. Source: CrunchBase' }
         ],
         'Education': [
-            { type: 'Series C', title: 'ELSA Speak', parties: 'SIG, Vietnam Investments Group', value: '$23M', date: 'Q1 2024', description: 'AI English learning app. Nguồn: CrunchBase' },
-            { type: 'Series B', title: 'MindX Technology School', parties: 'Monk\'s Hill, Do Ventures', value: '$15M', date: 'Q2 2024', description: 'STEM education platform. Nguồn: TechInAsia' }
+            { type: 'Series C', title: 'ELSA Speak', parties: 'SIG, Vietnam Investments Group', value: '$23M', date: 'Q1 2024', description: 'AI English learning app. Source: CrunchBase' },
+            { type: 'Series B', title: 'MindX Technology School', parties: 'Monk\'s Hill, Do Ventures', value: '$15M', date: 'Q2 2024', description: 'STEM education platform. Source: TechInAsia' }
         ],
         'Manufacturing': [
-            { type: 'FDI Expansion', title: 'Samsung Vietnam', parties: 'Samsung Electronics', value: '$1.8B', date: '2024', description: 'Mở rộng các nhà máy tại Bắc Ninh, Thái Nguyên. Nguồn: MPI' },
-            { type: 'FDI', title: 'Amkor Technology', parties: 'Amkor Technology Inc.', value: '$1.6B', date: '2024', description: 'Nhà máy đóng gói chip tại Bắc Ninh. Nguồn: Reuters' }
+            { type: 'FDI Expansion', title: 'Samsung Vietnam', parties: 'Samsung Electronics', value: '$1.8B', date: '2024', description: 'Expanding factories in Bac Ninh, Thai Nguyen. Source: MPI' },
+            { type: 'FDI', title: 'Amkor Technology', parties: 'Amkor Technology Inc.', value: '$1.6B', date: '2024', description: 'Chip packaging factory in Bac Ninh. Source: Reuters' }
         ],
         'Logistics': [
-            { type: 'Series C', title: 'Ahamove', parties: 'Temasek, SoftBank Vision', value: '$42M', date: 'Q3 2024', description: 'Last-mile delivery platform. Nguồn: DealStreetAsia' },
-            { type: 'Series B', title: 'GHN (Giao Hàng Nhanh)', parties: 'Temasek', value: '$100M', date: '2024', description: 'E-commerce logistics leader. Nguồn: Bloomberg' }
+            { type: 'Series C', title: 'Ahamove', parties: 'Temasek, SoftBank Vision', value: '$42M', date: 'Q3 2024', description: 'Last-mile delivery platform. Source: DealStreetAsia' },
+            { type: 'Series B', title: 'GHN (Giao Hang Nhanh)', parties: 'Temasek', value: '$100M', date: '2024', description: 'E-commerce logistics leader. Source: Bloomberg' }
         ]
     };
 
     return verifiedDeals[industry] || [
-        { type: 'N/A', title: `Chưa có dữ liệu deals cụ thể cho ngành ${industry}`, parties: '—', value: '—', date: '2024', description: `Liên hệ DealStreetAsia, TechInAsia để cập nhật funding ngành ${industry} tại Việt Nam` }
+        { type: 'N/A', title: `No specific deal data available for ${industry} sector`, parties: '—', value: '—', date: '2024', description: `Check DealStreetAsia, TechInAsia for ${industry} funding updates in Vietnam` }
     ];
 }
 
@@ -1108,15 +1108,15 @@ function generateExecutiveSummary(
     data: typeof DEFAULT_INDUSTRY_DATA,
     aiOverlay: AIMarketOverlay | null
 ): MarketIntelligenceReport['executiveSummary'] {
-    const companyName = userCompany.name || 'Doanh nghiệp';
+    const companyName = userCompany.name || 'Enterprise';
     const industry = userCompany.industry || 'Technology';
     const competitorNames = competitors.map(c => c.name).join(', ');
     const competitorNamesShort = competitors.length > 3
-        ? competitors.slice(0, 3).map(c => c.name).join(', ') + ` và ${competitors.length - 3} đối thủ khác`
+        ? competitors.slice(0, 3).map(c => c.name).join(', ') + ` and ${competitors.length - 3} other competitors`
         : competitorNames;
 
-    const growthLabel = data.cagr > 15 ? 'tăng trưởng nhanh' : data.cagr > 10 ? 'tăng trưởng ổn định' : 'phát triển bền vững';
-    const concentrationDesc = landscape.concentration.hhi > 2500 ? 'tập trung cao' : landscape.concentration.hhi > 1500 ? 'tập trung vừa' : 'cạnh tranh phân tán';
+    const growthLabel = data.cagr > 15 ? 'rapid growth' : data.cagr > 10 ? 'stable growth' : 'sustainable development';
+    const concentrationDesc = landscape.concentration.hhi > 2500 ? 'highly concentrated' : landscape.concentration.hhi > 1500 ? 'moderately concentrated' : 'fragmented competition';
 
     // Build competitor profile summaries for the overview
     const competitorProfiles = competitors.slice(0, 3).map(c => {
@@ -1127,27 +1127,27 @@ function generateExecutiveSummary(
 
     return {
         overview: aiOverlay
-            ? `${aiOverlay.marketOutlook} **${companyName}** đang cạnh tranh trực tiếp với **${competitorNamesShort}** trong thị trường **${concentrationDesc}** (HHI: ${landscape.concentration.hhi}). ${competitorProfiles ? `Các đối thủ chính: ${competitorProfiles}.` : ''} [Dữ liệu tĩnh biên soạn ~2024: CAGR ${data.cagr}%, SAM ${marketSize.sam}. Nguồn: ${data.source}]`
-            : `**Thị trường ${industry} tại Việt Nam** đang trong giai đoạn ${growthLabel} với CAGR ${data.cagr}% (${marketSize.cagrPeriod}). Quy mô thị trường hiện tại **${marketSize.sam}**, dự kiến đạt **$${marketSize.forecastSize.toFixed(1)}B** vào ${parseInt(marketSize.years[marketSize.years.length - 1] || String(new Date().getFullYear() + 5))}. **${companyName}** cạnh tranh trực tiếp với **${competitorNamesShort}** trong thị trường **${concentrationDesc}** (HHI: ${landscape.concentration.hhi}). ${competitorProfiles ? `Đối thủ đã chọn phân tích: ${competitorProfiles}.` : ''} Số liệu TAM/SAM/CAGR từ dữ liệu tĩnh biên soạn ~2024. Nguồn gốc: ${data.source}.`,
+            ? `${aiOverlay.marketOutlook} **${companyName}** is competing directly with **${competitorNamesShort}** in a **${concentrationDesc}** market (HHI: ${landscape.concentration.hhi}). ${competitorProfiles ? `Key competitors: ${competitorProfiles}.` : ''} [Static data compiled ~2024: CAGR ${data.cagr}%, SAM ${marketSize.sam}. Source: ${data.source}]`
+            : `**The ${industry} market in Vietnam** is in a phase of ${growthLabel} with CAGR ${data.cagr}% (${marketSize.cagrPeriod}). Current market size **${marketSize.sam}**, expected to reach **$${marketSize.forecastSize.toFixed(1)}B** by ${parseInt(marketSize.years[marketSize.years.length - 1] || String(new Date().getFullYear() + 5))}. **${companyName}** competes directly with **${competitorNamesShort}** in a **${concentrationDesc}** market (HHI: ${landscape.concentration.hhi}). ${competitorProfiles ? `Selected competitors for analysis: ${competitorProfiles}.` : ''} TAM/SAM/CAGR figures from static data compiled ~2024. Source: ${data.source}.`,
 
         keyInsights: [
-            `TAM: ${marketSize.tam} | SAM VN: ${marketSize.sam} | SOM: ${marketSize.som} [Dữ liệu ~2024, nguồn: ${data.cagrSource}]`,
-            `${landscape.totalCompaniesInIndustry.toLocaleString()} doanh nghiệp cùng ngành — ${companyName} cạnh tranh trực tiếp với ${competitorNamesShort}`,
+            `TAM: ${marketSize.tam} | SAM VN: ${marketSize.sam} | SOM: ${marketSize.som} [Data ~2024, source: ${data.cagrSource}]`,
+            `${landscape.totalCompaniesInIndustry.toLocaleString()} industry peers — ${companyName} competes directly with ${competitorNamesShort}`,
             `Top competitor: ${landscape.marketShare[0]?.name || 'N/A'} (${landscape.marketShare[0]?.share}% market share, +${landscape.marketShare[0]?.growth}% growth)`,
-            `${funding.totalDeals} deals đầu tư (data ~2024) — Tổng giá trị ${funding.totalValue} — Avg deal size ${funding.avgDealSize}`,
+            `${funding.totalDeals} investment deals (data ~2024) — Total value ${funding.totalValue} — Avg deal size ${funding.avgDealSize}`,
             ...(aiOverlay ? aiOverlay.executiveInsights.slice(0, 2).map(i => `[AI] ${i}`) : []),
-            `Competitive intensity: ${landscape.avgSimilarity > 0.7 ? 'RẤT CAO' : landscape.avgSimilarity > 0.5 ? 'CAO' : 'TRUNG BÌNH'} — Avg similarity ${(landscape.avgSimilarity * 100).toFixed(0)}%`,
-            aiOverlay ? 'Báo cáo được bổ sung bởi AI analysis hiện tại' : 'Báo cáo chỉ dùng dữ liệu tĩnh ~2024 — AI không khả dụng',
+            `Competitive intensity: ${landscape.avgSimilarity > 0.7 ? 'VERY HIGH' : landscape.avgSimilarity > 0.5 ? 'HIGH' : 'MEDIUM'} — Avg similarity ${(landscape.avgSimilarity * 100).toFixed(0)}%`,
+            aiOverlay ? 'Report supplemented by current AI analysis' : 'Report uses static data only (~2024) — AI unavailable',
         ],
 
         recommendations: [
-            `Differentiation là ưu tiên #1: ${companyName} có ${competitors.length} đối thủ trực tiếp (${competitorNamesShort}) với profile tương đồng. Focus vào unique value proposition`,
-            `Theo dõi ${landscape.marketShare[0]?.name || 'market leader'} (${landscape.marketShare[0]?.share}% share) — đối thủ có vị thế cao nhất trong phân tích`,
+            `Differentiation is priority #1: ${companyName} has ${competitors.length} direct competitors (${competitorNamesShort}) with similar profiles. Focus on unique value proposition`,
+            `Monitor ${landscape.marketShare[0]?.name || 'market leader'} (${landscape.marketShare[0]?.share}% share) — competitor with highest position in analysis`,
             funding.yoyGrowth > 0
-                ? `Thị trường funding đang nóng (+${funding.yoyGrowth}% YoY data ~2024) — cân nhắc fundraising hoặc strategic partnership`
-                : `Thị trường funding co lại (${funding.yoyGrowth}% YoY data ~2024) — tập trung profitability và unit economics`,
+                ? `Funding market is hot (+${funding.yoyGrowth}% YoY data ~2024) — consider fundraising or strategic partnership`
+                : `Funding market contracting (${funding.yoyGrowth}% YoY data ~2024) — focus on profitability and unit economics`,
             ...(aiOverlay ? aiOverlay.opportunities.slice(0, 2).map(o => `[AI Opportunity] ${o}`) : []),
-            `Tận dụng CAGR ${data.cagr}% (ước tính ~2024) — window 3-5 năm để ${companyName} mở rộng thị phần trước consolidation`
+            `Leverage CAGR ${data.cagr}% (est. ~2024) — 3-5 year window for ${companyName} to expand market share before consolidation`
         ]
     };
 }

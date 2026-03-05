@@ -432,46 +432,46 @@ const ConcentrationGauge = ({ level, hhi }: { level: string; hhi: number }) => {
 const getPESTLEData = (industry: string) => {
     const industrySpecific: Record<string, { pDetails: string[]; eDetails: string[]; sDetails: string[]; tDetails: string[]; lDetails: string[]; envDetails: string[] }> = {
         'Technology': {
-            pDetails: ['QD 749: Chuyen doi so quoc gia 2025-2030', 'Uu dai thue cho DN cong nghe cao', 'Chinh tri on dinh, FTA: RCEP, CPTPP, EVFTA', 'Ngan sach $2B cho digital infrastructure'],
-            eDetails: ['GDP tang 6.5%, kinh te so 16.5% GDP', 'FDI dang ky $36.6B (2024)', 'Tang lop trung luu 33 trieu', 'Outsourcing hub top 6 toan cau'],
-            sDetails: ['79.1M nguoi dung internet (78.4%)', '72.7M smartphone users', 'Median age 31.9 tuoi', '530,000+ lap trinh vien'],
-            tDetails: ['5G phu song 63 tinh', 'AI market uoc $700M (2025)', '3,800+ tech startups', 'Cloud migration tang 78%'],
-            lDetails: ['Luat An ninh mang 2018', 'ND 13/2023: Data localization', 'Sandbox fintech', 'PDPD co hieu luc 2024'],
-            envDetails: ['Net Zero 2050', 'Green IT chiem 12% ngan sach CNTT', 'ESG compliance bat buoc', 'Renewable 30% den 2030']
+            pDetails: ['Decision 749: National Digital Transformation 2025-2030', 'Tax incentives for high-tech enterprises', 'Political stability, FTA: RCEP, CPTPP, EVFTA', '$2B budget for digital infrastructure'],
+            eDetails: ['GDP growth 6.5%, digital economy 16.5% GDP', 'Registered FDI $36.6B (2024)', 'Middle class 33 million', 'Top 6 outsourcing hub globally'],
+            sDetails: ['79.1M internet users (78.4%)', '72.7M smartphone users', 'Median age 31.9 years', '530,000+ developers'],
+            tDetails: ['5G coverage across 63 provinces', 'AI market est. $700M (2025)', '3,800+ tech startups', 'Cloud migration grew 78%'],
+            lDetails: ['Cybersecurity Law 2018', 'Decree 13/2023: Data localization', 'Fintech sandbox', 'PDPD effective 2024'],
+            envDetails: ['Net Zero 2050', 'Green IT: 12% of IT budget', 'ESG compliance mandatory', 'Renewables 30% by 2030']
         },
         'Finance': {
-            pDetails: ['NHNN khuyen khich so hoa (QD 810)', '69% chua su dung ngan hang day du', 'Sandbox fintech regulation', 'Chinh sach tien te on dinh'],
-            eDetails: ['85 trieu tai khoan mobile banking', 'E-wallet GMV tang 65% YoY', 'NPL ratio 4.55% (Q3/2024)', 'FDI nganh tai chinh tang'],
-            sDetails: ['48M vi dien tu', 'Gen Z/Millennial digital-first', 'BNPL tang 180% GMV', 'Financial literacy dang tang'],
-            tDetails: ['Open Banking pilot voi NAPAS', 'AI credit scoring pho bien', 'Blockchain/DeFi thi nghiem', 'eKYC bat buoc'],
-            lDetails: ['ND 101/2024 that chat P2P', 'Cap phep e-wallet 12-18 thang', 'AML/CFT nang cao', 'Basel III trien khai'],
-            envDetails: ['Green bond thi truong $15B', 'ESG cho ngan hang 2025', 'Sustainable finance framework', 'Carbon credit trading']
+            pDetails: ['SBV encourages digitization (Decision 810)', '69% underbanked population', 'Fintech sandbox regulation', 'Stable monetary policy'],
+            eDetails: ['85M mobile banking accounts', 'E-wallet GMV grew 65% YoY', 'NPL ratio 4.55% (Q3/2024)', 'FDI in financial sector growing'],
+            sDetails: ['48M e-wallets', 'Gen Z/Millennial digital-first', 'BNPL grew 180% GMV', 'Financial literacy increasing'],
+            tDetails: ['Open Banking pilot with NAPAS', 'AI credit scoring widespread', 'Blockchain/DeFi experiments', 'eKYC mandatory'],
+            lDetails: ['Decree 101/2024 tightened P2P', 'E-wallet licensing 12-18 months', 'Enhanced AML/CFT', 'Basel III implementation'],
+            envDetails: ['Green bond market $15B', 'ESG for banks 2025', 'Sustainable finance framework', 'Carbon credit trading']
         },
         'Retail': {
-            pDetails: ['VECOM ho tro e-commerce', 'FTA giam thue xuat nhap khau 0-5%', 'Chinh sach bao ve nguoi tieu dung', 'Uu dai DN vua va nho'],
-            eDetails: ['E-commerce GMV $20.5B (2024)', 'Tang lop trung luu 33 trieu -> 50 trieu', 'Bien loi nhuan ban le 2-5%', 'Social commerce tang 300%'],
-            sDetails: ['55% mua hang qua social media', 'Livestream selling bung no', 'Quick commerce 30 phut', '75% ung ho hang Viet chat luong'],
-            tDetails: ['Shopee, Lazada, TikTok Shop chiem 90%', 'Omnichannel retail mo rong', 'AI personalization', 'Dark store logistics'],
-            lDetails: ['Bao ve quyen nguoi tieu dung', 'Quy dinh e-commerce moi', 'Thue san thuong mai dien tu', 'IP enforcement'],
-            envDetails: ['Bao bi xanh bat buoc', 'Circular economy', 'Tieu dung ben vung tang', 'Carbon footprint labeling']
+            pDetails: ['VECOM supports e-commerce', 'FTA reduces import/export tax to 0-5%', 'Consumer protection policy', 'SME incentives'],
+            eDetails: ['E-commerce GMV $20.5B (2024)', 'Middle class 33M → 50M', 'Retail profit margin 2-5%', 'Social commerce grew 300%'],
+            sDetails: ['55% buy through social media', 'Livestream selling booming', 'Quick commerce 30 minutes', '75% support quality Vietnamese products'],
+            tDetails: ['Shopee, Lazada, TikTok Shop hold 90%', 'Omnichannel retail expanding', 'AI personalization', 'Dark store logistics'],
+            lDetails: ['Consumer rights protection', 'New e-commerce regulations', 'E-commerce platform tax', 'IP enforcement'],
+            envDetails: ['Green packaging mandatory', 'Circular economy', 'Sustainable consumption growing', 'Carbon footprint labeling']
         },
         'Healthcare': {
-            pDetails: ['Chi tieu y te tang 12% YoY', 'Ho so suc khoe dien tu 2025', 'Bao hiem y te pho cap', 'Chinh sach telehealth'],
-            eDetails: ['Tong chi y te $20B (5.5% GDP)', 'Healthtech market $1.2B', '120+ healthtech startups', 'Medical tourism tang'],
-            sDetails: ['12.8% dan so tren 60 tuoi', 'Nhu cau cham soc man tinh tang', '50,000+ benh nhan quoc te/nam', 'Nhan thuc suc khoe tang'],
-            tDetails: ['Telehealth post-COVID tang 35%', '45% benh vien da so hoa', 'AI diagnostics', 'Wearable health devices'],
-            lDetails: ['Quy dinh thiet bi y te', 'Data privacy y te', 'Sandbox healthtech', 'Quy dinh duoc pham'],
-            envDetails: ['Xu ly chat thai y te', 'Green hospital', 'Sustainable pharma', 'Vaccine cold chain green']
+            pDetails: ['Healthcare spending grew 12% YoY', 'Electronic health records 2025', 'Universal health insurance', 'Telehealth policy'],
+            eDetails: ['Total healthcare spending $20B (5.5% GDP)', 'Healthtech market $1.2B', '120+ healthtech startups', 'Medical tourism growing'],
+            sDetails: ['12.8% population over 60', 'Chronic care demand growing', '50,000+ international patients/year', 'Health awareness growing'],
+            tDetails: ['Telehealth post-COVID grew 35%', '45% hospitals digitized', 'AI diagnostics', 'Wearable health devices'],
+            lDetails: ['Medical device regulations', 'Healthcare data privacy', 'Healthtech sandbox', 'Pharmaceutical regulations'],
+            envDetails: ['Medical waste management', 'Green hospital', 'Sustainable pharma', 'Vaccine cold chain green']
         }
     };
 
     const data = industrySpecific[industry] || {
-        pDetails: ['Chinh phu ho tro nganh ' + industry, 'On dinh chinh tri', 'FTA: RCEP, CPTPP, EVFTA', 'Quy hoach nganh 2025-2030'],
-        eDetails: ['GDP tang 6.5%', 'Tang lop trung luu 33 trieu', 'FDI tang 32% YoY', 'Lam phat kiem soat 3.5%'],
-        sDetails: ['70% dan so duoi 35 tuoi', 'Internet 78%, Smartphone 85%', 'Thi truong 100M dan', 'Digital adoption cao'],
-        tDetails: ['5G phu song 63 tinh', 'AI adoption tang', 'Cloud migration 78%', 'Startup ecosystem phat trien'],
-        lDetails: ['Luat An ninh mang 2018', 'PDPD co hieu luc 2024', 'IP protection can cai thien', 'Quy dinh nganh cap nhat'],
-        envDetails: ['Net Zero 2050', 'Green financing $15B', 'ESG requirements tang', 'Renewable 30% den 2030']
+        pDetails: ['Government supports ' + industry + ' sector', 'Political stability', 'FTA: RCEP, CPTPP, EVFTA', 'Sector planning 2025-2030'],
+        eDetails: ['GDP growth 6.5%', 'Middle class 33 million', 'FDI grew 32% YoY', 'Inflation controlled at 3.5%'],
+        sDetails: ['70% population under 35', 'Internet 78%, Smartphone 85%', 'Market of 100M people', 'High digital adoption'],
+        tDetails: ['5G covers 63 provinces', 'AI adoption growing', 'Cloud migration 78%', 'Startup ecosystem developing'],
+        lDetails: ['Cybersecurity Law 2018', 'PDPD effective 2024', 'IP protection needs improvement', 'Updated industry regulations'],
+        envDetails: ['Net Zero 2050', 'Green financing $15B', 'ESG requirements growing', 'Renewables 30% by 2030']
     };
 
     return [
@@ -1019,7 +1019,7 @@ export const MarketIndustryPage: React.FC<MarketIndustryPageProps> = ({ userData
                                                     ? 'bg-amber-50 text-amber-500'
                                                     : 'hover:bg-[#F4F4F5]:bg-gray-800 text-[#A1A1AA]'
                                             }`}
-                                            title={bookmarkedSections.has('overview') ? 'Bỏ bookmark' : 'Bookmark phần này'}
+                                            title={bookmarkedSections.has('overview') ? 'Remove bookmark' : 'Bookmark this section'}
                                         >
                                             {bookmarkedSections.has('overview') ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
                                         </button>
