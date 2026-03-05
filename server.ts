@@ -87,6 +87,19 @@ function sanitizeQuery(input: unknown, maxLen = 200): string | null {
     return input.trim().slice(0, maxLen);
 }
 
+// Helper: enforce Clerk auth on sensitive endpoints
+// Returns userId when authenticated, or null + 401 response when not.
+// When CLERK_SECRET_KEY is not set (dev mode), bypasses auth entirely.
+function requireAuth(req: Request, res: Response): string | null {
+    if (!process.env['CLERK_SECRET_KEY']) return 'dev_user'; // Dev mode bypass
+    const userId = req.auth?.userId;
+    if (!userId) {
+        res.status(401).json({ error: 'Unauthorized — please sign in' });
+        return null;
+    }
+    return userId;
+}
+
 // 🆕 Initialize RSS Parser for Live News
 const rssParser = new Parser();
 
@@ -246,7 +259,7 @@ app.get('/api/strategies/my', async (req: Request, res: Response): Promise<void>
             return;
         }
 
-        const strategies = getUserStrategies(userId);
+        const strategies = await getUserStrategies(userId);
         res.json({ success: true, strategies, count: strategies.length });
     } catch (error) {
         console.error('❌ Error fetching strategies:', error);
@@ -264,13 +277,13 @@ app.get('/api/strategies/:id', async (req: Request, res: Response): Promise<void
         }
 
         const strategyId = req.params['id'] ?? '';
-        const strategy = getStrategy(userId, strategyId);
+        const strategy = await getStrategy(userId, strategyId);
         if (!strategy) {
             res.status(404).json({ error: 'Strategy not found' });
             return;
         }
 
-        const versions = getStrategyVersions(userId, strategyId);
+        const versions = await getStrategyVersions(userId, strategyId);
         res.json({ success: true, strategy, versions });
     } catch (error) {
         console.error('❌ Error fetching strategy:', error);
@@ -294,7 +307,7 @@ app.post('/api/strategies/save', async (req: Request, res: Response): Promise<vo
             return;
         }
 
-        const result = saveStrategy(userId, companyName, type || 'gtm', strategyData, {
+        const result = await saveStrategy(userId, companyName, type || 'gtm', strategyData, {
             title,
             description,
             companyId,
@@ -323,7 +336,7 @@ app.delete('/api/strategies/:id', async (req: Request, res: Response): Promise<v
             return;
         }
 
-        const deleted = deleteStrategy(userId, req.params['id'] ?? '');
+        const deleted = await deleteStrategy(userId, req.params['id'] ?? '');
         if (!deleted) {
             res.status(404).json({ error: 'Strategy not found' });
             return;
@@ -354,7 +367,7 @@ app.post('/api/strategies/:id/restore', async (req: Request, res: Response): Pro
         }
 
         const restoreId = req.params['id'] ?? '';
-        const restored = restoreVersion(userId, restoreId, version);
+        const restored = await restoreVersion(userId, restoreId, version);
         if (!restored) {
             res.status(404).json({ error: 'Strategy or version not found' });
             return;
@@ -526,8 +539,9 @@ app.get('/api/companies/competitors', async (req, res): Promise<void> => {
     }
 });
 
-// 🆕 New endpoint: Get all companies for RAG vectorization
-app.get('/api/companies/raw/all', (_req, res) => {
+// 🆕 New endpoint: Get all companies for RAG vectorization (auth required)
+app.get('/api/companies/raw/all', (req, res) => {
+    if (!requireAuth(req, res)) return;
     try {
         res.json({
             total: allCompaniesData.length,
@@ -726,8 +740,9 @@ app.get('/api/vectors/cache', (_req, res) => {
     }
 });
 
-// 🧠 Market Intelligence API - Dynamic Market Analysis
+// 🧠 Market Intelligence API (auth required)
 app.post('/api/market-intelligence', async (req: Request, res: Response): Promise<void> => {
+    if (!requireAuth(req, res)) return;
     try {
         const { userCompany, selectedCompetitors } = req.body;
 
@@ -757,8 +772,9 @@ app.post('/api/market-intelligence', async (req: Request, res: Response): Promis
     }
 });
 
-// 🎯 Competitor Intelligence API - Comprehensive Competitor Analysis
+// 🎯 Competitor Intelligence API (auth required)
 app.post('/api/competitor-intelligence', async (req: Request, res: Response): Promise<void> => {
+    if (!requireAuth(req, res)) return;
     try {
         const { userCompany, selectedCompetitors } = req.body;
 
@@ -785,8 +801,9 @@ app.post('/api/competitor-intelligence', async (req: Request, res: Response): Pr
     }
 });
 
-// 🎯 Customer Insights API - Deep Customer Understanding
+// 🎯 Customer Insights API (auth required)
 app.post('/api/customer-insights', async (req: Request, res: Response): Promise<void> => {
+    if (!requireAuth(req, res)) return;
     try {
         const { companyName, industry, products, targetMarket } = req.body;
 
@@ -814,8 +831,9 @@ app.post('/api/customer-insights', async (req: Request, res: Response): Promise<
     }
 });
 
-// 🆕 GTM Strategy Generation Endpoint — AI-Powered Living Playbook (No Fake Data)
+// 🆕 GTM Strategy Generation Endpoint (auth required)
 app.post('/api/gtm/generate', async (req: Request, res: Response): Promise<void> => {
+    if (!requireAuth(req, res)) return;
     try {
         const { companyName, targetMarkets = [] } = req.body;
 
@@ -869,8 +887,9 @@ app.post('/api/playbooks/generate', async (req: Request, res: Response): Promise
     }
 });
 
-// 🎯 ICP Engine — Smart Customer Segmentation & Ideal Customer Profile (Phase 13)
+// 🎯 ICP Engine (auth required)
 app.post('/api/icp/generate', async (req: Request, res: Response): Promise<void> => {
+    if (!requireAuth(req, res)) return;
     try {
         const { companyName, industry, productDescription } = req.body;
 

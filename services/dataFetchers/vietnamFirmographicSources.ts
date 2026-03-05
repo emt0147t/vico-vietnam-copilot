@@ -1,20 +1,20 @@
 /**
  * 🏢 Vietnamese Firmographic Data Sources
  *
- * Connector skeletons for 6 Vietnamese data sources.
+ * Connector implementations for Vietnamese data sources.
  * Each source defines fetch logic, parsing, and trust scores.
- * Ready to plug into real APIs when access is obtained.
  *
  * Sources:
- * 1. DangKyKinhDoanh.gov.vn — Business registration, tax code
- * 2. CafeF.vn — Financial statements, ticker data
- * 3. GSO (gso.gov.vn) — Industry workforce, sector stats
- * 4. VCCI — Business rankings, climate data
- * 5. HOSE/HNX/UPCoM — Listed company fundamentals
- * 6. Wikidata — Structured company metadata
+ * 1. DangKyKinhDoanh.gov.vn — Business registration, tax code  [skeleton — no public API]
+ * 2. CafeF.vn — Financial statements, ticker data              [LIVE ✅]
+ * 3. GSO (gso.gov.vn) — Industry workforce, sector stats       [skeleton — sector level only]
+ * 4. VCCI — Business rankings, climate data                    [skeleton — no public API]
+ * 5. HOSE/HNX/UPCoM — Listed company fundamentals             [LIVE via CafeF ✅]
+ * 6. Wikidata — Structured company metadata                    [LIVE ✅ via SPARQL]
  */
 
 import { CompanyProfile } from '../../data/companies';
+import { fetchCafeFFinancials, fetchCafeFStock } from '../cafefLiveFetcher';
 
 // ============================================================================
 // TYPES
@@ -36,10 +36,10 @@ export interface FirmographicSource {
     nameVi: string;
     baseUrl: string;
     trustScore: number;
-    dataFields: string[];        // What fields this source provides
+    dataFields: string[];
     rateLimit: number;           // Requests per minute
     requiresAuth: boolean;
-    fetch(companyName: string, taxCode?: string): Promise<FirmographicResult | null>;
+    fetch(companyName: string, taxCode?: string, ticker?: string): Promise<FirmographicResult | null>;
 }
 
 // ============================================================================
@@ -50,6 +50,7 @@ export const FIRMOGRAPHIC_SOURCES: FirmographicSource[] = [
 
     // ─────────────────────────────────────────────────────────
     // 1. DangKyKinhDoanh.gov.vn — Business Registration Portal
+    // Status: skeleton — portal has no public REST API
     // ─────────────────────────────────────────────────────────
     {
         id: 'dkkd',
@@ -62,43 +63,29 @@ export const FIRMOGRAPHIC_SOURCES: FirmographicSource[] = [
         requiresAuth: false,
 
         async fetch(companyName: string, _taxCode?: string): Promise<FirmographicResult | null> {
-            // API contract: GET /api/company/search?name={companyName}
-            // Response: { maSoThue, tenCongTy, diaChiTruSo, ngayThanhLap, nguoiDaiDien, nganhNgheKinhDoanh }
-            try {
-                const searchUrl = `https://dangkykinhdoanh.gov.vn/api/company/search?name=${encodeURIComponent(companyName)}`;
-
-                // When live API available, uncomment:
-                // const res = await fetch(searchUrl);
-                // const data = await res.json();
-
-                // Skeleton return — demonstrates parsing logic
-                return {
-                    source: 'dkkd',
-                    sourceUrl: searchUrl,
-                    trustScore: 0.95,
-                    data: {
-                        // Parsed fields would map:
-                        // name: data.tenCongTy,
-                        // address: data.diaChiTruSo,
-                        // year: new Date(data.ngayThanhLap).getFullYear(),
-                    },
-                    rawFields: {
-                        endpoint: searchUrl,
-                        status: 'skeleton',
-                        note: 'Requires live API access to dangkykinhdoanh.gov.vn',
-                    },
-                    fetchedAt: new Date().toISOString(),
-                    cacheKey: `dkkd_${companyName.toLowerCase().replace(/\s+/g, '_')}`,
-                };
-            } catch {
-                return null;
-            }
+            // No public API available. The portal requires browser-based access.
+            // TODO: Integrate if official API or partner access is obtained.
+            const searchUrl = `https://dangkykinhdoanh.gov.vn/vn/Pages/Trangchu.aspx?s=${encodeURIComponent(companyName)}`;
+            return {
+                source: 'dkkd',
+                sourceUrl: searchUrl,
+                trustScore: 0.0,   // Returns 0 because no data fetched
+                data: {},
+                rawFields: {
+                    status: 'no_public_api',
+                    note: 'dangkykinhdoanh.gov.vn has no public REST API. Manual lookup required at: ' + searchUrl,
+                },
+                fetchedAt: new Date().toISOString(),
+                cacheKey: `dkkd_${companyName.toLowerCase().replace(/\s+/g, '_')}`,
+            };
         },
     },
 
-    // ─────────────────────────────────────────────────────────
-    // 2. CafeF.vn — Financial Data & Stock Market
-    // ─────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // 2. CafeF.vn — Financial Data & Stock Market  [LIVE ✅]
+    // Uses cafefLiveFetcher to get real audited financial statements
+    // Works for companies with a Vietnamese stock ticker (HOSE/HNX/UPCoM)
+    // ─────────────────────────────────────────────────────────────────────────
     {
         id: 'cafef',
         name: 'CafeF Financial Portal',
@@ -109,44 +96,73 @@ export const FIRMOGRAPHIC_SOURCES: FirmographicSource[] = [
         rateLimit: 20,
         requiresAuth: false,
 
-        async fetch(companyName: string, _taxCode?: string): Promise<FirmographicResult | null> {
-            // CafeF API: GET https://s.cafef.vn/Ajax/PageNew/DataHistory/PriceHistory.ashx?Symbol={TICKER}
-            // Financial data: https://s.cafef.vn/bao-cao-tai-chinh/{TICKER}/IncSta/2024/0/0/0/bao-cao-ket-qua-kinh-doanh-.chn
-            try {
-                // For listed companies, CafeF provides:
-                // - Revenue (Doanh thu thuần)
-                // - Net profit (Lợi nhuận sau thuế)
-                // - EPS, P/E, Market Cap
-                // - Historical price data
+        async fetch(companyName: string, _taxCode?: string, ticker?: string): Promise<FirmographicResult | null> {
+            if (!ticker) {
+                // CafeF financial data requires a ticker — skip for private companies
+                return {
+                    source: 'cafef',
+                    sourceUrl: `https://cafef.vn/search/?keywords=${encodeURIComponent(companyName)}`,
+                    trustScore: 0.0,
+                    data: {},
+                    rawFields: {
+                        status: 'no_ticker',
+                        note: `CafeF financial data requires a stock ticker. ${companyName} may be a private company.`,
+                    },
+                    fetchedAt: new Date().toISOString(),
+                    cacheKey: `cafef_noticker_${companyName.toLowerCase()}`,
+                };
+            }
 
-                // Parse logic for CafeF financial statements:
-                // 1. Fetch income statement page
-                // 2. Parse table rows for "Doanh thu thuần" → revenue
-                // 3. Parse "Lợi nhuận sau thuế" → net profit
-                // 4. Calculate YoY growth
+            try {
+                const currentYear = new Date().getFullYear();
+                const [financials, stock] = await Promise.all([
+                    fetchCafeFFinancials(ticker, currentYear),
+                    fetchCafeFStock(ticker),
+                ]);
+
+                if (!financials && !stock) return null;
+
+                const financialsUrl = `https://s.cafef.vn/bao-cao-tai-chinh/${ticker}/IncSta/${currentYear}/0/0/0/bao-cao-ket-qua-kinh-doanh-.chn`;
+
+                const data: Partial<CompanyProfile> = {};
+
+                if (financials) {
+                    if (financials.revenueUSD > 0) {
+                        (data as any).revenue = `~$${financials.revenueUSD}M (FY${financials.year}, CafeF)`;
+                        (data as any).revenueVerified = true;
+                        (data as any).revenueYear = financials.year;
+                        (data as any).dataProvenanceNote = `Revenue from FY${financials.year} financial statement via CafeF`;
+                    }
+                    if (financials.revenueGrowthYoY !== 0) {
+                        (data as any).growth = financials.revenueGrowthYoY;
+                    }
+                }
+
+                if (stock) {
+                    (data as any).ticker = stock.ticker;
+                    (data as any).exchange = stock.exchange;
+                }
 
                 return {
                     source: 'cafef',
-                    sourceUrl: `https://s.cafef.vn/bao-cao-tai-chinh/${companyName}`,
+                    sourceUrl: financialsUrl,
                     trustScore: 0.85,
-                    data: {
-                        // ticker: parsed from page,
-                        // exchange: 'HOSE' | 'HNX' | 'UPCoM',
-                        // revenue: formatted string,
-                        // revenueVerified: true, // CafeF pulls from audited reports
-                        // revenueYear: 2024,
-                        // dataProvenanceNote: `Revenue from ${year} audited financial statement via CafeF`,
-                    },
+                    data,
                     rawFields: {
-                        endpoint: 'cafef_financial_statement',
-                        status: 'skeleton',
-                        note: 'CafeF provides audited financial data for all listed companies',
-                        parseLogic: 'HTML table → extract "Doanh thu thuần" and "Lợi nhuận sau thuế"',
+                        ticker,
+                        status: 'live',
+                        revenueVNDbillions: financials?.revenue ?? 0,
+                        revenueUSDmillions: financials?.revenueUSD ?? 0,
+                        netProfitVNDbillions: financials?.netProfit ?? 0,
+                        lastPrice: stock?.lastPrice ?? 0,
+                        exchange: stock?.exchange ?? '',
+                        fetchYear: currentYear,
                     },
                     fetchedAt: new Date().toISOString(),
-                    cacheKey: `cafef_${companyName.toLowerCase()}`,
+                    cacheKey: `cafef_${ticker.toLowerCase()}_${currentYear}`,
                 };
-            } catch {
+            } catch (e) {
+                console.warn(`[CafeF firmographic] fetch failed for ${ticker}:`, e);
                 return null;
             }
         },
@@ -154,6 +170,7 @@ export const FIRMOGRAPHIC_SOURCES: FirmographicSource[] = [
 
     // ─────────────────────────────────────────────────────────
     // 3. GSO (gso.gov.vn) — General Statistics Office
+    // Status: sector-level data only, no company-level API
     // ─────────────────────────────────────────────────────────
     {
         id: 'gso',
@@ -165,38 +182,27 @@ export const FIRMOGRAPHIC_SOURCES: FirmographicSource[] = [
         rateLimit: 5,
         requiresAuth: false,
 
-        async fetch(companyName: string, _taxCode?: string): Promise<FirmographicResult | null> {
-            // GSO provides sector-level data, not individual company data
-            // Use for: industry classification, workforce benchmarks, sector growth rates
-            // API: https://www.gso.gov.vn/px-web-2/?pxid=V0211
-            try {
-                return {
-                    source: 'gso',
-                    sourceUrl: 'https://www.gso.gov.vn/px-web-2/',
-                    trustScore: 0.98,
-                    data: {
-                        // GSO enriches at industry level:
-                        // - Number of enterprises in sector
-                        // - Average employees per enterprise in sector
-                        // - Sector contribution to GDP
-                    },
-                    rawFields: {
-                        endpoint: 'gso_enterprise_statistics',
-                        status: 'skeleton',
-                        note: `GSO provides sector-level stats, not individual company. Query: ${companyName}`,
-                        dataType: 'sector_benchmarks',
-                    },
-                    fetchedAt: new Date().toISOString(),
-                    cacheKey: `gso_sector_${companyName.toLowerCase()}`,
-                };
-            } catch {
-                return null;
-            }
+        async fetch(_companyName: string, _taxCode?: string): Promise<FirmographicResult | null> {
+            // GSO provides sector-level statistics, not individual company data.
+            // API (PX-Web) is available for aggregate queries but not per-company lookup.
+            return {
+                source: 'gso',
+                sourceUrl: 'https://www.gso.gov.vn/px-web-2/',
+                trustScore: 0.0,
+                data: {},
+                rawFields: {
+                    status: 'sector_level_only',
+                    note: 'GSO provides sector benchmarks, not individual company data. Use for industry size/growth context.',
+                    apiDocs: 'https://www.gso.gov.vn/px-web-2/?pxid=V0211',
+                },
+                fetchedAt: new Date().toISOString(),
+            };
         },
     },
 
     // ─────────────────────────────────────────────────────────
     // 4. VCCI — Vietnam Chamber of Commerce
+    // Status: skeleton — no public API for VNR500 data
     // ─────────────────────────────────────────────────────────
     {
         id: 'vcci',
@@ -209,39 +215,30 @@ export const FIRMOGRAPHIC_SOURCES: FirmographicSource[] = [
         requiresAuth: false,
 
         async fetch(companyName: string, _taxCode?: string): Promise<FirmographicResult | null> {
-            // VCCI publishes: Vietnam Business 500 (VNR500), PCI rankings, business climate surveys
-            // Use for: company rankings, industry sentiment, growth trajectory signals
-            try {
-                return {
-                    source: 'vcci',
-                    sourceUrl: `https://vcci.com.vn/search?q=${encodeURIComponent(companyName)}`,
-                    trustScore: 0.88,
-                    data: {
-                        // From VNR500 rankings:
-                        // - Revenue ranking position
-                        // - Industry classification
-                        // - Growth trajectory (if multi-year ranking available)
-                    },
-                    rawFields: {
-                        endpoint: 'vcci_vnr500',
-                        status: 'skeleton',
-                        note: 'VCCI VNR500 provides top company rankings with verified revenue',
-                    },
-                    fetchedAt: new Date().toISOString(),
-                    cacheKey: `vcci_${companyName.toLowerCase()}`,
-                };
-            } catch {
-                return null;
-            }
+            // VCCI VNR500 rankings are published as PDF/Excel reports, not through a public API.
+            return {
+                source: 'vcci',
+                sourceUrl: `https://vcci.com.vn/search?q=${encodeURIComponent(companyName)}`,
+                trustScore: 0.0,
+                data: {},
+                rawFields: {
+                    status: 'no_public_api',
+                    note: 'VCCI VNR500 rankings are PDF-only. Integrate manually or via PDF parsing when annual report is published.',
+                    reportUrl: 'https://vcci.com.vn/bao-cao',
+                },
+                fetchedAt: new Date().toISOString(),
+                cacheKey: `vcci_${companyName.toLowerCase()}`,
+            };
         },
     },
 
-    // ─────────────────────────────────────────────────────────
-    // 5. HOSE / HNX / UPCoM — Stock Exchange Data
-    // ─────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // 5. HOSE / HNX / UPCoM — Stock Exchange Data  [LIVE via CafeF ✅]
+    // Uses cafefLiveFetcher.fetchCafeFStock() for real-time stock data
+    // ─────────────────────────────────────────────────────────────────────────
     {
         id: 'stock_exchange',
-        name: 'Vietnam Stock Exchanges',
+        name: 'Vietnam Stock Exchanges (via CafeF)',
         nameVi: 'Sở Giao dịch Chứng khoán Việt Nam',
         baseUrl: 'https://www.hsx.vn',
         trustScore: 0.95,
@@ -249,38 +246,56 @@ export const FIRMOGRAPHIC_SOURCES: FirmographicSource[] = [
         rateLimit: 15,
         requiresAuth: false,
 
-        async fetch(companyName: string, _taxCode?: string): Promise<FirmographicResult | null> {
-            // HOSE API: https://www.hsx.vn/Modules/Listed/Web/SymbolList
-            // HNX API: https://www.hnx.vn/vi-vn/cophieu-etfs/chung-khoan-ny.html
-            // Provides: ticker, listing date, share count, market cap, sector
-            try {
+        async fetch(companyName: string, _taxCode?: string, ticker?: string): Promise<FirmographicResult | null> {
+            if (!ticker) {
                 return {
                     source: 'stock_exchange',
                     sourceUrl: 'https://www.hsx.vn/Modules/Listed/Web/SymbolList',
-                    trustScore: 0.95,
-                    data: {
-                        // ticker: 'FPT',
-                        // exchange: 'HOSE',
-                        // revenueVerified: true,
-                    },
+                    trustScore: 0.0,
+                    data: {},
                     rawFields: {
-                        endpoint: 'hose_listed_companies',
-                        status: 'skeleton',
-                        note: `Exchange lookup for: ${companyName}`,
-                        exchanges: ['HOSE', 'HNX', 'UPCoM'],
+                        status: 'no_ticker',
+                        note: `No ticker provided for ${companyName}. This source only supports listed companies.`,
                     },
                     fetchedAt: new Date().toISOString(),
-                    cacheKey: `exchange_${companyName.toLowerCase()}`,
                 };
-            } catch {
+            }
+
+            try {
+                const stock = await fetchCafeFStock(ticker);
+                if (!stock) return null;
+
+                return {
+                    source: 'stock_exchange',
+                    sourceUrl: `https://www.hsx.vn/Modules/Listed/Web/StockDetail/${ticker}`,
+                    trustScore: 0.95,
+                    data: {
+                        ticker: stock.ticker,
+                        exchange: stock.exchange,
+                        revenueVerified: true,
+                    } as any,
+                    rawFields: {
+                        status: 'live',
+                        ticker,
+                        exchange: stock.exchange,
+                        lastPrice: stock.lastPrice,
+                        changePercent: stock.change,
+                        peRatio: stock.peRatio,
+                        marketCap: stock.marketCap,
+                    },
+                    fetchedAt: new Date().toISOString(),
+                    cacheKey: `exchange_${ticker.toLowerCase()}`,
+                };
+            } catch (e) {
+                console.warn(`[Stock Exchange firmographic] fetch failed for ${ticker}:`, e);
                 return null;
             }
         },
     },
 
-    // ─────────────────────────────────────────────────────────
-    // 6. Wikidata — Structured Metadata
-    // ─────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // 6. Wikidata — Structured Metadata  [LIVE ✅ via public SPARQL endpoint]
+    // ─────────────────────────────────────────────────────────────────────────
     {
         id: 'wikidata',
         name: 'Wikidata SPARQL',
@@ -292,45 +307,61 @@ export const FIRMOGRAPHIC_SOURCES: FirmographicSource[] = [
         requiresAuth: false,
 
         async fetch(companyName: string, _taxCode?: string): Promise<FirmographicResult | null> {
-            // Wikidata SPARQL query for Vietnamese companies:
-            // SELECT ?company ?companyLabel ?inception ?hq ?website WHERE {
-            //   ?company wdt:P17 wd:Q881;        # country: Vietnam
-            //            wdt:P31/wdt:P279* wd:Q4830453.  # instance of: business
-            //   ?company rdfs:label ?label.
-            //   FILTER(CONTAINS(LCASE(?label), LCASE("companyName")))
-            //   OPTIONAL { ?company wdt:P571 ?inception }
-            //   OPTIONAL { ?company wdt:P159 ?hq }
-            //   OPTIONAL { ?company wdt:P856 ?website }
-            // }
             try {
-                const sparqlQuery = encodeURIComponent(
-                    `SELECT ?company ?companyLabel ?inception ?website WHERE {
+                const sparql = `
+                    SELECT ?company ?companyLabel ?inception ?website WHERE {
                         ?company wdt:P17 wd:Q881; wdt:P31/wdt:P279* wd:Q4830453.
-                        ?company rdfs:label ?label. FILTER(CONTAINS(LCASE(?label), LCASE("${companyName}")))
+                        ?company rdfs:label ?label.
+                        FILTER(CONTAINS(LCASE(?label), LCASE("${companyName.replace(/"/g, '')}")))
                         OPTIONAL { ?company wdt:P571 ?inception }
                         OPTIONAL { ?company wdt:P856 ?website }
                         SERVICE wikibase:label { bd:serviceParam wikibase:language "vi,en". }
-                    } LIMIT 5`
-                );
+                    } LIMIT 3`;
+
+                const url = `https://query.wikidata.org/sparql?query=${encodeURIComponent(sparql)}&format=json`;
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/sparql-results+json',
+                        'User-Agent': 'VICO-MarketIntelligence/1.0 (https://vico.ai; contact@vico.ai)',
+                    },
+                    signal: AbortSignal.timeout(10_000),
+                });
+
+                if (!response.ok) return null;
+
+                const json = await response.json() as any;
+                const bindings = json?.results?.bindings ?? [];
+
+                if (bindings.length === 0) return null;
+
+                const top = bindings[0];
+                const foundedYear = top.inception?.value
+                    ? new Date(top.inception.value).getFullYear()
+                    : undefined;
+                const website = top.website?.value ?? undefined;
+                const label = top.companyLabel?.value ?? undefined;
 
                 return {
                     source: 'wikidata',
-                    sourceUrl: `https://query.wikidata.org/sparql?query=${sparqlQuery}`,
+                    sourceUrl: url,
                     trustScore: 0.75,
                     data: {
-                        // name: from ?companyLabel
-                        // year: from ?inception
-                        // website: from ?website
-                    },
+                        ...(label && { name: label }),
+                        ...(foundedYear && { year: foundedYear }),
+                        ...(website && { website }),
+                    } as Partial<CompanyProfile>,
                     rawFields: {
-                        endpoint: 'wikidata_sparql',
-                        status: 'skeleton',
-                        note: `Wikidata SPARQL query for: ${companyName}`,
+                        status: 'live',
+                        resultCount: bindings.length,
+                        foundedYear: foundedYear ?? 'unknown',
+                        website: website ?? 'unknown',
                     },
                     fetchedAt: new Date().toISOString(),
-                    cacheKey: `wikidata_${companyName.toLowerCase()}`,
+                    cacheKey: `wikidata_${companyName.toLowerCase().replace(/\s+/g, '_')}`,
                 };
-            } catch {
+            } catch (e) {
+                console.warn(`[Wikidata firmographic] fetch failed for ${companyName}:`, e);
                 return null;
             }
         },
@@ -342,39 +373,37 @@ export const FIRMOGRAPHIC_SOURCES: FirmographicSource[] = [
 // ============================================================================
 
 /**
- * Fetch firmographic data from all available sources for a company
- * Prioritizes by trust score — higher trust sources override lower ones
+ * Fetch firmographic data from all available sources for a company.
+ * Higher-trust sources override lower-trust ones field-by-field.
+ *
+ * @param ticker  Optional stock ticker — enables CafeF and stock-exchange sources
  */
 export async function fetchAllFirmographicData(
     companyName: string,
-    taxCode?: string
+    taxCode?: string,
+    ticker?: string,
 ): Promise<{
     mergedData: Partial<CompanyProfile>;
     sources: FirmographicResult[];
     enrichmentSources: string[];
 }> {
-    const results: FirmographicResult[] = [];
-
     // Fetch from all sources in parallel
     const promises = FIRMOGRAPHIC_SOURCES.map(source =>
-        source.fetch(companyName, taxCode).catch(() => null)
+        source.fetch(companyName, taxCode, ticker).catch(() => null)
     );
 
     const settled = await Promise.all(promises);
+    const results: FirmographicResult[] = settled.filter((r): r is FirmographicResult => r !== null);
 
-    for (const result of settled) {
-        if (result) results.push(result);
-    }
-
-    // Sort by trust score (highest first) and merge
+    // Sort by trust score (highest first) and merge, skipping empty results
     results.sort((a, b) => b.trustScore - a.trustScore);
 
     const mergedData: Partial<CompanyProfile> = {};
     const enrichmentSources: string[] = [];
 
     for (const result of results) {
+        if (result.trustScore === 0) continue; // Skip sources that returned no data
         enrichmentSources.push(result.source);
-        // Only overwrite if the higher-trust source has the field
         for (const [key, value] of Object.entries(result.data)) {
             if (value !== undefined && value !== null && value !== '') {
                 if (!(key in mergedData)) {

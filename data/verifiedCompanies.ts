@@ -257,11 +257,11 @@ export const VERIFIED_COMPANIES: VerifiedCompany[] = [
         'Chuyển đổi từ mô hình labor-arbitrage sang consulting giá trị cao',
         'Rủi ro tập trung khách hàng — top 10 chiếm 35% doanh thu',
       ],
-      'news_article',
-      'https://cafef.vn/fpt-software-thach-thuc-2026.html',
-      0.75,
-      true,
-      'Aggregated from CafeF analyst reports, VnExpress interviews with FPT leadership, and VINASA IT industry report 2025'
+      'manual_research',
+      'https://cafef.vn/doanh-nghiep.chn',
+      0.60,
+      false,
+      'Aggregated insights from CafeF business section, VnExpress FPT coverage, and VINASA IT industry report 2025. No single verifiable article — use as analyst summary.'
     ),
 
     targetAudience: v(
@@ -368,11 +368,11 @@ export const VERIFIED_COMPANIES: VerifiedCompany[] = [
         'Gaming revenue phụ thuộc vào licensing game nước ngoài',
         'Áp lực lợi nhuận từ đầu tư mở rộng ZaloPay',
       ],
-      'news_article',
-      'https://cafef.vn/vng-thach-thuc-2026.html',
-      0.75,
-      true,
-      'Aggregated from VNG earnings calls, CafeF analysis, and VnExpress tech coverage'
+      'manual_research',
+      'https://cafef.vn/doanh-nghiep.chn',
+      0.60,
+      false,
+      'Aggregated from VNG earnings calls (UPCoM filings), CafeF VNZ analyst coverage, and VnExpress tech section. No single verifiable URL — analyst summary.'
     ),
 
     targetAudience: v(
@@ -471,11 +471,11 @@ export const VERIFIED_COMPANIES: VerifiedCompany[] = [
         'Phụ thuộc vào Samsung SDS cho pipeline khách hàng Hàn Quốc',
         'Cần mở rộng thị trường Nhật Bản và Mỹ',
       ],
-      'news_article',
-      'https://cafef.vn/cmg-phan-tich-2026.html',
-      0.70,
-      true,
-      'From CafeF analyst reports and industry analysis'
+      'manual_research',
+      'https://cafef.vn/doanh-nghiep.chn',
+      0.58,
+      false,
+      'Aggregated from CafeF CMG analyst coverage and IT industry reports. No single verifiable article.'
     ),
 
     targetAudience: v(
@@ -573,11 +573,11 @@ export const VERIFIED_COMPANIES: VerifiedCompany[] = [
         'Chuyển đổi từ mô hình nhà nước sang commercial agility',
         'Mở rộng sang thị trường quốc tế (Đông Nam Á, Châu Phi)',
       ],
-      'news_article',
-      'https://vnexpress.net/viettel-chuyen-doi-so-2026.html',
-      0.65,
+      'manual_research',
+      'https://vnexpress.net/kinh-doanh/vien-thong.html',
+      0.55,
       false,
-      'From Viettel annual report and ICT press coverage'
+      'From Viettel Group annual report (ICT segment) and VnExpress telecom/digital section. Viettel Solutions is a non-listed subsidiary — limited public data.'
     ),
 
     targetAudience: v(
@@ -676,11 +676,11 @@ export const VERIFIED_COMPANIES: VerifiedCompany[] = [
         'Quy định NHNN ngày càng chặt chẽ cho e-wallets',
         'Chuyển đổi sang mô hình "super app" tài chính',
       ],
-      'news_article',
-      'https://dealstreetasia.com/stories/vietnam-fintech-challenges-2026',
-      0.70,
-      true,
-      'From DealStreetAsia fintech analysis, SBV regulatory updates, and industry reports'
+      'manual_research',
+      'https://dealstreetasia.com/sector/fintech/',
+      0.60,
+      false,
+      'Aggregated from DealStreetAsia Vietnam fintech coverage, SBV e-wallet regulatory circulars, and industry reports. MoMo is private — no audited financials.'
     ),
 
     targetAudience: v(
@@ -772,10 +772,11 @@ export const VERIFIED_COMPANIES: VerifiedCompany[] = [
         'Biên lợi nhuận thấp trong processing payments — cần giá trị gia tăng',
         'Áp lực từ SBV về bảo mật và tuân thủ',
       ],
-      'news_article',
-      'https://dealstreetasia.com/stories/vietnam-digital-payments-2026',
-      0.65,
-      false
+      'manual_research',
+      'https://dealstreetasia.com/sector/fintech/',
+      0.55,
+      false,
+      'Aggregated from DealStreetAsia Vietnam payments coverage and SBV digital payment statistics. VNPay/VNLIFE is private — no public financials.'
     ),
 
     targetAudience: v(
@@ -1770,7 +1771,7 @@ export function getVerifiedDataStats() {
   const verifiedFields = companies.reduce((sum, c) => sum + c.verifiedFieldCount, 0);
   const avgScore = Math.round(companies.reduce((sum, c) => sum + c.overallDataScore, 0) / companies.length);
   const listedCount = companies.filter(c => c.isListed).length;
-  
+
   return {
     totalCompanies: companies.length,
     listedCompanies: listedCount,

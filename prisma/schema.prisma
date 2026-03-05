@@ -295,3 +295,34 @@ model StrategyVersion {
   @@unique([strategyId, version], map: "idx_version_unique")
   @@index([strategyId], map: "idx_version_strategy")
 }
+
+// ============================================================================
+// WORKSPACE (Executive Workspace — Saved Intelligence Documents)
+// ============================================================================
+
+model WorkspaceDocument {
+  id          String   @id @default(cuid())
+
+  type        String   // "ICP" | "PLAYBOOK" | "PESTEL" | "MARKET_REPORT" | "COMPETITOR_ANALYSIS" | "GTM_STRATEGY"
+  title       String   @db.VarChar(500)
+  industry    String?  @db.VarChar(255)
+  companyName String?  @db.VarChar(255)
+
+  // The full report JSON payload
+  content     Json
+
+  // Provenance
+  dataSource  String   @default("manual") // "ai_generated" | "template" | "manual"
+  tags        String[] // Array of user-defined tags
+
+  // Soft-delete
+  archived    Boolean  @default(false)
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type], map: "idx_workspace_type")
+  @@index([archived, createdAt], map: "idx_workspace_list")
+  @@index([companyName], map: "idx_workspace_company")
+}

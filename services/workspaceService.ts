@@ -1,14 +1,11 @@
 /**
- * 📂 Workspace Service — Phase 14: Executive Workspace (Saved Intelligence)
+ * 📂 Workspace Service — Prisma-backed persistence
  *
- * File-based persistence for user-generated reports (ICP, Playbook,
- * PESTEL, Market Reports, etc.). Each document is stored as a JSON
- * file inside data/db/workspace/.
+ * Stores executive workspace documents (ICP, Playbook, PESTEL, etc.) in
+ * PostgreSQL via Prisma. Falls back to file-based storage when DATABASE_URL
+ * is not configured so dev mode still works.
  *
- * All methods are async to allow seamless migration to PostgreSQL /
- * Supabase / MongoDB later without changing call sites.
- *
- * Follows the same file-based pattern as services/strategyStore.ts.
+ * All methods are async — call sites in server.ts are unchanged.
  */
 
 import fs from 'fs';
@@ -18,18 +15,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const WORKSPACE_DIR = path.join(__dirname, '..', 'data', 'db', 'workspace');
-
-// Ensure base directory exists on import
-if (!fs.existsSync(WORKSPACE_DIR)) {
-  fs.mkdirSync(WORKSPACE_DIR, { recursive: true });
-}
-
 // ============================================================================
-// TYPES
+// TYPES (identical to before — no breaking changes)
 // ============================================================================
 
-/** Accepted document categories — extend as new report types are added */
 export type DocumentType =
   | 'ICP'
   | 'PLAYBOOK'
@@ -38,30 +27,20 @@ export type DocumentType =
   | 'COMPETITOR_ANALYSIS'
   | 'GTM_STRATEGY';
 
-/** Metadata stored alongside the raw JSON payload */
 export interface SavedDocument {
   id: string;
   type: DocumentType;
   title: string;
-  /** Optional industry tag for filtering */
   industry: string;
-  /** Optional company name for context */
   companyName: string;
-  /** The raw JSON report payload (ICP, Playbook, etc.) */
   content: Record<string, unknown>;
-  /** ISO timestamp */
   createdAt: string;
-  /** ISO timestamp — updated on re-save */
   updatedAt: string;
-  /** Source provenance: AI-generated vs template */
   dataSource: 'ai_generated' | 'template' | 'manual';
-  /** User-defined tags for search/filter */
   tags: string[];
-  /** Soft-delete flag */
   archived: boolean;
 }
 
-/** Shape accepted by the save endpoint */
 export interface SaveDocumentInput {
   type: DocumentType;
   title: string;
@@ -72,7 +51,6 @@ export interface SaveDocumentInput {
   tags?: string[];
 }
 
-/** Lightweight list item (excludes heavy `content` blob) */
 export interface DocumentListItem {
   id: string;
   type: DocumentType;
@@ -87,43 +65,11 @@ export interface DocumentListItem {
 }
 
 // ============================================================================
-// HELPERS
-// ============================================================================
-
-function generateId(): string {
-  return `doc_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-}
-
-function docPath(id: string): string {
-  // Sanitize id for safe filesystem use
-  const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '_');
-  return path.join(WORKSPACE_DIR, `${safeId}.json`);
-}
-
-function readDoc(filePath: string): SavedDocument | null {
-  try {
-    const raw = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(raw) as SavedDocument;
-  } catch {
-    return null;
-  }
-}
-
-function writeDOC(doc: SavedDocument): void {
-  fs.writeFileSync(docPath(doc.id), JSON.stringify(doc, null, 2), 'utf-8');
-}
-
-// ============================================================================
-// VALID TYPES (for runtime validation)
+// VALID TYPES (runtime validation)
 // ============================================================================
 
 const VALID_TYPES: Set<string> = new Set<string>([
-  'ICP',
-  'PLAYBOOK',
-  'PESTEL',
-  'MARKET_REPORT',
-  'COMPETITOR_ANALYSIS',
-  'GTM_STRATEGY',
+  'ICP', 'PLAYBOOK', 'PESTEL', 'MARKET_REPORT', 'COMPETITOR_ANALYSIS', 'GTM_STRATEGY',
 ]);
 
 export function isValidDocumentType(t: string): t is DocumentType {
@@ -131,169 +77,251 @@ export function isValidDocumentType(t: string): t is DocumentType {
 }
 
 // ============================================================================
+// PRISMA LAZY INIT
+// ============================================================================
+
+let _prisma: any = null;
+
+async function getPrisma(): Promise<any | null> {
+  if (_prisma) return _prisma;
+  if (!process.env['DATABASE_URL']) return null;
+  try {
+    const { PrismaClient } = await import('@prisma/client');
+    _prisma = new PrismaClient();
+    return _prisma;
+  } catch {
+    return null;
+  }
+}
+
+// ============================================================================
+// FILE-BASED FALLBACK
+// ============================================================================
+
+const WORKSPACE_DIR = path.join(__dirname, '..', 'data', 'db', 'workspace');
+
+function ensureWorkspaceDir() {
+  if (!fs.existsSync(WORKSPACE_DIR)) fs.mkdirSync(WORKSPACE_DIR, { recursive: true });
+}
+
+function docPath(id: string): string {
+  const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '_');
+  return path.join(WORKSPACE_DIR, `${safeId}.json`);
+}
+
+function fileReadDoc(filePath: string): SavedDocument | null {
+  try { return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as SavedDocument; }
+  catch { return null; }
+}
+
+function fileWriteDoc(doc: SavedDocument): void {
+  ensureWorkspaceDir();
+  fs.writeFileSync(docPath(doc.id), JSON.stringify(doc, null, 2), 'utf-8');
+}
+
+function fileGenerateId(): string {
+  return `doc_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function fileListDocs(typeFilter?: DocumentType): SavedDocument[] {
+  ensureWorkspaceDir();
+  return fs.readdirSync(WORKSPACE_DIR)
+    .filter(f => f.endsWith('.json'))
+    .map(f => fileReadDoc(path.join(WORKSPACE_DIR, f)))
+    .filter((d): d is SavedDocument => d !== null && !d.archived && (!typeFilter || d.type === typeFilter));
+}
+
+// ============================================================================
+// DB → TS MAPPER
+// ============================================================================
+
+function dbToDoc(row: any): SavedDocument {
+  return {
+    id: row.id,
+    type: row.type as DocumentType,
+    title: row.title,
+    industry: row.industry ?? '',
+    companyName: row.companyName ?? '',
+    content: row.content as Record<string, unknown>,
+    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : row.updatedAt,
+    dataSource: (row.dataSource ?? 'manual') as SavedDocument['dataSource'],
+    tags: row.tags ?? [],
+    archived: row.archived ?? false,
+  };
+}
+
+function toListItem(doc: SavedDocument): DocumentListItem {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { content: _content, ...rest } = doc;
+  return rest as DocumentListItem;
+}
+
+// ============================================================================
 // SERVICE CLASS
 // ============================================================================
 
 export class WorkspaceService {
-  // -----------------------------------------------------------------------
-  // CREATE / UPDATE
-  // -----------------------------------------------------------------------
 
-  /**
-   * Save a new document to the workspace.
-   * Returns the full persisted document.
-   */
   async saveDocument(input: SaveDocumentInput): Promise<SavedDocument> {
     const now = new Date().toISOString();
-    const doc: SavedDocument = {
-      id: generateId(),
-      type: input.type,
-      title: input.title.trim(),
-      industry: (input.industry ?? '').trim(),
-      companyName: (input.companyName ?? '').trim(),
-      content: input.content,
-      createdAt: now,
-      updatedAt: now,
-      dataSource: input.dataSource ?? 'manual',
-      tags: input.tags ?? [],
-      archived: false,
-    };
+    const prisma = await getPrisma();
 
-    writeDOC(doc);
-    console.log(`📂 Workspace: saved "${doc.title}" (${doc.type}) → ${doc.id}`);
-    return doc;
-  }
-
-  // -----------------------------------------------------------------------
-  // READ — list (lightweight, sorted newest-first)
-  // -----------------------------------------------------------------------
-
-  /**
-   * Returns all non-archived documents as lightweight list items
-   * (content blob excluded to keep responses fast).
-   *
-   * @param typeFilter  Optional — only return docs of this type
-   */
-  async getDocuments(typeFilter?: DocumentType): Promise<DocumentListItem[]> {
-    const files = fs.readdirSync(WORKSPACE_DIR).filter((f) => f.endsWith('.json'));
-
-    const items: DocumentListItem[] = [];
-    for (const file of files) {
-      const doc = readDoc(path.join(WORKSPACE_DIR, file));
-      if (!doc) continue;
-      if (doc.archived) continue;
-      if (typeFilter && doc.type !== typeFilter) continue;
-
-      items.push({
-        id: doc.id,
-        type: doc.type,
-        title: doc.title,
-        industry: doc.industry,
-        companyName: doc.companyName,
-        createdAt: doc.createdAt,
-        updatedAt: doc.updatedAt,
-        dataSource: doc.dataSource,
-        tags: doc.tags,
-        archived: doc.archived,
-      });
+    if (!prisma) {
+      // File fallback
+      const doc: SavedDocument = {
+        id: fileGenerateId(), type: input.type, title: input.title.trim(),
+        industry: (input.industry ?? '').trim(), companyName: (input.companyName ?? '').trim(),
+        content: input.content, createdAt: now, updatedAt: now,
+        dataSource: input.dataSource ?? 'manual', tags: input.tags ?? [], archived: false,
+      };
+      fileWriteDoc(doc);
+      console.log(`📂 Workspace (file): saved "${doc.title}" (${doc.type}) → ${doc.id}`);
+      return doc;
     }
 
-    // Newest first
-    items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return items;
+    try {
+      const row = await prisma.workspaceDocument.create({
+        data: {
+          type: input.type,
+          title: input.title.trim(),
+          industry: input.industry?.trim() ?? null,
+          companyName: input.companyName?.trim() ?? null,
+          content: input.content,
+          dataSource: input.dataSource ?? 'manual',
+          tags: input.tags ?? [],
+          archived: false,
+        },
+      });
+      console.log(`📂 Workspace (DB): saved "${row.title}" (${row.type}) → ${row.id}`);
+      return dbToDoc(row);
+    } catch (e) {
+      console.warn('[workspaceService] Prisma error, falling back to file:', e);
+      const doc: SavedDocument = {
+        id: fileGenerateId(), type: input.type, title: input.title.trim(),
+        industry: (input.industry ?? '').trim(), companyName: (input.companyName ?? '').trim(),
+        content: input.content, createdAt: now, updatedAt: now,
+        dataSource: input.dataSource ?? 'manual', tags: input.tags ?? [], archived: false,
+      };
+      fileWriteDoc(doc);
+      return doc;
+    }
   }
 
-  // -----------------------------------------------------------------------
-  // READ — single (full content)
-  // -----------------------------------------------------------------------
+  async getDocuments(typeFilter?: DocumentType): Promise<DocumentListItem[]> {
+    const prisma = await getPrisma();
 
-  /**
-   * Returns a single document by ID including its full `content` payload.
-   */
+    if (!prisma) {
+      return fileListDocs(typeFilter)
+        .map(toListItem)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    try {
+      const rows = await prisma.workspaceDocument.findMany({
+        where: { archived: false, ...(typeFilter ? { type: typeFilter } : {}) },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true, type: true, title: true, industry: true, companyName: true,
+          createdAt: true, updatedAt: true, dataSource: true, tags: true, archived: true,
+        },
+      });
+      return rows.map((r: any) => ({
+        id: r.id, type: r.type as DocumentType, title: r.title,
+        industry: r.industry ?? '', companyName: r.companyName ?? '',
+        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+        updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : r.updatedAt,
+        dataSource: r.dataSource as SavedDocument['dataSource'], tags: r.tags ?? [], archived: r.archived,
+      }));
+    } catch (e) {
+      console.warn('[workspaceService] Prisma list error, falling back to file:', e);
+      return fileListDocs(typeFilter)
+        .map(toListItem)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+  }
+
   async getDocumentById(id: string): Promise<SavedDocument | null> {
-    const filePath = docPath(id);
-    if (!fs.existsSync(filePath)) return null;
-    return readDoc(filePath);
+    const prisma = await getPrisma();
+    if (!prisma) return fileReadDoc(docPath(id));
+    try {
+      const row = await prisma.workspaceDocument.findUnique({ where: { id } });
+      return row ? dbToDoc(row) : null;
+    } catch {
+      return fileReadDoc(docPath(id));
+    }
   }
 
-  // -----------------------------------------------------------------------
-  // DELETE (hard delete — removes file from disk)
-  // -----------------------------------------------------------------------
-
-  /**
-   * Permanently removes a document.
-   * Returns `true` if the document existed and was deleted.
-   */
   async deleteDocument(id: string): Promise<boolean> {
-    const filePath = docPath(id);
-    if (!fs.existsSync(filePath)) return false;
-
-    fs.unlinkSync(filePath);
-    console.log(`📂 Workspace: deleted document ${id}`);
-    return true;
+    const prisma = await getPrisma();
+    if (!prisma) {
+      const fp = docPath(id);
+      if (!fs.existsSync(fp)) return false;
+      fs.unlinkSync(fp);
+      return true;
+    }
+    try {
+      await prisma.workspaceDocument.delete({ where: { id } });
+      console.log(`📂 Workspace (DB): deleted ${id}`);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  // -----------------------------------------------------------------------
-  // ARCHIVE (soft delete — sets archived flag)
-  // -----------------------------------------------------------------------
-
-  /**
-   * Soft-deletes a document by setting archived = true.
-   * The document remains on disk but is excluded from list queries.
-   */
   async archiveDocument(id: string): Promise<SavedDocument | null> {
-    const doc = await this.getDocumentById(id);
-    if (!doc) return null;
-
-    doc.archived = true;
-    doc.updatedAt = new Date().toISOString();
-    writeDOC(doc);
-    console.log(`📂 Workspace: archived document ${id}`);
-    return doc;
+    const prisma = await getPrisma();
+    if (!prisma) {
+      const doc = fileReadDoc(docPath(id));
+      if (!doc) return null;
+      doc.archived = true; doc.updatedAt = new Date().toISOString();
+      fileWriteDoc(doc); return doc;
+    }
+    try {
+      const row = await prisma.workspaceDocument.update({
+        where: { id }, data: { archived: true },
+      });
+      return dbToDoc(row);
+    } catch { return null; }
   }
 
-  // -----------------------------------------------------------------------
-  // UPDATE (re-save with new content)
-  // -----------------------------------------------------------------------
-
-  /**
-   * Updates an existing document's content and metadata.
-   * Returns the updated document or null if not found.
-   */
   async updateDocument(
     id: string,
     updates: Partial<Pick<SavedDocument, 'title' | 'content' | 'tags' | 'industry' | 'companyName'>>,
   ): Promise<SavedDocument | null> {
-    const doc = await this.getDocumentById(id);
-    if (!doc) return null;
-
-    if (updates.title !== undefined) doc.title = updates.title.trim();
-    if (updates.content !== undefined) doc.content = updates.content;
-    if (updates.tags !== undefined) doc.tags = updates.tags;
-    if (updates.industry !== undefined) doc.industry = updates.industry.trim();
-    if (updates.companyName !== undefined) doc.companyName = updates.companyName.trim();
-
-    doc.updatedAt = new Date().toISOString();
-    writeDOC(doc);
-    console.log(`📂 Workspace: updated document ${id}`);
-    return doc;
+    const prisma = await getPrisma();
+    if (!prisma) {
+      const doc = fileReadDoc(docPath(id));
+      if (!doc) return null;
+      if (updates.title !== undefined) doc.title = updates.title.trim();
+      if (updates.content !== undefined) doc.content = updates.content;
+      if (updates.tags !== undefined) doc.tags = updates.tags;
+      if (updates.industry !== undefined) doc.industry = updates.industry.trim();
+      if (updates.companyName !== undefined) doc.companyName = updates.companyName.trim();
+      doc.updatedAt = new Date().toISOString();
+      fileWriteDoc(doc); return doc;
+    }
+    try {
+      const row = await prisma.workspaceDocument.update({
+        where: { id },
+        data: {
+          ...(updates.title !== undefined && { title: updates.title.trim() }),
+          ...(updates.content !== undefined && { content: updates.content }),
+          ...(updates.tags !== undefined && { tags: updates.tags }),
+          ...(updates.industry !== undefined && { industry: updates.industry.trim() }),
+          ...(updates.companyName !== undefined && { companyName: updates.companyName.trim() }),
+        },
+      });
+      return dbToDoc(row);
+    } catch { return null; }
   }
 
-  // -----------------------------------------------------------------------
-  // STATS (for dashboard widgets)
-  // -----------------------------------------------------------------------
-
-  /**
-   * Returns aggregate counts grouped by document type.
-   */
   async getStats(): Promise<{ type: DocumentType; count: number }[]> {
     const docs = await this.getDocuments();
     const counts = new Map<DocumentType, number>();
-
     for (const doc of docs) {
       counts.set(doc.type, (counts.get(doc.type) ?? 0) + 1);
     }
-
     return Array.from(counts.entries())
       .map(([type, count]) => ({ type, count }))
       .sort((a, b) => b.count - a.count);
@@ -301,14 +329,12 @@ export class WorkspaceService {
 }
 
 // ============================================================================
-// SINGLETON INSTANCE
+// SINGLETON
 // ============================================================================
 
 let _instance: WorkspaceService | null = null;
 
 export function getWorkspaceService(): WorkspaceService {
-  if (!_instance) {
-    _instance = new WorkspaceService();
-  }
+  if (!_instance) _instance = new WorkspaceService();
   return _instance;
 }
