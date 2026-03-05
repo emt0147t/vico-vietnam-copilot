@@ -406,7 +406,7 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                   
                   {/* ICP Builder Tab — Phase 13: Smart Customer Segmentation */}
                   {activeTab === 'icp-builder' && (
-                      <ICPBuilder />
+                      <ICPBuilder userData={userData} />
                   )}
                   
                   {/* News Intelligence Tab */}
@@ -419,12 +419,12 @@ export const CompletionPage: React.FC<CompletionPageProps> = ({ userData, onBack
                   
                   {/* Go-To-Market Tab */}
                   {activeTab === 'go-to-market' && (
-                      <GTMStrategyPanel />
+                      <GTMStrategyPanel userData={userData} />
                   )}
                   
                   {/* GTM Playbook Builder Tab */}
                   {activeTab === 'playbook' && (
-                      <GTMPlaybookBuilder />
+                      <GTMPlaybookBuilder userData={userData} />
                   )}
                   
                   {/* Operational Tab — now merged into pipeline */}

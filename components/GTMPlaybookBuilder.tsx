@@ -268,10 +268,16 @@ const LockedState: React.FC = () => (
 
 // ==================== MAIN COMPONENT ====================
 
-export default function GTMPlaybookBuilder() {
-  const [selectedCompanyName, setSelectedCompanyName] = useState<string>(
-    ENRICHED_COMPANIES[0]?.name || ''
-  );
+export default function GTMPlaybookBuilder({ userData }: { userData?: any }) {
+  const [selectedCompanyName, setSelectedCompanyName] = useState<string>(() => {
+    if (userData?.orgName) {
+      const match = ENRICHED_COMPANIES.find(
+        c => c.name.toLowerCase() === userData.orgName.toLowerCase()
+      );
+      if (match) return match.name;
+    }
+    return ENRICHED_COMPANIES[0]?.name || '';
+  });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);

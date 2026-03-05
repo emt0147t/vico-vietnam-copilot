@@ -216,8 +216,16 @@ const LoadingSkeleton: React.FC = () => (
 
 // ===================== MAIN COMPONENT =====================
 
-export function GTMStrategyPanel() {
-  const [selectedName, setSelectedName] = useState(ENRICHED_COMPANIES[0]?.name ?? '');
+export function GTMStrategyPanel({ userData }: { userData?: any }) {
+  const [selectedName, setSelectedName] = useState(() => {
+    if (userData?.orgName) {
+      const match = ENRICHED_COMPANIES.find(
+        c => c.name.toLowerCase() === userData.orgName.toLowerCase()
+      );
+      if (match) return match.name;
+    }
+    return ENRICHED_COMPANIES[0]?.name ?? '';
+  });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);

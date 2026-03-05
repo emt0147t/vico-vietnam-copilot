@@ -208,9 +208,26 @@ function roleColor(role: string): string {
 // MAIN COMPONENT
 // ============================================================================
 
-export default function ICPBuilder() {
-  const [selectedCompany, setSelectedCompany] = useState<CompanyProfile | null>(null);
-  const [icpData, setIcpData] = useState<ICPProfile | null>(null);
+export default function ICPBuilder({ userData }: { userData?: any }) {
+  const [selectedCompany, setSelectedCompany] = useState<CompanyProfile | null>(() => {
+    // Pre-select user's company from onboarding if it matches a hero company
+    if (userData?.orgName) {
+      const match = HERO_COMPANIES.find(
+        c => c.name.toLowerCase() === userData.orgName.toLowerCase()
+      );
+      if (match) return match;
+    }
+    return null;
+  });
+  const [icpData, setIcpData] = useState<ICPProfile | null>(() => {
+    if (userData?.orgName) {
+      const match = HERO_COMPANIES.find(
+        c => c.name.toLowerCase() === userData.orgName.toLowerCase()
+      );
+      if (match?.icp_profile) return match.icp_profile as ICPProfile;
+    }
+    return null;
+  });
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');

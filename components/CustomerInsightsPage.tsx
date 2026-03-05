@@ -482,10 +482,17 @@ const LockedState: React.FC = () => (
 
 
 // ==================== MAIN PAGE COMPONENT ====================
-export const CustomerInsightsPage: React.FC<CustomerInsightsPageProps> = () => {
-  const [selectedCompanyName, setSelectedCompanyName] = useState<string>(
-    ENRICHED_COMPANIES[0]?.name || ''
-  );
+export const CustomerInsightsPage: React.FC<CustomerInsightsPageProps> = ({ userData }) => {
+  const [selectedCompanyName, setSelectedCompanyName] = useState<string>(() => {
+    // Pre-select user's company from onboarding if it matches a hero company
+    if (userData?.orgName) {
+      const match = ENRICHED_COMPANIES.find(
+        c => c.name.toLowerCase() === userData.orgName.toLowerCase()
+      );
+      if (match) return match.name;
+    }
+    return ENRICHED_COMPANIES[0]?.name || '';
+  });
   const [activeSection, setActiveSection] = useState('overview');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
