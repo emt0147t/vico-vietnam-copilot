@@ -8,7 +8,7 @@ VICO is an AI-powered market intelligence platform tailored for the Vietnam mark
 
 **Major Update:** We're transforming VICO from 60-70% synthetic data to **90%+ real, verified data** from authoritative sources with trust scoring and source attribution.
 
-📋 **[START HERE → IMPLEMENTATION_COMPLETE.md](IMPLEMENTATION_COMPLETE.md)** ← All documentation, code, and guides
+**[START HERE → IMPLEMENTATION_COMPLETE.md](IMPLEMENTATION_COMPLETE.md)** ← All documentation, code, and guides
 - **Quick Start:** Get running in 2 hours
 - **Strategic Guide:** Understand the full approach
 - **Code Examples:** Copy-paste ready implementations
